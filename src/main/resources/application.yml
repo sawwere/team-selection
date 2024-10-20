@@ -11,6 +11,8 @@ server:
 
 
 spring:
+  application:
+    name: team-selection
   datasource:
     driver-class-name: org.postgresql.Driver
     username: postgres
@@ -22,6 +24,12 @@ spring:
       password: 1234
       driver-class-name: org.postgresql.Driver
     url: http://localhost:5432
+  flyway:
+    user: postgres
+    password: 1234
+    schemas: public
+    baselineOnMigrate: true
+    enabled: false # Change when complete migrating classes from Kotlin
   jpa:
     hibernate:
       ddl-auto: update
