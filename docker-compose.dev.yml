@@ -1,0 +1,18 @@
+services:
+  team-selection:
+    build: '.'
+    network_mode: host
+    volumes:
+      - './resources:/resources'
+    container_name: 'team-selection'
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres/team-selection
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"

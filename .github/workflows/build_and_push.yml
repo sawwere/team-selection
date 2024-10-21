@@ -1,0 +1,54 @@
+name: Build and push application image
+
+on:
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/build_and_push.yml'
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/build_and_push.yml'
+
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    name: Build
+    environment: Deploy
+    env:
+      LOGIN: ${{ secrets.DOCKER_LOGIN }}
+      NAME: ${{ secrets.DOCKER_NAME }}
+    permissions:
+      packages: write
+      pull-requests: write
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: setup java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: maven build
+        working-directory: .
+        run: mvn -am package
+
+      - name: Run tests
+        working-directory: .
+        run: mvn -am verify
+
+      - name: Login to docker.io
+        run: echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+
+      - name: Build application image
+        run:  docker build -t $LOGIN/$NAME:latest .
+
+      - name: Push image to docker.io
+        run: docker push $LOGIN/$NAME:latest
