@@ -37,3 +37,5 @@ build/
 *.xlsx
 /src/main/resources/keystore/
 src/main/resources/keystore/ts.p12
+/src/main/resources/application-prod.yml
+.env

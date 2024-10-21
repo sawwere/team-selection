@@ -1,72 +1,54 @@
-package ru.sfedu.teamselection.domain;
+package ru.sfedu.teamselection.dto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.domain.Track;
 
 
-
+@Builder
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "teams")
-public class Team {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TeamDto {
     private Long id;
 
-    @Column
     private String name;
 
-    @Column
     private String about;
 
-    @Column(name = "project_type")
+    @JsonProperty(value = "project_type")
     private String projectType;
 
-    @Column(name = "quantity_of_students")
+    @JsonProperty(value = "quantity_of_students", defaultValue = "0")
     @Builder.Default
     private Integer quantityOfStudents = 0;
 
-    @Column(name = "captain_id")
+    @JsonProperty(value = "captain_id")
     @Builder.Default
     private Long captainId = 0L; //TODO check
 
-    @Column(name = "is_full")
+    @JsonProperty(value = "is_full")
     @Builder.Default
     private Boolean isFull = false;
 
-    @Column
     @Builder.Default
     private String tags = ""; //TODO
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonProperty(value = "current_track")
     @JsonBackReference
     private Track currentTrack;
 
-    @Column
-    @OneToMany(mappedBy = "currentTeam", fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Student> students;
+    private List<StudentDto> students;
 
-    @Column
     @Builder.Default
     private String candidates = ""; //TODO
 }
