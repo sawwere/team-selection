@@ -71,40 +71,6 @@ class StudentController(
 
     @Operation(
         method = "GET",
-        summary = "Получение данных о студенте по email (необходимо вызывать после авторизации)",
-        parameters = [Parameter(name = "email", description = "email без @sfedu.ru")]
-    )
-    @GetMapping("/{email}") // checked
-    fun getUserDataByEmail(@PathVariable email: String): ResponseEntity<StudentDto> {
-        val emailString = "$email@sfedu.ru"
-        val result = studentRepository.findByEmail(emailString)
-        return if (result != null) {
-            val dto = StudentDto.entityToDto(student = result)
-            ResponseEntity<StudentDto>(dto, HttpStatus.OK)
-        }
-        else ResponseEntity<StudentDto>(null, HttpStatus.NOT_FOUND)
-    }
-
-    @Operation(
-        method = "GET",
-        summary = "Получение списка всех студентов за все время"
-    )
-    @GetMapping("/all") // checked
-    fun getAllStudents(): ResponseEntity<MutableList<StudentDto>> {
-        val result = studentRepository.findAll()
-        return if (result.isNotEmpty()){
-            val finalResult = mutableListOf<StudentDto>()
-            result.forEach {
-                finalResult.add(StudentDto.entityToDto(it))
-            }
-            ResponseEntity<MutableList<StudentDto>>(finalResult, HttpStatus.OK)
-        } else{
-            ResponseEntity<MutableList<StudentDto>>(null, HttpStatus.METHOD_NOT_ALLOWED)
-        }
-    }
-
-    @Operation(
-        method = "GET",
         summary = "Получение списка всех студентов по текущему треку в зависимости от типа: bachelor/master",
         parameters = [Parameter(name = "type", description = "тип трека bachelor/master")]
     )
@@ -141,74 +107,6 @@ class StudentController(
         } else{
             ResponseEntity<MutableList<StudentDto>>(HttpStatus.NOT_FOUND)
         }
-    }
-
-    @Operation(
-        method = "POST",
-        summary = "Регистрация пользователя",
-        parameters = [Parameter(name = "student", description = "сущность студента")]
-    )
-    @PostMapping("/register/{type}") // checked
-    fun registerUser(@RequestBody student: Student, @PathVariable type: String) = try {
-        val newUser = userRepository.findByEmail(student.email!!)?.apply {
-            registered = true
-        }
-        student.apply {
-            user = newUser
-        }
-        val track = trackRepository.findAllByType(type).filter { it.startDate != null }.maxBy { it.startDate!! }
-        student.trackId = track.id
-        studentRepository.save(student)
-        ResponseEntity<Student>(HttpStatus.OK)
-    } catch (ex: Exception){
-        log.info{ "Error occurred while writing student to DB: ${ex.message}" }
-        ResponseEntity<Student>(HttpStatus.METHOD_NOT_ALLOWED)
-    }
-
-    @Operation(
-        method = "POST",
-        summary = "Изменить данные пользователя",
-        parameters = [Parameter(name = "student", description = "сущность студента")]
-    )
-    @PostMapping("/changeStudentData") // checked
-    fun changeStudentData(@RequestBody student: Student) = try {
-        val foundStudent = studentRepository.findById(student.id!!).getOrNull()
-        foundStudent?.apply {
-            if (!student.fio.isNullOrEmpty()) {
-                fio = student.fio
-            }
-            if (!student.email.isNullOrEmpty()) {
-                email = student.email
-            }
-            if (student.captain != null) {
-                captain = student.captain
-            }
-            if (student.status != null) {
-                status = student.status
-            }
-            if (student.aboutSelf != null) {
-                aboutSelf = student.aboutSelf
-            }
-            if (student.course != null) {
-                course = student.course
-            }
-            if (student.contacts != null) {
-                contacts = student.contacts
-            }
-            if (student.groupNumber != null) {
-                groupNumber = student.groupNumber
-            }
-            if (student.tags != null) {
-                tags = student.tags
-            }
-        }
-        if (foundStudent != null) {
-            studentRepository.save(foundStudent)
-        }
-        ResponseEntity<Student>(HttpStatus.OK)
-    } catch (ex: Exception){
-        log.info{ "Error occurred while writing student to DB: ${ex.message}" }
-        ResponseEntity<Student>(HttpStatus.METHOD_NOT_ALLOWED)
     }
 
     @Operation(
@@ -263,62 +161,6 @@ class StudentController(
             log.info{ "Error occurred while writing student to DB: ${ex.message}" }
             ResponseEntity<MutableList<StudentDto>>(HttpStatus.NOT_FOUND)
         }
-    }
-
-    @Operation(
-        method = "GET",
-        summary = "Найти заявки студентов в различные команды",
-        parameters = [
-            Parameter(name = "studentId", description = "id студента"),
-        ]
-    )
-    @GetMapping("/getSubscriptionsById") //checked
-    fun getStudentSubscriptions(@RequestParam studentId: Long): ResponseEntity<Any> {
-        val student = studentRepository.findById(studentId).get()
-        return if (student.subscriptions == ""){
-            ResponseEntity<Any>(mutableListOf<Team>(), HttpStatus.OK)
-        } else {
-            val teams = mutableListOf<Team>()
-            val ids = student.subscriptions?.split(" ")?.map { it.toLong() }
-            ids?.forEach {
-                val team = teamRepository.findById(it).getOrNull()
-                if (team != null) teams.add(team)
-            }
-            ResponseEntity(teams, HttpStatus.OK)
-        }
-    }
-
-    @Operation(
-        method = "GET",
-        summary = "Получение студента по его id",
-        parameters = [
-            Parameter(name = "studentId", description = "id студента"),
-        ]
-    )
-    @GetMapping("/getStudentById") // checked
-    fun getStudentById(@RequestParam studentId: Long): ResponseEntity<StudentDto> {
-        val student = studentRepository.findById(studentId).getOrNull()
-        if (student == null) {
-            return ResponseEntity<StudentDto>(HttpStatus.NOT_FOUND)
-        }
-        val result = StudentDto.entityToDto(student)
-        return ResponseEntity<StudentDto>(result, HttpStatus.OK)
-    }
-
-    @Operation(
-        method = "DELETE",
-        summary = "Удалить студента по его id",
-        parameters = [
-            Parameter(name = "studentId", description = "id студента"),
-        ]
-    )
-    @DeleteMapping("/deleteStudentById") // checked
-    fun deleteStudentById(@RequestParam studentId: Long) = try {
-        studentRepository.deleteById(studentId)
-        ResponseEntity<Student>(HttpStatus.OK)
-    } catch (ex: Exception){
-        log.info{ "Error occurred while writing student to DB: ${ex.message}" }
-        ResponseEntity<Student>(HttpStatus.METHOD_NOT_ALLOWED)
     }
 
 }
