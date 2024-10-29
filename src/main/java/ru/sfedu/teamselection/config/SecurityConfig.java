@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
+import ru.sfedu.teamselection.service.Oauth2UserService;
 
 
 @Configuration
@@ -17,8 +19,9 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    //private final Oauth2UserService oauth2UserService;
-    //private final SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
+    private final Oauth2UserService oauth2UserService;
+    private final SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
+
     private static final String ADMIN_ROLE_NAME = "ADMIN";
 
     @Bean
@@ -36,12 +39,14 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests((auth) -> auth
                         .anyRequest().permitAll()
+                )
+                .oauth2Login(login -> login
+                        .loginPage("/oauth2/authorization/azure")
+                        .userInfoEndpoint(endpoint ->
+                                endpoint.userService(oauth2UserService)
+                        )
+                        .successHandler(simpleAuthenticationSuccessHandler)
                 );
-//                .oauth2Login(login -> login
-//                        .loginPage("/oauth2/authorization/azure")
-////                        .userInfoEndpoint()
-////                        .successHandler()
-//                );
         return http.build();
     }
 }

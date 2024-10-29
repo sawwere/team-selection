@@ -39,3 +39,4 @@ build/
 src/main/resources/keystore/ts.p12
 /src/main/resources/application-prod.yml
 .env
+.gigaide/gigaide.properties
