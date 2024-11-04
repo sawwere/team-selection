@@ -1,23 +1,28 @@
 package ru.sfedu.teamselection.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 
 @Getter
@@ -35,8 +40,9 @@ public class Team {
     @Column
     private String name;
 
-    @Column
-    private String about;
+    @Column(name = "project_description")
+    @Size(max = 1024)
+    private String projectDescription;
 
     @Column(name = "project_type")
     private String projectType;
@@ -45,28 +51,41 @@ public class Team {
     @Builder.Default
     private Integer quantityOfStudents = 0;
 
-    @Column(name = "captain_id")
+    @Column(name = "captain_id", nullable = false)
     @Builder.Default
-    private Long captainId = 0L; //TODO check
+    private Long captainId = -1L; //TODO check
 
     @Column(name = "is_full")
     @Builder.Default
     private Boolean isFull = false;
 
     @Column
+    @ManyToMany
+    @JoinTable(
+            name = "teams_technologies",
+            joinColumns = @JoinColumn(name = "team_id"),
+            inverseJoinColumns = @JoinColumn(name = "technology_id")
+    )
     @Builder.Default
-    private String tags = ""; //TODO
+    private List<Technology> technologies = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonBackReference
     private Track currentTrack;
 
     @Column
     @OneToMany(mappedBy = "currentTeam", fetch = FetchType.LAZY)
-    @JsonManagedReference
     private List<Student> students;
 
     @Column
+    @OneToMany(mappedBy = "team")
     @Builder.Default
-    private String candidates = ""; //TODO
+    private List<Application> applications = new ArrayList<>();
+
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime  updatedAt;
 }

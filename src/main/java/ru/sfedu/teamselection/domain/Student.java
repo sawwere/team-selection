@@ -1,21 +1,27 @@
 package ru.sfedu.teamselection.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @Getter
@@ -30,56 +36,45 @@ public class Student {
     private Long id;
 
     @Column
-    @JsonProperty
-    private String fio;
-
-    @Column
-    @JsonProperty
-    private String email;
-
-    @Column
-    @JsonProperty
     private Integer course;
 
     @Column(name = "group_number")
-    @JsonProperty
     private Integer groupNumber;
 
     @Column(name = "about_self")
-    @JsonProperty
+    @Size(max = 1024)
     private String aboutSelf;
 
     @Column
-    @JsonProperty
-    private String tags; // TODO Строка разделенная пробелами
-
-    @Column
-    @JsonProperty
+    @Size(max = 255)
     private String contacts;
 
-    @Column
-    @JsonProperty
+    @Column(name = "has_team")
     @Builder.Default
-    private Boolean status = null; // статус участик команды/не участник
+    private Boolean hasTeam = null; // статус участик команды/не участник
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonBackReference
     private Team currentTeam;
 
-    @Column(name = "track_id")
-    private Long trackId; //TODO
+    @Column(name = "is_captain")
+    @Builder.Default
+    private Boolean isCaptain = null; //TODO поменять логику начального значения
 
     @Column
+    @ManyToMany
+    @JoinTable(
+            name = "students_technologies",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "technology_id")
+    )
     @Builder.Default
-    @JsonProperty
-    private Boolean captain = null; //TODO поменять логику начального значения
+    private List<Technology> technologies = new ArrayList<>();
 
     @Column
-    @JsonProperty
+    @OneToMany(mappedBy = "student")
     @Builder.Default
-    private String subscriptions = ""; //TODO ??
+    private List<Application> applications = new ArrayList<>();
 
-    @OneToOne
-    @JsonProperty
+    @OneToOne()
     private User user;
 }

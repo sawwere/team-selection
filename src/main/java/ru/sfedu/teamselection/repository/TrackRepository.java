@@ -8,6 +8,6 @@ import java.util.List;
 
 @Transactional
 public interface TrackRepository extends JpaRepository<Track, Long> {
-    List<Track> findAllByType(String type);
+//    List<Track> findAllByType(String type);
 }
 

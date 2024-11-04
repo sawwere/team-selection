@@ -18,15 +18,15 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
         return Team.builder()
                 .id(dto.getId())
                 .name(dto.getName())
-                .about(dto.getAbout())
+                .projectDescription(dto.getAbout())
                 .projectType(dto.getProjectType())
                 .quantityOfStudents(dto.getQuantityOfStudents())
                 .captainId(dto.getCaptainId())
                 .isFull(dto.getIsFull())
-                .tags(dto.getTags())
+//                .technologies(dto.getTags())
                 .currentTrack(dto.getCurrentTrack())
                 .students(dto.getStudents().stream().map(studentDtoMapper::mapToEntity).toList())
-                .candidates(dto.getCandidates())
+//                .applications(dto.getCandidates())
                 .build();
     }
 
@@ -38,15 +38,15 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
         return TeamDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
-                .about(entity.getAbout())
+                .about(entity.getProjectDescription())
                 .projectType(entity.getProjectType())
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .captainId(entity.getCaptainId())
                 .isFull(entity.getIsFull())
-                .tags(entity.getTags())
+//                .tags(entity.getTechnologies())
                 .currentTrack(entity.getCurrentTrack())
                 .students(entity.getStudents().stream().map(studentDtoMapper::mapToDto).toList())
-                .candidates(entity.getCandidates())
+//                .candidates(entity.getApplications())
                 .build();
     }
 }

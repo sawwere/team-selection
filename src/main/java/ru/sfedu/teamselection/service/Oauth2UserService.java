@@ -1,11 +1,11 @@
 package ru.sfedu.teamselection.service;
 
+
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.enums.Roles;
 import ru.sfedu.teamselection.repository.UserRepository;
 
 @Service
@@ -27,7 +27,7 @@ public class Oauth2UserService extends DefaultOAuth2UserService {
             User newUser = new User();
             newUser.setFio(user.getFullName());
             newUser.setEmail(email);
-            newUser.setRole(Roles.USER);
+            //newUser.setRole(Roles.USER);
             newUser.setIsEnabled(false);
             userRepository.save(newUser);
         }

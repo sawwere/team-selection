@@ -14,6 +14,8 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,42 +37,34 @@ public class Track {
     private Long id;
 
     @Column
-    @JsonProperty
+    @Size(max = 255)
     private String name;
 
     @Column
-    @JsonProperty
+    @Size(max = 255)
     private String about;
 
     @Column(name = "start_date")
-    @JsonProperty
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate startDate;
 
     @Column(name = "end_date")
-    @JsonProperty
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate endDate;
 
     @Column
-    @JsonProperty
     private String type; //два значения bachelor/master
 
     @Column(name = "min_constraint")
-    @JsonProperty
     @Builder.Default
     private Integer minConstraint = 3;
 
     @Column(name = "max_constraint")
-    @JsonProperty
     @Builder.Default
     private Integer maxConstraint = 5;
 
-    @Column(name = "max_third_course_constraint")
-    private Integer maxThirdCourseConstraint;
+    @Column(name = "max_second_course_constraint")
+    private Integer maxSecondCourseConstraint;
 
     @OneToMany(mappedBy = "currentTrack", fetch = FetchType.LAZY)
-    @JsonManagedReference
     @Builder.Default
     List<Team> currentTeams = new ArrayList<>();
 }

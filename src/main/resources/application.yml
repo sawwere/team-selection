@@ -29,10 +29,10 @@ spring:
     password: 1234
     schemas: public
     baselineOnMigrate: true
-    enabled: false # Change when complete migrating classes from Kotlin
+    enabled: true
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       jpa:
         enable_lazy_load_no_trans: true

@@ -115,7 +115,7 @@ public class StudentController {
     @GetMapping(FIND_SUBSCRIPTIONS_BY_ID) //checked
     public List<TeamDto> findSubscriptionsById(@PathVariable(value = "id") Long studentId) {
         LOGGER.info("ENTER findSubscriptionsById(%d) endpoint".formatted(studentId));
-        return studentService.getUserSubscriptions(studentId)
+        return studentService.getUserApplications(studentId)
                 .stream()
                 .map(teamDtoMapper::mapToDto)
                 .toList();

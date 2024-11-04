@@ -59,7 +59,7 @@ public class StudentService {
                 .filter(it -> it.getStartDate() != null)
                 .max(new TrackByStartComparator())
                 .orElseThrow();
-        student.setTrackId(track.getId());
+        //student.setTrackId(track.getId());
         studentRepository.save(student);
         return student;
     }
@@ -96,14 +96,14 @@ public class StudentService {
      * @param id student id
      * @return the new list
      */
-    public List<Team> getUserSubscriptions(Long id) {
+    public List<Team> getUserApplications(Long id) {
         Student student = findByIdOrElseThrow(id);
-        if (student.getSubscriptions().isEmpty()) {
+        if (student.getApplications().isEmpty()) {
             return new ArrayList<>();
         } else {
-            return Arrays.stream(student.getSubscriptions().split(" "))
-                    .map(teamId ->
-                            teamService.findByIdOrElseThrow(Long.parseLong(teamId))
+            return student.getApplications().stream()
+                    .map(application ->
+                            teamService.findByIdOrElseThrow(application.getTeam().getId())
                     )
                     .toList();
         }
@@ -112,15 +112,15 @@ public class StudentService {
     public Student update(Long id, StudentDto dto) {
         Student student = findByIdOrElseThrow(id);
 
-        student.setFio(dto.getFio());
-        student.setEmail(dto.getEmail());
-        student.setCaptain(dto.getCaptain());
-        student.setStatus(dto.getStatus());
-        student.setAboutSelf(dto.getAboutSelf());
-        student.setCourse(dto.getCourse());
-        student.setContacts(dto.getContacts());
-        student.setGroupNumber(dto.getGroupNumber());
-        student.setTags(dto.getTags());
+//        student.setFio(dto.getFio());
+//        student.setEmail(dto.getEmail());
+//        student.setCaptain(dto.getCaptain());
+//        student.setStatus(dto.getStatus());
+//        student.setAboutSelf(dto.getAboutSelf());
+//        student.setCourse(dto.getCourse());
+//        student.setContacts(dto.getContacts());
+//        student.setGroupNumber(dto.getGroupNumber());
+//        student.setTags(dto.getTags());
 
         studentRepository.save(student);
         return student;

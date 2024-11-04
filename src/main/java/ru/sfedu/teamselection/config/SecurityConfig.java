@@ -39,13 +39,13 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests((auth) -> auth
                         .anyRequest().permitAll()
-                )
-                .oauth2Login(login -> login
-                        .loginPage("/oauth2/authorization/azure")
-                        .userInfoEndpoint(endpoint ->
-                                endpoint.userService(oauth2UserService)
-                        )
-                        .successHandler(simpleAuthenticationSuccessHandler)
+//                )
+//                .oauth2Login(login -> login
+//                        .loginPage("/oauth2/authorization/azure")
+//                        .userInfoEndpoint(endpoint ->
+//                                endpoint.userService(oauth2UserService)
+//                        )
+//                        .successHandler(simpleAuthenticationSuccessHandler)
                 );
         return http.build();
     }
