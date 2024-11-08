@@ -11,6 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entity of various technologies/skills used or required in a team project or specific traits of a student
+ */
 @Builder
 @Getter
 @Setter

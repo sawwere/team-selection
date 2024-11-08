@@ -1,7 +1,6 @@
 package ru.sfedu.teamselection.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +47,8 @@ public class StudentService {
     }
 
     public Student create(StudentDto dto, String type) {
-        User newUser = userService.findByEmail(dto.getEmail());
+        //TODO
+        User newUser = userService.findByEmail("TODO");
 
         Student student = studentDtoMapper.mapToEntity(dto);
 
