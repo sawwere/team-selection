@@ -13,6 +13,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entity of student's applications for participation in teams
+ */
 @Builder
 @Getter
 @Setter
