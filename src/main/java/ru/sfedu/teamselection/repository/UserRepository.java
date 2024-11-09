@@ -9,6 +9,8 @@ import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.enums.Roles;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmail(String email);
@@ -18,5 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("update User u set u.role = ?1 where u.email = ?2")
     void updateRoleByEmail(Role role, String email);
 
+    @Query("select u from User u join fetch u.role where u.email = ?1")
+    Optional<User> findByEmailFetchRole(String email);
 }
 

@@ -1,10 +1,12 @@
 package ru.sfedu.teamselection.mapper;
 
+import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.ApplicationDto;
 
+@Component
 public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Application> {
     /**
      * Map Dto to Entity

@@ -1,38 +1,45 @@
 package ru.sfedu.teamselection.service;
 
 
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 
+import java.util.Optional;
+
+@RequiredArgsConstructor
 @Service
 public class Oauth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    public Oauth2UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
-    public DefaultOidcUser loadUser(OAuth2UserRequest userRequest) {
-        DefaultOidcUser user = (DefaultOidcUser) super.loadUser(userRequest);
-        String email = user.getEmail();
-        User userInDb = userRepository.findByEmail(email);
+    public User loadUser(OAuth2UserRequest userRequest) {
+        var oAuth2User = super.loadUser(userRequest);
+        String email = oAuth2User.getAttribute("email");
+        String login = oAuth2User.getAttribute("login");
+        //TODO Пока так, ибо в гитхабе почта приватная по умолчанию
+        Optional<User> userInDb = userRepository.findByEmailFetchRole(login);
 
-        if (userInDb == null) {
-            User newUser = new User();
-            newUser.setFio(user.getFullName());
-            newUser.setEmail(email);
-            //newUser.setRole(Roles.USER);
-            newUser.setIsEnabled(false);
-            userRepository.save(newUser);
+        if (userInDb.isEmpty()) {
+            User newUser = User.builder()
+                    .fio(login)
+                    .email(login)
+                    .isEnabled(true)
+                    .role(roleRepository.findById(1L).orElseThrow())
+                    .build();
+            return userRepository.save(newUser);
         }
 
-        return user;
+        return userInDb.get();
     }
 }
 
