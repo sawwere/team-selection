@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.controller.personal;
+package ru.sfedu.teamselection.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,6 +21,7 @@ import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
+import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.StudentService;
 
 
@@ -49,7 +50,10 @@ public class StudentController {
     public static final String UPDATE_STUDENT = "/api/v1/students/{id}";
     public static final String DELETE_STUDENT = "/api/v1/students/{id}";
 
+
     public static final String FIND_SUBSCRIPTIONS_BY_ID = "/api/v1/students/{id}/subscriptions";
+
+    private final ApplicationService applicationService;
 
     @Operation(
             method = "GET",
@@ -106,20 +110,7 @@ public class StudentController {
         return studentDtoMapper.mapToDto(studentService.update(studentId, student));
     }
 
-    @Operation(
-            method = "GET",
-            summary = "Найти заявки студентов в различные команды",
-            parameters = {
-                @Parameter(name = "id", description = "id студента", in = ParameterIn.PATH),
-            })
-    @GetMapping(FIND_SUBSCRIPTIONS_BY_ID) //checked
-    public List<TeamDto> findSubscriptionsById(@PathVariable(value = "id") Long studentId) {
-        LOGGER.info("ENTER findSubscriptionsById(%d) endpoint".formatted(studentId));
-        return studentService.getUserApplications(studentId)
-                .stream()
-                .map(teamDtoMapper::mapToDto)
-                .toList();
-    }
+
 
     @Operation(
             method = "GET",

@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.TeamDto;
+import ru.sfedu.teamselection.repository.TrackRepository;
 
 @Component
 @RequiredArgsConstructor
 public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
     private final StudentDtoMapper studentDtoMapper;
+
+    private final TrackRepository trackRepository;
 
     /**
      * {@inheritDoc}
@@ -24,7 +27,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .captainId(dto.getCaptainId())
                 .isFull(dto.getIsFull())
 //                .technologies(dto.getTags())
-                .currentTrack(dto.getCurrentTrack())
+                .currentTrack(trackRepository.findById(dto.getCurrentTrackId()).orElseThrow())
                 .students(dto.getStudents().stream().map(studentDtoMapper::mapToEntity).toList())
 //                .applications(dto.getCandidates())
                 .build();
@@ -44,7 +47,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .captainId(entity.getCaptainId())
                 .isFull(entity.getIsFull())
 //                .tags(entity.getTechnologies())
-                .currentTrack(entity.getCurrentTrack())
+                .currentTrackId(entity.getCurrentTrack().getId())
                 .students(entity.getStudents().stream().map(studentDtoMapper::mapToDto).toList())
 //                .candidates(entity.getApplications())
                 .build();

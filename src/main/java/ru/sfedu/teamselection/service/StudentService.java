@@ -13,6 +13,7 @@ import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
+import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
 import ru.sfedu.teamselection.util.TrackByStartComparator;
 
@@ -23,10 +24,11 @@ public class StudentService {
     private final StudentRepository studentRepository;
 
     private final UserService userService;
-    private final TeamService teamService;
     private final TrackService trackService;
 
     private final StudentDtoMapper studentDtoMapper;
+
+    private final TeamRepository teamRepository;
 
     /**
      * Find Student entity by id
@@ -91,23 +93,7 @@ public class StudentService {
         return studentRepository.findAll(specification);
     }
 
-    /**
-     * Returns a list of teams for which student is subscribed
-     * @param id student id
-     * @return the new list
-     */
-    public List<Team> getUserApplications(Long id) {
-        Student student = findByIdOrElseThrow(id);
-        if (student.getApplications().isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return student.getApplications().stream()
-                    .map(application ->
-                            teamService.findByIdOrElseThrow(application.getTeam().getId())
-                    )
-                    .toList();
-        }
-    }
+
 
     public Student update(Long id, StudentDto dto) {
         Student student = findByIdOrElseThrow(id);
