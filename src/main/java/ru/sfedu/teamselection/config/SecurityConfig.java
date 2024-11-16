@@ -38,15 +38,16 @@ public class SecurityConfig {
                     return corsConfiguration;
                 }))
                 .authorizeHttpRequests((auth) -> auth
-                        .anyRequest().permitAll()
-//                )
-//                .oauth2Login(login -> login
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated()
+                ).oauth2Login(login -> login
 //                        .loginPage("/oauth2/authorization/azure")
-//                        .userInfoEndpoint(endpoint ->
-//                                endpoint.userService(oauth2UserService)
-//                        )
-//                        .successHandler(simpleAuthenticationSuccessHandler)
+                        .userInfoEndpoint(endpoint ->
+                                endpoint.userService(oauth2UserService)
+                        )
+                        .successHandler(simpleAuthenticationSuccessHandler)
                 );
+
         return http.build();
     }
 }

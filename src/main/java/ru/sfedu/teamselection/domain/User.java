@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 
 @Builder
@@ -31,7 +33,7 @@ import org.springframework.security.core.GrantedAuthority;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements OAuth2User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -80,6 +82,16 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime  updatedAt;
 
+    /**
+     * Get the OAuth 2.0 token attributes
+     *
+     * @return the OAuth 2.0 token attributes
+     */
+    @Override
+    public Map<String, Object> getAttributes() {
+        return null;
+    }
+
     //@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(getRole());
@@ -121,5 +133,10 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(fio, email);
+    }
+
+    @Override
+    public String getName() {
+        return fio;
     }
 }

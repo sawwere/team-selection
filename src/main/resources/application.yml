@@ -37,6 +37,13 @@ spring:
       jpa:
         enable_lazy_load_no_trans: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: ${CLIENT_ID}
+            clientSecret: ${CLIENT_SECRET}
 # TODO learn how to enable this
   cloud:
     azure:

@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 
@@ -23,10 +24,12 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException {
-        var user = (DefaultOidcUser) authentication.getPrincipal();
+        var user = authentication.getPrincipal();
+        response.addHeader("SessionId", ((WebAuthenticationDetails) authentication.getDetails()).getSessionId());
         redirectStrategy.sendRedirect(request,
                 response,
-                "https://pdflutterweb.web.app/?token=%s".formatted(user.getIdToken().getTokenValue())
+
+                "http://localhost:5173/profile"
         );
 
     }
