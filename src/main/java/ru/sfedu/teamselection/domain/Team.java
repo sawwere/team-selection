@@ -69,11 +69,11 @@ public class Team {
     @Builder.Default
     private List<Technology> technologies = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Track currentTrack;
 
     @Column
-    @OneToMany(mappedBy = "currentTeam", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "currentTeam", fetch = FetchType.EAGER)
     private List<Student> students;
 
     @Column

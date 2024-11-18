@@ -39,7 +39,7 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 ).oauth2Login(login -> login
 //                        .loginPage("/oauth2/authorization/azure")
                         .userInfoEndpoint(endpoint ->

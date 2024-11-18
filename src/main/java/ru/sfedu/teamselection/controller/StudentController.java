@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
-import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
@@ -40,8 +41,7 @@ public class StudentController {
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_BY_ID = "/api/v1/students/{id}";
-    public static final String FIND_BY_LIKE = "/api/v1/students/like";
-    public static final String FIND_BY_EMAIL = "/api/v1/students/{email}";
+    public static final String FIND_TEAM_HISTORY = "/api/v1/students/{id}/teams";
 
     public static final String SEARCH_STUDENTS = "/api/v1/students/search";
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
@@ -61,18 +61,33 @@ public class StudentController {
             parameters = {
                     @Parameter(name = "input",
                             description = "строка из поиска, разделенная пробелами",
-                            in = ParameterIn.PATH),
-                    @Parameter(name = "email",
-                            description = "email без @sfedu.ru",
-                            in = ParameterIn.PATH)
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "course",
+                            description = "Курс обучения студента",
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "course",
+                            description = "Номер группы студента",
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "has_team",
+                            description = "Состоит ли в команде",
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "technologies",
+                            description = "Список технологий(умений) студента",
+                            in = ParameterIn.QUERY),
             })
     @GetMapping(SEARCH_STUDENTS)
     public List<StudentDto> search(
             @RequestParam(value = "input", required = false) String like,
-            @RequestParam(value = "email", required = false) String email
+            @RequestParam(value = "course", required = false) Integer course,
+            @RequestParam(value = "group_number", required = false) Integer groupNumber,
+            @RequestParam(value = "has_team", required = false) Boolean hasTeam,
+            @RequestParam(value = "technologies", required = false) List<String> technologies
     ) {
-        LOGGER.info("ENTER search(%s, %s) endpoint".formatted(like, email));
-        return studentService.search(like, email).stream().map(studentDtoMapper::mapToDto).toList();
+        LOGGER.info("ENTER search() endpoint");
+        return studentService.search(like, course, groupNumber, hasTeam, technologies)
+                .stream()
+                .map(studentDtoMapper::mapToDto)
+                .toList();
     }
 
     @Operation(
@@ -91,9 +106,9 @@ public class StudentController {
             parameters = { @Parameter(name = "student", description = "сущность студента")}
             )
     @PostMapping(CREATE_STUDENT) // checked
-    public StudentDto createUser(@RequestBody StudentDto student, @RequestParam String type) {
+    public StudentDto createStudent(@RequestBody StudentCreationDto student) {
         LOGGER.info("ENTER createUser() endpoint");
-        return studentDtoMapper.mapToDto(studentService.create(student, type));
+        return studentDtoMapper.mapToDto(studentService.create(student));
     }
 
     @Operation(
@@ -101,10 +116,11 @@ public class StudentController {
             summary = "Изменить данные пользователя",
             parameters = {
                     @Parameter(name = "id", description = "сущность студента", in = ParameterIn.PATH),
+                    //@Parameter(name = "student", description = "сущность студента")
             })
-    @PostMapping(UPDATE_STUDENT) // checked
+    @PutMapping(UPDATE_STUDENT)
     public StudentDto updateStudent(@PathVariable(value = "id") Long studentId,
-                                    @RequestBody StudentDto student) {
+                                  @RequestBody StudentDto student) {
         LOGGER.info("ENTER updateStudent(%d) endpoint".formatted(studentId));
         return studentDtoMapper.mapToDto(studentService.update(studentId, student));
     }

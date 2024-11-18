@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
@@ -104,7 +105,7 @@ public class TeamController {
             parameters = { @Parameter(name = "team", description = "сущность команды")}
     )
     @PostMapping(CREATE_TEAM)
-    public TeamDto createTeam(@RequestBody TeamDto team) {
+    public TeamDto createTeam(@RequestBody TeamCreationDto team) {
         LOGGER.info("ENTER createUser() endpoint");
         return teamDtoMapper.mapToDto(teamService.create(team));
     }
@@ -115,7 +116,7 @@ public class TeamController {
             parameters = { @Parameter(name = "teamId", description = "id команды")}
     )
     @PutMapping(ADD_STUDENT_TO_TEAM)
-    public TeamDto addStudentToTeam(@RequestParam Long teamId, @RequestParam Long studentId) {
+    public TeamDto addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
         return teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId));
     }
