@@ -60,7 +60,7 @@ public class TeamController {
             method = "DELETE",
             summary = "Удалить команду по ее id",
             parameters = {
-                    @Parameter(name = "id", description = "id студента", in = ParameterIn.PATH),
+                    @Parameter(name = "id", description = "id команды", in = ParameterIn.PATH),
             }
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -110,14 +110,27 @@ public class TeamController {
     }
 
     @Operation(
-            method = "POST",
-            summary = "Создание команды",
-            parameters = { @Parameter(name = "team", description = "сущность команды")}
+            method = "PUT",
+            summary = "Добавление студента к команде",
+            parameters = { @Parameter(name = "teamId", description = "id команды")}
     )
-    @PostMapping(ADD_STUDENT_TO_TEAM)
+    @PutMapping(ADD_STUDENT_TO_TEAM)
     public TeamDto addStudentToTeam(@RequestParam Long teamId, @RequestParam Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
         return teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId));
     }
 
+    @Operation(
+            method = "POST",
+            summary = "Изменить данные команды",
+            parameters = {
+                    @Parameter(name = "id", description = "сущность команды", in = ParameterIn.PATH),
+                    //@Parameter(name = "student", description = "сущность студента")
+            })
+    @PostMapping(UPDATE_TEAM) // checked
+    public TeamDto updateTeam(@PathVariable(value = "id") Long teamId,
+                                    @RequestBody TeamDto team) {
+        LOGGER.info("ENTER updateTeam(%d) endpoint".formatted(teamId));
+        return teamDtoMapper.mapToDto(teamService.update(teamId, team));
+    }
 }

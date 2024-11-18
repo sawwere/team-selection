@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
@@ -80,5 +81,22 @@ public class TeamService {
 
         return team;
 
+    }
+
+    public Team update(Long id, TeamDto dto) {
+        Team team = findByIdOrElseThrow(id);
+
+//        student.setFio(dto.getFio());
+//        student.setEmail(dto.getEmail());
+//        student.setCaptain(dto.getCaptain());
+//        student.setStatus(dto.getStatus());
+//        student.setAboutSelf(dto.getAboutSelf());
+//        student.setCourse(dto.getCourse());
+//        student.setContacts(dto.getContacts());
+//        student.setGroupNumber(dto.getGroupNumber());
+//        student.setTags(dto.getTags());
+
+        teamRepository.save(team);
+        return team;
     }
 }

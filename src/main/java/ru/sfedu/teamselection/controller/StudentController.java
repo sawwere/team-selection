@@ -101,11 +101,10 @@ public class StudentController {
             summary = "Изменить данные пользователя",
             parameters = {
                     @Parameter(name = "id", description = "сущность студента", in = ParameterIn.PATH),
-                    //@Parameter(name = "student", description = "сущность студента")
             })
     @PostMapping(UPDATE_STUDENT) // checked
     public StudentDto updateStudent(@PathVariable(value = "id") Long studentId,
-                                  @RequestBody StudentDto student) {
+                                    @RequestBody StudentDto student) {
         LOGGER.info("ENTER updateStudent(%d) endpoint".formatted(studentId));
         return studentDtoMapper.mapToDto(studentService.update(studentId, student));
     }
