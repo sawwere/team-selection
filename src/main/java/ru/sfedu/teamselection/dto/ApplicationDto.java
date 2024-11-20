@@ -23,7 +23,7 @@ public class ApplicationDto {
     @JsonProperty(value = "student_id")
     private long studentId;
 
-    @JsonProperty(value = "student_id")
+    @JsonProperty(value = "team_id")
     private long teamId;
 
     private String status;

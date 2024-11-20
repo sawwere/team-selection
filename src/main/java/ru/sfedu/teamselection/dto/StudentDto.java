@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.User;
 
 
 /**
@@ -52,5 +53,5 @@ public class StudentDto {
 
     private List<ApplicationDto> applications = new ArrayList<>();
 
-    private Long userId;
+    private UserDto user;
 }
