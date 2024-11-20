@@ -32,9 +32,6 @@ public class TeamController {
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_BY_ID = "/api/v1/teams/{id}";
-    public static final String FIND_BY_LIKE = "/api/v1/teams/like";
-
-    public static final String SEARCH_TEAMS = "/api/v1/teams/search";
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_ALL = "/api/v1/teams";
     public static final String CREATE_TEAM = "/api/v1/teams";

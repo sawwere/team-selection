@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.domain.Application;
-import ru.sfedu.teamselection.enums.ApplicationStatus;
 
 /**
  * DTO for {@link Application}

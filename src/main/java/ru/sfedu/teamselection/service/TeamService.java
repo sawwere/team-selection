@@ -123,4 +123,14 @@ public class TeamService {
         teamRepository.save(team);
         return team;
     }
+
+    public int getSecondYearsCount(Team team) {
+        int res = 0;
+        for (Student student: team.getStudents()) {
+            if (student.getCourse() == 2) {
+                res += 1;
+            }
+        }
+        return res;
+    }
 }

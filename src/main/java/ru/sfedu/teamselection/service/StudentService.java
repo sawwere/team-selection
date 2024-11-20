@@ -7,6 +7,7 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
@@ -122,5 +123,14 @@ public class StudentService {
 
         studentRepository.save(student);
         return student;
+    }
+
+    @SuppressWarnings("checkstyle:MagicNumber")
+    public TrackType typeOfStudentTrack(Student student) {
+        return switch (student.getCourse()) {
+            case 1, 2 -> TrackType.bachelor;
+            case 5 -> TrackType.master;
+            default -> null;
+        };
     }
 }

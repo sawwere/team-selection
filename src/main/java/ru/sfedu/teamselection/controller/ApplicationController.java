@@ -4,25 +4,34 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.ApplicationDto;
 import ru.sfedu.teamselection.mapper.ApplicationDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 
-import java.util.List;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping()
 @Tag(name = "ApplicationController", description = "API для работы с заявками")
 @RequiredArgsConstructor
 public class ApplicationController {
-
-
     private static final Logger LOGGER = Logger.getLogger(ApplicationController.class.getName());
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_BY_ID = "/api/v1/applications/{id}";
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_ALL = "/api/v1/applications";
     public static final String DELETE_APPLICATION = "/api/v1/applications/{id}";
     public static final String CREATE_APPLICATION = "/api/v1/applications";
@@ -48,7 +57,8 @@ public class ApplicationController {
     @PostMapping(CREATE_APPLICATION) // checked
     public ApplicationDto createApplication(@RequestBody ApplicationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
-        return applicationDtoMapper.mapToDto(applicationService.create(application));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return applicationDtoMapper.mapToDto(applicationService.create(application, user));
     }
 
     @Operation(
@@ -77,9 +87,4 @@ public class ApplicationController {
         LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(applicationId));
         applicationService.delete(applicationId);
     }
-
-
-
-
-
 }

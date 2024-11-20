@@ -2,6 +2,7 @@ package ru.sfedu.teamselection.enums;
 
 public enum ApplicationStatus {
     Accepted,
-    Sending,
+    Sent,
+    Rejected,
     Cancelled
 }
