@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.controller.track;
+package ru.sfedu.teamselection.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

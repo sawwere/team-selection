@@ -7,11 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 
 /**
  * Entity of student's applications for participation in teams
@@ -29,8 +31,13 @@ public class Application {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
     private Team team;
+
+    @Builder.Default
+    private String status = ApplicationStatus.Sent.name();
 }

@@ -66,7 +66,7 @@ public class ReportService {
         firstRow.createCell(1).setCellValue(track.getAbout());
         firstRow.createCell(2).setCellValue(sdf.format(track.getStartDate()));
         firstRow.createCell(3).setCellValue(sdf.format(track.getEndDate()));
-        firstRow.createCell(4).setCellValue(track.getType());
+        //firstRow.createCell(4).setCellValue(track.getType());
         firstRow.createCell(5).setCellValue(String.valueOf(track.getMinConstraint()));
         firstRow.createCell(6).setCellValue(String.valueOf(track.getMaxConstraint()));
         //TODO Убрал пока менял классы сущщностей

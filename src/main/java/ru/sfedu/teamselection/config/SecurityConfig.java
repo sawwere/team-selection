@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,8 +40,8 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated()
-                ).oauth2Login(login -> login
+                        .anyRequest().permitAll())
+                .oauth2Login(login -> login
 //                        .loginPage("/oauth2/authorization/azure")
                         .userInfoEndpoint(endpoint ->
                                 endpoint.userService(oauth2UserService)

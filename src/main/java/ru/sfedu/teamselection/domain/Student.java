@@ -51,16 +51,16 @@ public class Student {
     @Size(max = 255)
     private String contacts;
 
-    @Column(name = "has_team")
+    @Column(name = "has_team", nullable = false)
     @Builder.Default
-    private Boolean hasTeam = null; // статус участик команды/не участник
+    private Boolean hasTeam = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Team currentTeam;
 
-    @Column(name = "is_captain")
+    @Column(name = "is_captain", nullable = false)
     @Builder.Default
-    private Boolean isCaptain = null; //TODO поменять логику начального значения
+    private Boolean isCaptain = false;
 
     @Column
     @ManyToMany

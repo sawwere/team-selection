@@ -1,20 +1,20 @@
 package ru.sfedu.teamselection.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
-import ru.sfedu.teamselection.util.TrackByStartComparator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @RequiredArgsConstructor
@@ -23,7 +23,6 @@ public class StudentService {
     private final StudentRepository studentRepository;
 
     private final UserService userService;
-    private final TeamService teamService;
     private final TrackService trackService;
 
     private final StudentDtoMapper studentDtoMapper;
@@ -46,20 +45,13 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
-    public Student create(StudentDto dto, String type) {
-        //TODO
-        User newUser = userService.findByEmail("TODO");
+    public Student create(StudentCreationDto dto) {
+        User newUser = userService.findByIdOrElseThrow(dto.getUserId());
 
-        Student student = studentDtoMapper.mapToEntity(dto);
+        Student student = studentDtoMapper.mapCreationToEntity(dto);
 
         newUser.setIsEnabled(true);
         student.setUser(newUser);
-        Track track = trackService.findAllByType(type)
-                .stream()
-                .filter(it -> it.getStartDate() != null)
-                .max(new TrackByStartComparator())
-                .orElseThrow();
-        //student.setTrackId(track.getId());
         studentRepository.save(student);
         return student;
     }
@@ -76,53 +68,69 @@ public class StudentService {
     /**
      * Performs search across all students with given filter criteria
      * @param like like parameter for the student string representation
-     * @param email desired student's email
+     * @param course student's group
+     * @param groupNumber student's course
+     * @param hasTeam student's status of having team
+     * @param technologies student's technologies(skills)
      * @return the filtered list
      */
-    public List<Student> search(String like, String email) {
+    public List<Student> search(String like,
+                                Integer course,
+                                Integer groupNumber,
+                                Boolean hasTeam,
+                                List<String> technologies) {
         Specification<Student> specification = Specification.allOf();
         if (like != null) {
-            specification = specification.and(StudentSpecification.like(email));
+            specification = specification.and(StudentSpecification.like(like));
         }
-        if (email != null) {
-            specification = specification.and(StudentSpecification.byEmail(email));
+        if (course != null) {
+            specification = specification.and(StudentSpecification.byCourse(course));
+        }
+        if (groupNumber != null) {
+            specification = specification.and(StudentSpecification.byGroup(groupNumber));
+        }
+        if (hasTeam != null) {
+            specification = specification.and(StudentSpecification.byHasTeam(hasTeam));
         }
 
-        return studentRepository.findAll(specification);
+        List<Student> findResult = studentRepository.findAll(specification);
+        if (technologies != null && !technologies.isEmpty()) {
+            List<Student> result = new ArrayList<>();
+            for (Student student : findResult) {
+                for (var tech :student.getTechnologies()) {
+                    if (technologies.contains(tech.getName())) {
+                        result.add(student);
+                    }
+                }
+            }
+            return result;
+        }
+
+        return findResult;
     }
 
-    /**
-     * Returns a list of teams for which student is subscribed
-     * @param id student id
-     * @return the new list
-     */
-    public List<Team> getUserApplications(Long id) {
-        Student student = findByIdOrElseThrow(id);
-        if (student.getApplications().isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return student.getApplications().stream()
-                    .map(application ->
-                            teamService.findByIdOrElseThrow(application.getTeam().getId())
-                    )
-                    .toList();
-        }
-    }
+
 
     public Student update(Long id, StudentDto dto) {
         Student student = findByIdOrElseThrow(id);
-
-//        student.setFio(dto.getFio());
-//        student.setEmail(dto.getEmail());
-//        student.setCaptain(dto.getCaptain());
-//        student.setStatus(dto.getStatus());
-//        student.setAboutSelf(dto.getAboutSelf());
-//        student.setCourse(dto.getCourse());
-//        student.setContacts(dto.getContacts());
-//        student.setGroupNumber(dto.getGroupNumber());
-//        student.setTags(dto.getTags());
+        student.setCourse(dto.getCourse());
+        student.setGroupNumber(dto.getGroupNumber());
+        student.setAboutSelf(dto.getAboutSelf());
+        student.setContacts(dto.getContacts());
+        student.setHasTeam(dto.getHasTeam());
+        student.setIsCaptain(dto.getIsCaptain());
+        // TODO technologies, applications, team ??
 
         studentRepository.save(student);
         return student;
+    }
+
+    @SuppressWarnings("checkstyle:MagicNumber")
+    public TrackType typeOfStudentTrack(Student student) {
+        return switch (student.getCourse()) {
+            case 1, 2 -> TrackType.bachelor;
+            case 5 -> TrackType.master;
+            default -> null;
+        };
     }
 }

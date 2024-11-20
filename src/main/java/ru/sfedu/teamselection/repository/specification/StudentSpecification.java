@@ -15,11 +15,27 @@ public final class StudentSpecification {
            );
     }
 
-    public static Specification<Student> byEmail(String email) {
+    public static Specification<Student> byCourse(Integer course) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(
-                        root.get("email"),
-                        email
+                        root.get("course"),
+                        course
+                );
+    }
+
+    public static Specification<Student> byGroup(Integer group) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(
+                        root.get("groupNumber"),
+                        group
+                );
+    }
+
+    public static Specification<Student> byHasTeam(Boolean hasTeam) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(
+                        root.get("hasTeam"),
+                        hasTeam
                 );
     }
 }
