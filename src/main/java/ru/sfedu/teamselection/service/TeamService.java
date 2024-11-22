@@ -3,6 +3,7 @@ package ru.sfedu.teamselection.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
@@ -11,6 +12,7 @@ import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
 import ru.sfedu.teamselection.repository.TeamRepository;
+import ru.sfedu.teamselection.repository.specification.TeamSpecification;
 
 
 @RequiredArgsConstructor
@@ -122,6 +124,50 @@ public class TeamService {
 
         teamRepository.save(team);
         return team;
+    }
+
+    /**
+     * Performs search across all students with given filter criteria
+     * @param like like parameter for the student string representation
+     * @param trackId team is assigned to this track
+     * @param isFull is team full of students
+     * @param projectType project type defined by team's captain
+     * @param technologies student's technologies(skills)
+     * @return the filtered list
+     */
+    public List<Team> search(String like,
+                             Long trackId,
+                             Boolean isFull,
+                             String projectType,
+                             List<Long> technologies) {
+        Specification<Team> specification = Specification.allOf();
+        if (like != null) {
+            specification = specification.and(TeamSpecification.like(like));
+        }
+        if (trackId != null) {
+            specification = specification.and(TeamSpecification.byTrack(trackId));
+        }
+        if (isFull != null) {
+            specification = specification.and(TeamSpecification.byIsFull(isFull));
+        }
+        if (projectType != null) {
+            specification = specification.and(TeamSpecification.byProjectType(projectType));
+        }
+        specification = specification.and(TeamSpecification.byTechnologies(technologies));
+        List<Team> findResult = teamRepository.findAll(specification);
+//        if (technologies != null && !technologies.isEmpty()) {
+//            List<Team> result = new ArrayList<>();
+//            for (Team team : findResult) {
+//                for (var tech :team.getTechnologies()) {
+//                    if (technologies.contains(tech.getName())) {
+//                        result.add(team);
+//                    }
+//                }
+//            }
+//            return result;
+//        }
+
+        return findResult;
     }
 
     public int getSecondYearsCount(Team team) {

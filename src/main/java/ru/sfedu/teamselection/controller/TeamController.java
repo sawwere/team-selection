@@ -4,9 +4,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.dto.TeamDto;
@@ -14,9 +25,6 @@ import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.TeamService;
-
-import java.util.List;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping()
@@ -34,6 +42,7 @@ public class TeamController {
     public static final String FIND_BY_ID = "/api/v1/teams/{id}";
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_ALL = "/api/v1/teams";
+    public static final String SEARCH_TEAMS = "/api/v1/teams/search";
     public static final String CREATE_TEAM = "/api/v1/teams";
     public static final String UPDATE_TEAM = "/api/v1/teams/{id}";
     public static final String DELETE_TEAM = "/api/v1/teams/{id}";
@@ -52,6 +61,41 @@ public class TeamController {
     public List<TeamDto> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
         return teamService.findAll().stream().map(teamDtoMapper::mapToDto).toList();
+    }
+
+    @Operation(
+            method = "GET",
+            summary = "Поиск студентов с фильтрацией по полям",
+            parameters = {
+                    @Parameter(name = "input",
+                            description = "строка из поиска, разделенная пробелами",
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "track_id",
+                            description = "К какому треку принадлежит команда",
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "is_full",
+                            description = "Полностью ли ли укомплектована команда",
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "project_type",
+                            description = "Тип проекта, указанный капитаном",
+                            in = ParameterIn.QUERY),
+                    @Parameter(name = "technologies",
+                            description = "Список технологий(умений) команды",
+                            in = ParameterIn.QUERY),
+            })
+    @GetMapping(SEARCH_TEAMS)
+    public List<TeamDto> search(
+            @RequestParam(value = "input", required = false) String like,
+            @RequestParam(value = "track_id", required = false) Long trackId,
+            @RequestParam(value = "is_full", required = false) Boolean isFull,
+            @RequestParam(value = "project_type", required = false) String projectType,
+            @RequestParam(value = "technologies", required = false) List<Long> technologies
+    ) {
+        LOGGER.info("ENTER search() endpoint");
+        return teamService.search(like, trackId, isFull, projectType, technologies)
+                .stream()
+                .map(teamDtoMapper::mapToDto)
+                .toList();
     }
 
     @Operation(
