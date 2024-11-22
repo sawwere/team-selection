@@ -24,7 +24,7 @@ public class SecurityConfig {
     private final SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
 
     private static final String ADMIN_ROLE_NAME = "ADMIN";
-
+    public static final String LOGOUT_URL = "/api/v1/auth/logout";
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http) throws Exception {
@@ -39,8 +39,11 @@ public class SecurityConfig {
                     return corsConfiguration;
                 }))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/error").permitAll()
-                        .anyRequest().permitAll())
+                        .requestMatchers("/error", "/login").permitAll()
+                        .requestMatchers(HttpMethod.DELETE).hasAuthority(ADMIN_ROLE_NAME)
+                        .anyRequest().authenticated())
+                .logout(logout -> logout
+                        .logoutUrl(LOGOUT_URL))
                 .oauth2Login(login -> login
 //                        .loginPage("/oauth2/authorization/azure")
                         .userInfoEndpoint(endpoint ->
