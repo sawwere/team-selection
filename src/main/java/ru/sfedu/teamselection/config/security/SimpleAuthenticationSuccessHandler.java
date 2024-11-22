@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -19,6 +20,10 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
+    @Value("${app.frontendUrl}")
+    private String frontendUrl;
+
+    @SuppressWarnings({"checkstyle:MagicNumber", "checkstyle:MultipleStringLiterals"})
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
@@ -47,6 +52,7 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             response.addCookie(jSessionIdCookie);
         }
 
-        redirectStrategy.sendRedirect(request, response, "http://localhost:5173/teams");
+
+        redirectStrategy.sendRedirect(request, response, frontendUrl + "/teams");
     }
 }

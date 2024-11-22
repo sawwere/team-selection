@@ -2,6 +2,7 @@ package ru.sfedu.teamselection.config;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,9 @@ public class SecurityConfig {
 
     private static final String ADMIN_ROLE_NAME = "ADMIN";
     public static final String LOGOUT_URL = "/api/v1/auth/logout";
+
+    @Value("${app.frontendUrl}")
+    private String frontendUrl;
 
     public SecurityConfig(Oauth2UserService oauth2UserService,
                           SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler) {
@@ -59,7 +63,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(List.of(frontendUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("SessionId")); // Разрешаем браузеру видеть эти заголовки

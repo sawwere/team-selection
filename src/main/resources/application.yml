@@ -64,7 +64,8 @@ spring:
 #            scopes: https://graph.microsoft.com/Analytics.Read, https://graph.microsoft.com/User.Read
 #        b2c:
 #          user-name-attribute-name: email
-
+app:
+  frontendUrl: http://localhost:5173
 
 
 
