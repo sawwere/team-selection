@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.StudentService;
+import ru.sfedu.teamselection.service.UserService;
 
 
 @RestController
@@ -32,6 +36,8 @@ import ru.sfedu.teamselection.service.StudentService;
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentService studentService;
+
+    private final UserService userService;
 
 
     private final StudentDtoMapper studentDtoMapper;
@@ -152,5 +158,16 @@ public class StudentController {
     public void deleteStudent(@PathVariable(value = "id") Long studentId) {
         LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(studentId));
         studentService.delete(studentId);
+    }
+
+    /**
+     * Получение текущего пользователя.
+     * @return информация о текущем пользователе.
+     */
+    @GetMapping("/api/v1/me")
+    public ResponseEntity<UserDto> getCurrentUser() {
+        User currentUser = userService.getCurrentUser();
+        UserDto userDto = new UserDto(currentUser.getId(), currentUser.getFio(), currentUser.getEmail(), "test");
+        return ResponseEntity.ok(userDto);
     }
 }
