@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.repository.specification;
 
 
+import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Student;
 
@@ -37,5 +38,16 @@ public final class StudentSpecification {
                         root.get("hasTeam"),
                         hasTeam
                 );
+    }
+
+    public static Specification<Student> hasTechnologies(List<Long> technologies) {
+        return (root, query, criteriaBuilder) -> {
+            if (technologies == null || technologies.isEmpty()) {
+                return criteriaBuilder.conjunction(); // do not filter if list is empty
+            }
+            return root.join("technologies")
+                    .get("id")
+                    .in(technologies);
+        };
     }
 }
