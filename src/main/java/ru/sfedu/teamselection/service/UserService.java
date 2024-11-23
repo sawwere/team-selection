@@ -2,6 +2,7 @@ package ru.sfedu.teamselection.service;
 
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.repository.UserRepository;
@@ -24,5 +25,18 @@ public class UserService {
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByFio(username);
+    }
+
+    /**
+     * Get current user based on security context
+     * @return Authenticated user object
+     */
+    public User getCurrentUser() {
+        var username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return findByUsername(username);
     }
 }

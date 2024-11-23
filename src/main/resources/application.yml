@@ -1,7 +1,7 @@
 server:
   port: 8080
 # TODO enable ssl
-#  forward-headers-strategy: native
+  forward-headers-strategy: native
 #  ssl:
 #    key-store-type: PKCS12
 #    key-store: classpath:keystore/ts.p12
@@ -64,7 +64,8 @@ spring:
 #            scopes: https://graph.microsoft.com/Analytics.Read, https://graph.microsoft.com/User.Read
 #        b2c:
 #          user-name-attribute-name: email
-
+app:
+  frontendUrl: http://localhost:5173
 
 
 
