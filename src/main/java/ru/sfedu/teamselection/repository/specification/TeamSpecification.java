@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.repository.specification;
 
 import java.util.List;
+import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Team;
 
@@ -11,8 +12,8 @@ public final class TeamSpecification {
     public static Specification<Team> like(String text) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(
-                        root.get("name"),
-                        text
+                        criteriaBuilder.lower(root.get("name")),
+                        ("%" + text + "%").toLowerCase(Locale.ROOT)
                 );
     }
 
