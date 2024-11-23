@@ -1,5 +1,8 @@
 package ru.sfedu.teamselection.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -12,10 +15,6 @@ import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-
 
 @RequiredArgsConstructor
 @Service
@@ -23,7 +22,6 @@ public class StudentService {
     private final StudentRepository studentRepository;
 
     private final UserService userService;
-    private final TrackService trackService;
 
     private final StudentDtoMapper studentDtoMapper;
 

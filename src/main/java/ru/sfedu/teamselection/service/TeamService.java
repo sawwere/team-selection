@@ -10,7 +10,9 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.dto.TeamDto;
+import ru.sfedu.teamselection.dto.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.specification.TeamSpecification;
 
@@ -23,6 +25,8 @@ public class TeamService {
     private final TeamDtoMapper teamDtoMapper;
 
     private final StudentService studentService;
+
+    private final TechnologyDtoMapper technologyDtoMapper;
 
     /**
      * Find Team entity by id
@@ -154,20 +158,8 @@ public class TeamService {
             specification = specification.and(TeamSpecification.byProjectType(projectType));
         }
         specification = specification.and(TeamSpecification.byTechnologies(technologies));
-        List<Team> findResult = teamRepository.findAll(specification);
-//        if (technologies != null && !technologies.isEmpty()) {
-//            List<Team> result = new ArrayList<>();
-//            for (Team team : findResult) {
-//                for (var tech :team.getTechnologies()) {
-//                    if (technologies.contains(tech.getName())) {
-//                        result.add(team);
-//                    }
-//                }
-//            }
-//            return result;
-//        }
 
-        return findResult;
+        return teamRepository.findAll(specification);
     }
 
     public int getSecondYearsCount(Team team) {
@@ -178,5 +170,20 @@ public class TeamService {
             }
         }
         return res;
+    }
+
+    public TeamSearchOptionsDto getSearchOptionsTeams(Long trackId) {
+        var teams = search(null, trackId, null, null, null);
+        TeamSearchOptionsDto teamSearchOptionsDto = new TeamSearchOptionsDto();
+        for (Team team : teams) {
+            teamSearchOptionsDto.getProjectTypes().add(team.getProjectType());
+            teamSearchOptionsDto.getTechnologies().addAll(
+                    team.getTechnologies()
+                            .stream()
+                            .map(technologyDtoMapper::mapToDto)
+                            .toList()
+            );
+        }
+        return teamSearchOptionsDto;
     }
 }

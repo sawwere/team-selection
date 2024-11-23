@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.dto.TeamDto;
+import ru.sfedu.teamselection.dto.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
@@ -49,6 +50,19 @@ public class TeamController {
 
     public static final String FIND_SUBSCRIPTIONS_BY_ID = "/api/v1/teams/{id}/subscriptions";
     public static final String ADD_STUDENT_TO_TEAM = "api/v1/teams/{teamId}/students/{studentId}";
+
+    public static final String GET_SEARCH_OPTIONS = "/api/v1/teams/filters";
+
+
+    @Operation(
+            method = "GET",
+            summary = "Получение списка возможных опций для поиска среди команд заданного трека"
+    )
+    @GetMapping(GET_SEARCH_OPTIONS)
+
+    public TeamSearchOptionsDto getSearchOptionsTeams(@RequestParam(value = "track_id") Long trackId) {
+        return teamService.getSearchOptionsTeams(trackId);
+    }
 
     private final ApplicationService applicationService;
 
