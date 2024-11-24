@@ -2,6 +2,7 @@ package ru.sfedu.teamselection.repository.specification;
 
 import java.util.List;
 import java.util.Locale;
+
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Team;
 

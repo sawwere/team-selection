@@ -4,16 +4,19 @@ package ru.sfedu.teamselection.repository.specification;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Student;
 
+import java.util.Locale;
+
 public final class StudentSpecification {
     private StudentSpecification() {}
 
     public static Specification<Student> like(String text) {
         return (root, query, criteriaBuilder) ->
-           criteriaBuilder.like(
-                   root.get("fio"),
-                   text
-           );
+             criteriaBuilder.like(
+                    criteriaBuilder.lower(root.get("user").get("fio")),
+                    ("%" + text + "%").toLowerCase(Locale.ROOT)
+            );
     }
+
 
     public static Specification<Student> byCourse(Integer course) {
         return (root, query, criteriaBuilder) ->

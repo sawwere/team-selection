@@ -2,6 +2,8 @@ package ru.sfedu.teamselection.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -98,7 +100,7 @@ public class TeamService {
         //All checks are ok, now we can add student
         team.getStudents().add(student);
         team.setQuantityOfStudents(team.getQuantityOfStudents() + 1);
-        team.setIsFull(team.getQuantityOfStudents() == team.getCurrentTrack().getMaxConstraint());
+        team.setIsFull(Objects.equals(team.getQuantityOfStudents(), team.getCurrentTrack().getMaxConstraint()));
 
         student.setHasTeam(true);
         student.setCurrentTeam(team);
