@@ -87,7 +87,7 @@ public class StudentController {
             @RequestParam(value = "course", required = false) Integer course,
             @RequestParam(value = "group_number", required = false) Integer groupNumber,
             @RequestParam(value = "has_team", required = false) Boolean hasTeam,
-            @RequestParam(value = "technologies", required = false) List<String> technologies
+            @RequestParam(value = "technologies", required = false) List<Long> technologies
     ) {
         LOGGER.info("ENTER search() endpoint");
         return studentService.search(like, course, groupNumber, hasTeam, technologies)

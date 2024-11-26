@@ -1,6 +1,6 @@
 package ru.sfedu.teamselection.service;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
+import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
 
 
@@ -20,6 +21,7 @@ import ru.sfedu.teamselection.repository.specification.StudentSpecification;
 @Service
 public class StudentService {
     private final StudentRepository studentRepository;
+    private final TechnologyRepository technologyRepository;
 
     private final UserService userService;
 
@@ -76,7 +78,7 @@ public class StudentService {
                                 Integer course,
                                 Integer groupNumber,
                                 Boolean hasTeam,
-                                List<String> technologies) {
+                                List<Long> technologies) {
         Specification<Student> specification = Specification.allOf();
         if (like != null) {
             specification = specification.and(StudentSpecification.like(like));
@@ -90,21 +92,9 @@ public class StudentService {
         if (hasTeam != null) {
             specification = specification.and(StudentSpecification.byHasTeam(hasTeam));
         }
+        specification = specification.and(StudentSpecification.hasTechnologies(technologies));
 
-        List<Student> findResult = studentRepository.findAll(specification);
-        if (technologies != null && !technologies.isEmpty()) {
-            List<Student> result = new ArrayList<>();
-            for (Student student : findResult) {
-                for (var tech :student.getTechnologies()) {
-                    if (technologies.contains(tech.getName())) {
-                        result.add(student);
-                    }
-                }
-            }
-            return result;
-        }
-
-        return findResult;
+        return studentRepository.findAll(specification);
     }
 
 
