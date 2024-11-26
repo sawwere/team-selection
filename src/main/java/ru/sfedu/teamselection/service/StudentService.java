@@ -1,6 +1,5 @@
 package ru.sfedu.teamselection.service;
 
-
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
