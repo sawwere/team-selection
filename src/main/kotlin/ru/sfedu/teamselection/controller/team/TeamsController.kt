@@ -27,46 +27,6 @@ class TeamsController(
 
     private val mapper = ObjectMapper()
 
-    @Operation(
-        method = "GET",
-        summary = "Поиск команды по id",
-        parameters = [Parameter(name = "teamId", description = "id команды")]
-    )
-    @GetMapping("getTeamByID")
-    fun getTeamById(@RequestParam teamId: Long): ResponseEntity<Team> {
-        val team = teamRepository.findById(teamId).getOrNull()
-        if (team == null) {
-            return ResponseEntity<Team>(HttpStatus.NOT_FOUND)
-        }
-        return ResponseEntity<Team>(team, HttpStatus.OK)
-    }
-
-    @Operation(
-        method = "GET",
-        summary = "Поиск команд по like",
-        parameters = [Parameter(name = "input", description = "строка из поиска, разделенная пробелами")]
-    )
-    @GetMapping("/like")
-    fun getLikeTeams(@RequestParam input: String): Any {
-        val inputValues = input.split(" ")
-        val teams = teamRepository.findAll()
-        if (teams.isEmpty())
-            return ResponseEntity<List<Team>>(null, HttpStatus.NOT_FOUND)
-        val mappedStudents = teams.map { mapper.writeValueAsString(it)  }
-        val result = mutableListOf<Team>()
-        mappedStudents.forEachIndexed { ind, it ->
-            var flag = false
-            inputValues.forEach { inp ->
-                if (it.contains(inp)) {
-                    flag = true
-                }
-            }
-            if (flag) {
-                result.add(teams[ind])
-            }
-        }
-        return ResponseEntity<List<Team>>(result, HttpStatus.OK)
-    }
 
     @Operation(
         method = "POST",
