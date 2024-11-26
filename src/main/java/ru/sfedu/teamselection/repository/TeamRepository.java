@@ -1,13 +1,13 @@
 package ru.sfedu.teamselection.repository;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import ru.sfedu.teamselection.domain.Team;
 
-import java.util.Optional;
-
 @Repository
-public interface TeamRepository extends JpaRepository<Team, Long> {
+public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificationExecutor<Team> {
 
     boolean existsByNameIgnoreCaseAndCurrentTrackId(String name, Long trackId);
 

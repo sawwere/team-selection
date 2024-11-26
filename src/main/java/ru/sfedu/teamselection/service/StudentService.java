@@ -23,7 +23,6 @@ public class StudentService {
     private final TechnologyRepository technologyRepository;
 
     private final UserService userService;
-    private final TrackService trackService;
 
     private final StudentDtoMapper studentDtoMapper;
 

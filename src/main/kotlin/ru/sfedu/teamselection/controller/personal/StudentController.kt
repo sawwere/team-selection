@@ -40,37 +40,6 @@ class StudentController(
 
     @Operation(
         method = "GET",
-        summary = "Поиск студентов по like",
-        parameters = [Parameter(name = "input", description = "строка из поиска, разделенная пробелами")]
-    )
-    @GetMapping("/like")
-    fun getLikeStudents(@RequestParam input: String): Any {
-        val inputValues = input.split(" ")
-        val students = studentRepository.findAll()
-        if (students.isEmpty())
-            return ResponseEntity<List<StudentDto>>(null, HttpStatus.NOT_FOUND)
-        val mappedStudents = students.map { mapper.writeValueAsString(it)  }
-        val result = mutableListOf<Student>()
-        mappedStudents.forEachIndexed { ind, it ->
-            var flag = false
-            inputValues.forEach { inp ->
-                if (it.contains(inp)) {
-                    flag = true
-                }
-            }
-            if (flag) {
-                result.add(students[ind])
-            }
-        }
-        val finalResult = mutableListOf<StudentDto>()
-        result.forEach {
-            finalResult.add(StudentDto.entityToDto(it))
-        }
-        return ResponseEntity<List<StudentDto>>(finalResult, HttpStatus.OK)
-    }
-
-    @Operation(
-        method = "GET",
         summary = "Получение списка всех студентов по текущему треку в зависимости от типа: bachelor/master",
         parameters = [Parameter(name = "type", description = "тип трека bachelor/master")]
     )
@@ -108,59 +77,4 @@ class StudentController(
             ResponseEntity<MutableList<StudentDto>>(HttpStatus.NOT_FOUND)
         }
     }
-
-    @Operation(
-        method = "GET",
-        summary = "Найти студентов по их статусу: состоят в команде или нет",
-        parameters = [
-            Parameter(name = "status", description = "true/false"),
-            Parameter(name = "trackId", description = "id текущего трека")
-        ]
-    )
-    @GetMapping("/findByStatusAndTrackId") //checked
-    fun findStudentByStatusAndTrackId(@RequestParam status: Boolean, @RequestParam trackId: Long): ResponseEntity<MutableList<StudentDto>> {
-        return try {
-            val studentList = studentRepository.findStudentByStatusAndTrackId(status, trackId)
-            if (studentList.isNotEmpty()) {
-                val finalResult = mutableListOf<StudentDto>()
-                studentList.forEach {
-                    finalResult.add(StudentDto.entityToDto(it))
-                }
-                ResponseEntity<MutableList<StudentDto>>(finalResult, HttpStatus.OK)
-            } else {
-                ResponseEntity<MutableList<StudentDto>>(HttpStatus.NOT_FOUND)
-            }
-        } catch (ex: Exception) {
-            log.info{ "Error occurred while writing student to DB: ${ex.message}" }
-            ResponseEntity<MutableList<StudentDto>>(HttpStatus.INTERNAL_SERVER_ERROR)
-        }
-    }
-
-    @Operation(
-        method = "GET",
-        summary = "Найти студентов по их навыкам(тегам)",
-        parameters = [
-            Parameter(name = "tags", description = "склеенная строка из тегов через пробелы"),
-            Parameter(name = "trackId", description = "id текущего трека")
-        ]
-    )
-    @GetMapping("/findByTagAndTrackId") // checked
-    fun findStudentByTag(@RequestParam tags: String, trackId: Long): ResponseEntity<MutableList<StudentDto>> {
-        return try {
-            val studentList = studentRepository.findStudentByTagsInAndTrackId(tags.split(" "), trackId)
-            if (studentList.isNotEmpty()) {
-                val finalResult = mutableListOf<StudentDto>()
-                studentList.forEach {
-                    finalResult.add(StudentDto.entityToDto(it))
-                }
-                ResponseEntity<MutableList<StudentDto>>(finalResult, HttpStatus.OK)
-            } else {
-                ResponseEntity<MutableList<StudentDto>>(HttpStatus.NOT_FOUND)
-            }
-        } catch (ex: Exception) {
-            log.info{ "Error occurred while writing student to DB: ${ex.message}" }
-            ResponseEntity<MutableList<StudentDto>>(HttpStatus.NOT_FOUND)
-        }
-    }
-
 }
