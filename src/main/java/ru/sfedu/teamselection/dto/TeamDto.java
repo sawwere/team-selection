@@ -3,19 +3,15 @@ package ru.sfedu.teamselection.dto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.sfedu.teamselection.domain.Application;
-import ru.sfedu.teamselection.domain.Track;
 
 
 @Builder
@@ -39,9 +35,10 @@ public class TeamDto {
     @Builder.Default
     private Integer quantityOfStudents = 0;
 
-    @JsonProperty(value = "captain_id")
+    @JsonProperty(value = "captain")
     @NotNull
-    private Long captainId;
+    @JsonManagedReference
+    private StudentDto captain;
 
     @JsonProperty(value = "is_full")
     @Builder.Default
@@ -51,7 +48,6 @@ public class TeamDto {
     @JsonBackReference
     private Long currentTrackId;
 
-    @JsonManagedReference
     private List<StudentDto> students;
 
     @Builder.Default
