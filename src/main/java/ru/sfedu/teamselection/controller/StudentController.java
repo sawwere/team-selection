@@ -22,11 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
-import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.StudentService;
+import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 
 
@@ -35,31 +36,25 @@ import ru.sfedu.teamselection.service.UserService;
 @Tag(name = "StudentController", description = "API для работы со студентами")
 @RequiredArgsConstructor
 public class StudentController {
-    private final StudentService studentService;
-
-    private final UserService userService;
-
-
-    private final StudentDtoMapper studentDtoMapper;
-    private final TeamDtoMapper teamDtoMapper;
-
     private static final Logger LOGGER = Logger.getLogger(StudentController.class.getName());
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_BY_ID = "/api/v1/students/{id}";
-    public static final String FIND_TEAM_HISTORY = "/api/v1/students/{id}/teams";
-
     public static final String SEARCH_STUDENTS = "/api/v1/students/search";
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_ALL = "/api/v1/students";
     public static final String CREATE_STUDENT = "/api/v1/students";
     public static final String UPDATE_STUDENT = "/api/v1/students/{id}";
     public static final String DELETE_STUDENT = "/api/v1/students/{id}";
+    public static final String FIND_TEAM_HISTORY = "/api/v1/students/{id}/teams";
+
+    private final TeamService teamService;
+    private final StudentService studentService;
+    private final UserService userService;
 
 
-    public static final String FIND_SUBSCRIPTIONS_BY_ID = "/api/v1/students/{id}/subscriptions";
-
-    private final ApplicationService applicationService;
+    private final StudentDtoMapper studentDtoMapper;
+    private final TeamDtoMapper teamDtoMapper;
 
     @Operation(
             method = "GET",
@@ -169,5 +164,22 @@ public class StudentController {
         User currentUser = userService.getCurrentUser();
         UserDto userDto = new UserDto(currentUser.getId(), currentUser.getFio(), currentUser.getEmail(), "test");
         return ResponseEntity.ok(userDto);
+    }
+
+    /**
+     * Returns list of teams that the student has ever been member of
+     * @return new list
+     */
+    @Operation(
+            method = "DELETE",
+            summary = "Найти все команды, в которых когда либо состоял студент",
+            parameters = {
+                    @Parameter(name = "id", description = "id студента", in = ParameterIn.PATH),
+            }
+    )
+    @GetMapping(FIND_TEAM_HISTORY) // checked
+    public List<TeamDto> getTeamHistory(@PathVariable(value = "id") Long studentId) {
+        LOGGER.info("ENTER getTeamHistory(%d) endpoint".formatted(studentId));
+        return teamService.getTeamHistoryForStudent(studentId).stream().map(teamDtoMapper::mapToDto).toList();
     }
 }

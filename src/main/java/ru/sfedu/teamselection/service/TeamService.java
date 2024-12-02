@@ -3,7 +3,6 @@ package ru.sfedu.teamselection.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -187,5 +186,9 @@ public class TeamService {
             );
         }
         return teamSearchOptionsDto;
+    }
+
+    public List<Team> getTeamHistoryForStudent(Long studentId) {
+        return teamRepository.findAllByStudent(studentId);
     }
 }
