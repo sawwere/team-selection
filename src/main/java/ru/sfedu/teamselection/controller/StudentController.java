@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
-import ru.sfedu.teamselection.service.UserService;
 
 
 @RestController
@@ -44,14 +44,24 @@ public class StudentController {
     public static final String UPDATE_STUDENT = "/api/v1/students/{id}";
     public static final String DELETE_STUDENT = "/api/v1/students/{id}";
     public static final String FIND_TEAM_HISTORY = "/api/v1/students/{id}/teams";
+    public static final String GET_SEARCH_OPTIONS = "/api/v1/students/filters";
 
     private final TeamService teamService;
     private final StudentService studentService;
-    private final UserService userService;
 
 
     private final StudentDtoMapper studentDtoMapper;
     private final TeamDtoMapper teamDtoMapper;
+
+    @Operation(
+            method = "GET",
+            summary = "Получение списка возможных опций для поиска среди студентов"
+    )
+    @GetMapping(GET_SEARCH_OPTIONS)
+
+    public StudentSearchOptionsDto getSearchOptionsStudents() {
+        return studentService.getSearchOptionsStudents();
+    }
 
     @Operation(
             method = "GET",
@@ -79,10 +89,11 @@ public class StudentController {
             @RequestParam(value = "course", required = false) Integer course,
             @RequestParam(value = "group_number", required = false) Integer groupNumber,
             @RequestParam(value = "has_team", required = false) Boolean hasTeam,
+            @RequestParam(value = "is_captain", required = false) Boolean isCaptain,
             @RequestParam(value = "technologies", required = false) List<Long> technologies
     ) {
         LOGGER.info("ENTER search() endpoint");
-        return studentService.search(like, course, groupNumber, hasTeam, technologies)
+        return studentService.search(like, course, groupNumber, hasTeam, isCaptain, technologies)
                 .stream()
                 .map(studentDtoMapper::mapToDto)
                 .toList();

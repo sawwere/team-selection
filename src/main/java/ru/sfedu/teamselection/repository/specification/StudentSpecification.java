@@ -2,10 +2,9 @@ package ru.sfedu.teamselection.repository.specification;
 
 
 import java.util.List;
+import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Student;
-
-import java.util.Locale;
 
 public final class StudentSpecification {
     private StudentSpecification() {}
@@ -40,6 +39,14 @@ public final class StudentSpecification {
                 criteriaBuilder.equal(
                         root.get("hasTeam"),
                         hasTeam
+                );
+    }
+
+    public static Specification<Student> byIsCaptain(Boolean isCaptain) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(
+                        root.get("isCaptain"),
+                        isCaptain
                 );
     }
 
