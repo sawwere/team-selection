@@ -28,16 +28,6 @@ class TracksController(
 
     @Operation(
         method = "GET",
-        summary = "Получение списка всех студентов за все время"
-    )
-    @GetMapping("/all") // checked
-    fun getAllTracks() = trackRepository.findAll().let {
-        return@let if (it.isNotEmpty()) ResponseEntity<MutableList<Track>>(it, HttpStatus.OK)
-        else ResponseEntity<MutableList<Track>>(HttpStatus.METHOD_NOT_ALLOWED)
-    }
-
-    @Operation(
-        method = "GET",
         summary = "Найти трек по id",
         parameters = [
             Parameter(name = "trackId", description = "id трека")
