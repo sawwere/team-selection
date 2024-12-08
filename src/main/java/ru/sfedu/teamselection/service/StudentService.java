@@ -1,18 +1,21 @@
 package ru.sfedu.teamselection.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
+import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
 
 
@@ -20,10 +23,12 @@ import ru.sfedu.teamselection.repository.specification.StudentSpecification;
 @Service
 public class StudentService {
     private final StudentRepository studentRepository;
+    private final TechnologyRepository technologyRepository;
 
     private final UserService userService;
 
     private final StudentDtoMapper studentDtoMapper;
+    private final TechnologyDtoMapper technologyDtoMapper;
 
     /**
      * Find Student entity by id
@@ -31,6 +36,7 @@ public class StudentService {
      * @return entity with given id
      * @throws NoSuchElementException in case there is no student with such id
      */
+    @Transactional(readOnly = true)
     public Student findByIdOrElseThrow(Long id) throws NoSuchElementException {
         return studentRepository.findById(id).orElseThrow();
     }
@@ -39,10 +45,12 @@ public class StudentService {
      * Find all students
      * @return the list of all the students
      */
+    @Transactional(readOnly = true)
     public List<Student> findAll() {
         return studentRepository.findAll();
     }
 
+    @Transactional
     public Student create(StudentCreationDto dto) {
         User newUser = userService.findByIdOrElseThrow(dto.getUserId());
 
@@ -59,6 +67,7 @@ public class StudentService {
      * @param id student id
      * @throws NoSuchElementException in case there is no student with such id
      */
+    @Transactional
     public void delete(Long id) {
         studentRepository.delete(findByIdOrElseThrow(id));
     }
@@ -72,11 +81,13 @@ public class StudentService {
      * @param technologies student's technologies(skills)
      * @return the filtered list
      */
+    @Transactional(readOnly = true)
     public List<Student> search(String like,
                                 Integer course,
                                 Integer groupNumber,
                                 Boolean hasTeam,
-                                List<String> technologies) {
+                                Boolean isCaptain,
+                                List<Long> technologies) {
         Specification<Student> specification = Specification.allOf();
         if (like != null) {
             specification = specification.and(StudentSpecification.like(like));
@@ -90,25 +101,16 @@ public class StudentService {
         if (hasTeam != null) {
             specification = specification.and(StudentSpecification.byHasTeam(hasTeam));
         }
-
-        List<Student> findResult = studentRepository.findAll(specification);
-        if (technologies != null && !technologies.isEmpty()) {
-            List<Student> result = new ArrayList<>();
-            for (Student student : findResult) {
-                for (var tech :student.getTechnologies()) {
-                    if (technologies.contains(tech.getName())) {
-                        result.add(student);
-                    }
-                }
-            }
-            return result;
+        if (isCaptain != null) {
+            specification = specification.and(StudentSpecification.byIsCaptain(isCaptain));
         }
+        specification = specification.and(StudentSpecification.hasTechnologies(technologies));
 
-        return findResult;
+        return studentRepository.findAll(specification);
     }
 
 
-
+    @Transactional
     public Student update(Long id, StudentDto dto) {
         Student student = findByIdOrElseThrow(id);
         student.setCourse(dto.getCourse());
@@ -130,5 +132,22 @@ public class StudentService {
             case 5 -> TrackType.master;
             default -> null;
         };
+    }
+
+    @Transactional(readOnly = true)
+    public StudentSearchOptionsDto getSearchOptionsStudents() {
+        var students = findAll();
+
+        StudentSearchOptionsDto studentSearchOptionsDto = new StudentSearchOptionsDto();
+        for (Student student : students) {
+            studentSearchOptionsDto.getCourses().add(student.getCourse());
+            studentSearchOptionsDto.getGroups().add(student.getGroupNumber());
+        }
+        studentSearchOptionsDto.getTechnologies().addAll(technologyRepository.findAll()
+                .stream()
+                .map(technologyDtoMapper::mapToDto)
+                .toList()
+        );
+        return studentSearchOptionsDto;
     }
 }

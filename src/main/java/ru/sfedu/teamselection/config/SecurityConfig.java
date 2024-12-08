@@ -39,17 +39,20 @@ public class SecurityConfig {
         this.simpleAuthenticationSuccessHandler = simpleAuthenticationSuccessHandler;
     }
 
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/error", "/login").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/login").anonymous()
                         .requestMatchers(HttpMethod.DELETE).hasAuthority(ADMIN_ROLE_NAME)
                         .anyRequest().authenticated())
                 .logout(logout -> logout
-                        .logoutUrl(LOGOUT_URL))
+                        .logoutUrl(LOGOUT_URL).deleteCookies("JSESSIONID", "SessionId")
+                        .logoutSuccessUrl(frontendUrl + "/login"))
                 .oauth2Login(login -> login
                         .userInfoEndpoint(endpoint ->
                                 endpoint.userService(oauth2UserService)
