@@ -1,5 +1,7 @@
 package ru.sfedu.teamselection.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.dto.TechnologyDto;
@@ -32,5 +34,21 @@ public class TechnologyDtoMapper implements DtoMapper<TechnologyDto, Technology>
                 .id(entity.getId())
                 .name(entity.getName())
                 .build();
+    }
+
+    public List<Technology> mapListToEntity(List<TechnologyDto> dtoList) {
+        List<Technology> result = new ArrayList<>();
+        for (TechnologyDto item : dtoList) {
+            result.add(mapToEntity(item));
+        }
+        return  result;
+    }
+
+    public List<TechnologyDto> mapListToDto(List<Technology> entitiesList) {
+        List<TechnologyDto> result = new ArrayList<>();
+        for (Technology item : entitiesList) {
+            result.add(mapToDto(item));
+        }
+        return  result;
     }
 }

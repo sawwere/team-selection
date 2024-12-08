@@ -179,9 +179,13 @@ public class TeamController {
     @Operation(
             method = "POST",
             summary = "Изменить данные команды",
+            description = """
+                    ВНИМАНИЕ: небезопасный метод.
+                    Не осуществляются проверки на логическую целостность таблиц после обновления данных.
+                    """,
             parameters = {
                     @Parameter(name = "id", description = "сущность команды", in = ParameterIn.PATH),
-                    //@Parameter(name = "student", description = "сущность студента")
+                    @Parameter(name = "team", description = "сущность команды")
             })
     @PostMapping(UPDATE_TEAM) // checked
     public TeamDto updateTeam(@PathVariable(value = "id") Long teamId,
