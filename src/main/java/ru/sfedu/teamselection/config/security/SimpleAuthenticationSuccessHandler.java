@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
+import ru.sfedu.teamselection.domain.User;
 
 @Component
 @RequiredArgsConstructor
@@ -23,24 +24,24 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontendUrl}")
     private String frontendUrl;
 
-    @SuppressWarnings({"checkstyle:MagicNumber", "checkstyle:MultipleStringLiterals"})
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException {
-        var user = authentication.getPrincipal();
+        var user = (User) authentication.getPrincipal();
         String sessionId = ((WebAuthenticationDetails) authentication.getDetails()).getSessionId();
-
 
         Cookie sessionCookie = new Cookie("SessionId", sessionId);
         sessionCookie.setHttpOnly(true);
         sessionCookie.setSecure(true);
         sessionCookie.setPath("/");
         sessionCookie.setMaxAge(7 * 24 * 60 * 60);
-
-
         response.addCookie(sessionCookie);
+        Cookie userIdCookie = new Cookie("userId", user.getId().toString());
+        userIdCookie.setHttpOnly(true);
+        userIdCookie.setPath("/");
+        response.addCookie(userIdCookie);
 
         Cookie jSessionIdCookie = WebUtils.getCookie(request, "JSESSIONID");
         if (jSessionIdCookie == null) {
@@ -52,7 +53,17 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             response.addCookie(jSessionIdCookie);
         }
 
-
-        redirectStrategy.sendRedirect(request, response, frontendUrl + "/teams");
+        if (user.getRole().getName().contains("USER")) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            redirectStrategy.sendRedirect(request, response, frontendUrl + "/registration");
+        } else {
+            redirectStrategy.sendRedirect(request, response, frontendUrl + "/teams");
+        }
     }
+
+
 }
