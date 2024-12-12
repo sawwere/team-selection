@@ -8,13 +8,23 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.dto.TeamSearchOptionsDto;
-import ru.sfedu.teamselection.mapper.StudentDtoMapper;
-import ru.sfedu.teamselection.mapper.TeamDtoMapper;
+import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.TeamService;
 
@@ -171,9 +181,13 @@ public class TeamController {
     @Operation(
             method = "POST",
             summary = "Изменить данные команды",
+            description = """
+                    ВНИМАНИЕ: небезопасный метод.
+                    Не осуществляются проверки на логическую целостность таблиц после обновления данных.
+                    """,
             parameters = {
                     @Parameter(name = "id", description = "сущность команды", in = ParameterIn.PATH),
-                    //@Parameter(name = "student", description = "сущность студента")
+                    @Parameter(name = "team", description = "сущность команды")
             })
     @PostMapping(UPDATE_TEAM) // checked
     public TeamDto updateTeam(@PathVariable(value = "id") Long teamId,

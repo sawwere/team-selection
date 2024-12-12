@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.mapper;
+package ru.sfedu.teamselection.mapper.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -6,6 +6,7 @@ import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.mapper.DtoMapper;
 
 @Component
 @RequiredArgsConstructor

@@ -1,17 +1,17 @@
-package ru.sfedu.teamselection.mapper;
+package ru.sfedu.teamselection.mapper.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Application;
-import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.ApplicationDto;
+import ru.sfedu.teamselection.mapper.DtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Application>{
+public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Application> {
 
     private final TeamRepository teamRepository;
 
@@ -23,10 +23,10 @@ public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Applicati
     public Application mapToEntity(ApplicationDto dto) {
         return Application.builder()
                 .id(dto.getId())
-                .team()
+                //.team()
                 .status(dto.getStatus())
-                .student(studentRepository.findById(dto.getStudent().))
-                .build();;
+                //.student(studentRepository.findById(dto.getStudent()))
+                .build();
     }
 
     @Override

@@ -8,18 +8,25 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import ru.sfedu.teamselection.domain.User;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.TeamDto;
-import ru.sfedu.teamselection.mapper.StudentDtoMapper;
-import ru.sfedu.teamselection.mapper.TeamDtoMapper;
-import ru.sfedu.teamselection.repository.StudentRepository;
+import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
-import ru.sfedu.teamselection.service.UserService;
 
 
 @RestController
@@ -177,8 +184,7 @@ public class StudentController {
     }
 
     @GetMapping(GET_STUDENT_ID_BY_CURRENT_USER)
-    public Long getCurrentStudent()
-    {
+    public Long getCurrentStudent() {
         return studentService.getCurrentStudent();
     }
 }

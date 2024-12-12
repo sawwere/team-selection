@@ -1,13 +1,16 @@
-package ru.sfedu.teamselection.mapper;
+package ru.sfedu.teamselection.mapper.student;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
-import ru.sfedu.teamselection.dto.TeamDto;
+import ru.sfedu.teamselection.mapper.DtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.UserDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 
 @Component
 @RequiredArgsConstructor
@@ -34,21 +37,6 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .hasTeam(dto.getHasTeam())
                 .isCaptain(dto.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToEntity(dto.getCurrentTeam()))
-                //.user(dto.getUser())
-                .technologies(dto.getTechnologies().stream().map(technologyDtoMapper::mapToEntity).toList())
-                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
-                .build();
-    }
-
-    public Student mapToEntityWithoutTeams(StudentDto dto) {
-        return Student.builder()
-                .id(dto.getId())
-                .course(dto.getCourse())
-                .groupNumber(dto.getGroupNumber())
-                .aboutSelf(dto.getAboutSelf())
-                .contacts(dto.getContacts())
-                .hasTeam(dto.getHasTeam())
-                .isCaptain(dto.getIsCaptain())
                 //.user(dto.getUser())
                 .technologies(dto.getTechnologies().stream().map(technologyDtoMapper::mapToEntity).toList())
                 .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
@@ -88,38 +76,6 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .user(userDtoMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
                 .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
-                .build();
-    }
-
-    public Student mapCreationToEntity(StudentCreationDto dto) {
-        return Student.builder()
-                .course(dto.getCourse())
-                .groupNumber(dto.getGroupNumber())
-                .aboutSelf(dto.getAboutSelf())
-                .contacts(dto.getContacts())
-                .currentTeam(null)
-                .user(null)
-                .build();
-    }
-
-    private TeamDto mapTeam(Student student) {
-        if (student.getCurrentTeam() == null) {
-            return null;
-        }
-        return TeamDto.builder()
-                .id(student.getCurrentTeam().getId())
-                .name(student.getCurrentTeam().getName())
-                .projectDescription(student.getCurrentTeam().getProjectDescription())
-                .projectType(student.getCurrentTeam().getProjectType())
-                .quantityOfStudents(student.getCurrentTeam().getQuantityOfStudents())
-                .captainId(student.getCurrentTeam().getCaptainId())
-                .isFull(student.getCurrentTeam().getIsFull())
-                .technologies(student.getCurrentTeam()
-                        .getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
-                .applications(student.getCurrentTeam()
-                        .getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
-                .currentTrackId(student.getCurrentTeam().getCurrentTrack().getId())
-                .students(null)
                 .build();
     }
 }

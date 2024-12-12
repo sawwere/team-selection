@@ -24,6 +24,7 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontendUrl}")
     private String frontendUrl;
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,

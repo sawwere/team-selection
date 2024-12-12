@@ -1,11 +1,9 @@
 package ru.sfedu.teamselection.service;
 
 import jakarta.persistence.EntityManager;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -13,10 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.StudentCreationDto;
-import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.UserDto;
-import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.UserDtoMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.ApplicationCreationDto;
-import ru.sfedu.teamselection.mapper.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 
 
@@ -92,7 +92,7 @@ public class ApplicationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping(DELETE_APPLICATION)
     public void findApplicationByTeamIdAndStudentId(@PathVariable(value = "id") Long applicationId) {
-        LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(applicationId));
+        LOGGER.info("ENTER findApplicationByTeamIdAndStudentId(%d) endpoint".formatted(applicationId));
         applicationService.delete(applicationId);
     }
 

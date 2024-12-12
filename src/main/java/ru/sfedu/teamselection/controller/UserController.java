@@ -2,21 +2,24 @@ package ru.sfedu.teamselection.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
-import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.mapper.RoleDtoMapper;
 import ru.sfedu.teamselection.mapper.UserDtoMapper;
-import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.UserService;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping()
@@ -58,9 +61,12 @@ public class UserController {
     }
 
     @GetMapping(GET_ROLES)
-    public ResponseEntity<List<RoleDto>> getAllRoles()
-    {
-        return ResponseEntity.ok(userService.getAllRoles().stream().map(roleDtoMapper::mapToDto).collect(Collectors.toList()));
+    public ResponseEntity<List<RoleDto>> getAllRoles() {
+        return ResponseEntity.ok(userService.getAllRoles()
+                .stream()
+                .map(roleDtoMapper::mapToDto)
+                .collect(Collectors.toList())
+        );
     }
 
     @PostMapping("/api/v1/users/{id}/assign-role")
