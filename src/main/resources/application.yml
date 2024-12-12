@@ -67,6 +67,12 @@ spring:
 app:
   frontendUrl: http://localhost:5173
 
+cors:
+  allowed-origins: http://localhost:8080
+
+frontend:
+  login:
+    url: http://localhost:5173/login
 
 
 logging:

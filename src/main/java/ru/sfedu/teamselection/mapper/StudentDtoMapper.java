@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.TeamDto;
@@ -14,7 +13,7 @@ import ru.sfedu.teamselection.dto.TeamDto;
 @RequiredArgsConstructor
 public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
     private final TechnologyDtoMapper technologyDtoMapper;
-    private final ApplicationDtoMapper applicationDtoMapper;
+    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
     @Autowired
     private UserDtoMapper userDtoMapper;
     @Lazy
@@ -37,7 +36,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .currentTeam(teamDtoMapper.mapToEntity(dto.getCurrentTeam()))
                 //.user(dto.getUser())
                 .technologies(dto.getTechnologies().stream().map(technologyDtoMapper::mapToEntity).toList())
-                .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
+                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
                 .build();
     }
 
@@ -52,7 +51,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .isCaptain(dto.getIsCaptain())
                 //.user(dto.getUser())
                 .technologies(dto.getTechnologies().stream().map(technologyDtoMapper::mapToEntity).toList())
-                .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
+                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
                 .build();
     }
 
@@ -72,7 +71,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .currentTeam(teamDtoMapper.mapToDtoWithoutStudents(entity.getCurrentTeam()))
                 .user(userDtoMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
-                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
                 .build();
     }
 
@@ -88,7 +87,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .isCaptain(entity.getIsCaptain())
                 .user(userDtoMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
-                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
                 .build();
     }
 
@@ -118,7 +117,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .technologies(student.getCurrentTeam()
                         .getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
                 .applications(student.getCurrentTeam()
-                        .getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
+                        .getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
                 .currentTrackId(student.getCurrentTeam().getCurrentTrack().getId())
                 .students(null)
                 .build();

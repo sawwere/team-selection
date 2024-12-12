@@ -16,7 +16,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
     @Lazy
     @Autowired
     private StudentDtoMapper studentDtoMapper;
-    private final ApplicationDtoMapper applicationDtoMapper;
+    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
 
     private final TrackRepository trackRepository;
 
@@ -36,7 +36,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .technologies(new ArrayList<>()) //TODO: map strings to technologies
                 .currentTrack(trackRepository.findById(dto.getCurrentTrackId()).orElseThrow())
                 .students(dto.getStudents().stream().map(studentDtoMapper::mapToEntity).toList())
-                .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
+                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
                 .build();
     }
     public Team mapToEntityWithoutStudents(TeamDto dto) {
@@ -50,7 +50,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .isFull(dto.getIsFull())
                 .technologies(new ArrayList<>()) //TODO: map strings to technologies
                 .currentTrack(trackRepository.findById(dto.getCurrentTrackId()).orElseThrow())
-                .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
+                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
                 .build();
     }
 
@@ -67,7 +67,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .captainId(entity.getCaptainId())
                 .isFull(entity.getIsFull())
-                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
                 .currentTrackId(entity.getCurrentTrack().getId())
                 .students(entity.getStudents().stream().map(studentDtoMapper::mapToDtoWithoutTeam).toList())
                 .build();
@@ -84,7 +84,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .captainId(entity.getCaptainId())
                 .isFull(entity.getIsFull())
-                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
                 .currentTrackId(entity.getCurrentTrack().getId())
                 .build();
     }

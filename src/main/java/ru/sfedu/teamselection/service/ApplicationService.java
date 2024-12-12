@@ -11,10 +11,10 @@ import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.ApplicationDto;
+import ru.sfedu.teamselection.dto.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
-import ru.sfedu.teamselection.mapper.ApplicationDtoMapper;
+import ru.sfedu.teamselection.mapper.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
 
 
@@ -28,7 +28,7 @@ public class ApplicationService {
 
     private final TeamService teamService;
 
-    private final ApplicationDtoMapper applicationDtoMapper;
+    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
 
 
     public Application findByIdOrElseThrow(Long id) throws NoSuchElementException {
@@ -73,10 +73,10 @@ public class ApplicationService {
         }
     }
 
-    private Application tryCreateApplication(ApplicationDto dto, User sender) throws  ConstraintViolationException {
+    private Application tryCreateApplication(ApplicationCreationDto dto, User sender) throws  ConstraintViolationException {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
         // Check that there is actually sender's id in the dto
-        if (sender.getId().equals(student.getUser().getId())) {
+        if (!sender.getId().equals(student.getUser().getId())) {
             throw new AccessDeniedException("Tried to create application for another user!");
         }
 
@@ -100,7 +100,7 @@ public class ApplicationService {
         }
 
         // Creating new application with default status
-        Application application = applicationDtoMapper.mapToEntity(dto);
+        Application application = applicationCreationDtoMapper.mapToEntity(dto);
         application.setStatus(ApplicationStatus.Sent.name());
         return applicationRepository.save(application);
     }
@@ -111,7 +111,7 @@ public class ApplicationService {
     }
 
     @Transactional
-    private Application tryAcceptApplication(ApplicationDto dto, User sender) throws ConstraintViolationException {
+    private Application tryAcceptApplication(ApplicationCreationDto dto, User sender) throws ConstraintViolationException {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
 
         // Can't apply if student already has team or is captain
@@ -144,7 +144,7 @@ public class ApplicationService {
     }
 
     @Transactional
-    private Application tryRejectApplication(ApplicationDto dto, User sender) throws ConstraintViolationException {
+    private Application tryRejectApplication(ApplicationCreationDto dto, User sender) throws ConstraintViolationException {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
 
         Team team = teamService.findByIdOrElseThrow(dto.getTeamId());
@@ -166,7 +166,7 @@ public class ApplicationService {
      * @throws NoSuchElementException in case there is no such application
      */
     @Transactional
-    public Application update(ApplicationDto dto, User sender) throws NoSuchElementException {
+    public Application update(ApplicationCreationDto dto, User sender) throws NoSuchElementException {
         Application application = applicationRepository.findByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId());
         if (application == null) {
             throw new NoSuchElementException("There is no application with such data");
@@ -194,11 +194,16 @@ public class ApplicationService {
     }
 
     @Transactional
-    public Application create(ApplicationDto dto, User sender) {
+    public Application create(ApplicationCreationDto dto, User sender) {
         if (applicationRepository.existsByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId())) {
             return update(dto, sender);
         } else {
             return tryCreateApplication(dto, sender);
         }
+    }
+
+    public Application findApplicationByTeamIdAndStudentId(long teamId, long studentId)
+    {
+        return applicationRepository.findByTeamIdAndStudentId(teamId, studentId);
     }
 }
