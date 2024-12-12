@@ -21,4 +21,8 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
 //    List<Student> findAllByIdIn(List<Long> ids);
 //
 //    List<Student> findAllByTrackId(Long id);
+
+    Student findByUserId(Long userId);
+
+    boolean existsByUserId(Long userId);
 }

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import ru.sfedu.teamselection.domain.Application;
 
-import java.util.List;
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long>, JpaSpecificationExecutor<Application> {
@@ -14,4 +13,5 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     boolean existsByTeamIdAndStudentId(Long teamId, Long studentId);
 
     Application findByTeamIdAndStudentId(Long teamId, Long studentId);
+
 }

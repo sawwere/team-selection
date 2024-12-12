@@ -51,7 +51,7 @@ public class TeamDto {
     private List<StudentDto> students;
 
     @Builder.Default
-    private List<ApplicationDto> applications = new ArrayList<>();
+    private List<ApplicationCreationDto> applications = new ArrayList<>();
 
     @Builder.Default
     private List<TechnologyDto> technologies = new ArrayList<>();

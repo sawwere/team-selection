@@ -19,8 +19,9 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
     @Lazy
     @Autowired
     private StudentDtoMapper studentDtoMapper;
-    private final ApplicationDtoMapper applicationDtoMapper;
+
     private final TechnologyDtoMapper technologyDtoMapper;
+    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
 
     private final EntityManager entityManager;
 
@@ -40,7 +41,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .technologies(new ArrayList<>()) //TODO: map strings to technologies
                 .currentTrack(entityManager.getReference(Track.class, dto.getCurrentTrackId()))
                 .students(dto.getStudents().stream().map(studentDtoMapper::mapToEntity).toList())
-                .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
+                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
                 .build();
     }
 
@@ -62,8 +63,8 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .captain(captain.isEmpty() ? null : studentDtoMapper.mapToDtoWithoutTeam(captain.get()))
                 .isFull(entity.getIsFull())
-                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
                 .technologies(technologyDtoMapper.mapListToDto(entity.getTechnologies()))
+                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
                 .currentTrackId(entity.getCurrentTrack().getId())
                 .students(entity.getStudents().stream().map(studentDtoMapper::mapToDtoWithoutTeam).toList())
                 .build();
@@ -80,8 +81,8 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .projectType(entity.getProjectType())
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .isFull(entity.getIsFull())
-                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
                 .technologies(technologyDtoMapper.mapListToDto(entity.getTechnologies()))
+                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
                 .currentTrackId(entity.getCurrentTrack().getId())
                 .build();
     }
