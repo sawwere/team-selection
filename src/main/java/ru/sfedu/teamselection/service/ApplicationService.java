@@ -76,7 +76,7 @@ public class ApplicationService {
     private Application tryCreateApplication(ApplicationDto dto, User sender) throws  ConstraintViolationException {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
         // Check that there is actually sender's id in the dto
-        if (sender.getId().equals(student.getUser().getId())) {
+        if (!sender.getId().equals(student.getUser().getId())) {
             throw new AccessDeniedException("Tried to create application for another user!");
         }
 
@@ -200,5 +200,10 @@ public class ApplicationService {
         } else {
             return tryCreateApplication(dto, sender);
         }
+    }
+
+    public Application findApplicationByTeamIdAndStudentId(long teamId, long studentId)
+    {
+        return applicationRepository.findByTeamIdAndStudentId(teamId, studentId);
     }
 }

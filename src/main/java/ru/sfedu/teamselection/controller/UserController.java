@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequestMapping()
 @Tag(name = "UserController", description = "API для работы со пользователями")
 @RequiredArgsConstructor
+@CrossOrigin
 public class UserController {
     public static final String CURRENT_USER = "/api/v1/users/me";
     public static final String PUT_USER = "/api/v1/users";
@@ -33,7 +34,6 @@ public class UserController {
 
     private final RoleDtoMapper roleDtoMapper;
 
-    private final StudentService studentService;
 
     @PutMapping(PUT_USER)
     public UserDto putUser(@RequestBody @Valid UserDto userDto) {

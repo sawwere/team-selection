@@ -54,11 +54,6 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
 
         if (user.getRole().getName().contains("USER")) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
             redirectStrategy.sendRedirect(request, response, frontendUrl + "/registration");
         } else {
             redirectStrategy.sendRedirect(request, response, frontendUrl + "/teams");

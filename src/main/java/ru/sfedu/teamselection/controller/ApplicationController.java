@@ -87,4 +87,13 @@ public class ApplicationController {
         LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(applicationId));
         applicationService.delete(applicationId);
     }
+
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping(DELETE_APPLICATION)
+    public void findApplicationByTeamIdAndStudentId(@PathVariable(value = "id") Long applicationId) {
+        LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(applicationId));
+        applicationService.delete(applicationId);
+    }
+
 }

@@ -86,7 +86,7 @@ public class UserService {
     @Transactional
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
-        if (Objects.equals(user.getRole().getName(), "USER") && Objects.equals(roleName, "STUDENT"))
+        if (Objects.equals(user.getRole().getName(), "USER"))
         {
             Student student = Student.builder()
                     .user(user)

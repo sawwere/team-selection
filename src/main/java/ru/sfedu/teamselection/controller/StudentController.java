@@ -8,36 +8,32 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TeamDtoMapper;
+import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
+import ru.sfedu.teamselection.service.UserService;
 
 
 @RestController
 @RequestMapping()
 @Tag(name = "StudentController", description = "API для работы со студентами")
 @RequiredArgsConstructor
+@CrossOrigin
 public class StudentController {
     private static final Logger LOGGER = Logger.getLogger(StudentController.class.getName());
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_BY_ID = "/api/v1/students/{id}";
     public static final String SEARCH_STUDENTS = "/api/v1/students/search";
+    public static final String GET_STUDENT_ID_BY_CURRENT_USER = "/api/v1/students/me";
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_ALL = "/api/v1/students";
     public static final String CREATE_STUDENT = "/api/v1/students";
@@ -178,5 +174,11 @@ public class StudentController {
     public List<TeamDto> getTeamHistory(@PathVariable(value = "id") Long studentId) {
         LOGGER.info("ENTER getTeamHistory(%d) endpoint".formatted(studentId));
         return teamService.getTeamHistoryForStudent(studentId).stream().map(teamDtoMapper::mapToDto).toList();
+    }
+
+    @GetMapping(GET_STUDENT_ID_BY_CURRENT_USER)
+    public Long getCurrentStudent()
+    {
+        return studentService.getCurrentStudent();
     }
 }
