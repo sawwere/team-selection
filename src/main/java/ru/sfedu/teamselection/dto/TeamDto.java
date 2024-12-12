@@ -14,8 +14,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.sfedu.teamselection.domain.Application;
-import ru.sfedu.teamselection.domain.Track;
 
 
 @Builder
@@ -55,7 +53,7 @@ public class TeamDto {
     private List<StudentDto> students;
 
     @Builder.Default
-    private List<ApplicationDto> applications = new ArrayList<>();
+    private List<ApplicationCreationDto> applications = new ArrayList<>();
 
     @Builder.Default
     private List<TechnologyDto> technologies = new ArrayList<>();

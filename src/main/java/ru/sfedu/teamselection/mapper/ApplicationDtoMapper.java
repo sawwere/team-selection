@@ -6,39 +6,31 @@ import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.ApplicationDto;
+import ru.sfedu.teamselection.repository.StudentRepository;
+import ru.sfedu.teamselection.repository.TeamRepository;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Application> {
-    /**
-     * Map Dto to Entity
-     *
-     * @param dto Dto object to be mapped
-     * @return mapped entity
-     */
+public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Application>{
+
+    private final TeamRepository teamRepository;
+
+    private final StudentRepository studentRepository;
+
+    private final TeamDtoMapper teamDtoMapper;
+
     @Override
     public Application mapToEntity(ApplicationDto dto) {
         return Application.builder()
                 .id(dto.getId())
-                .team(Team.builder().id(dto.getTeamId()).build())
+                .team()
                 .status(dto.getStatus())
-                .student(Student.builder().id(dto.getStudentId()).build())
-                .build();
+                .student(studentRepository.findById(dto.getStudent().))
+                .build();;
     }
 
-    /**
-     * Map Entity to Dto
-     *
-     * @param entity Entity object to be mapped
-     * @return mapped dto
-     */
     @Override
     public ApplicationDto mapToDto(Application entity) {
-        return ApplicationDto.builder()
-                .id(entity.getId())
-                .teamId(entity.getTeam().getId())
-                .status(entity.getStatus())
-                .studentId(entity.getStudent().getId())
-                .build();
+        return null;
     }
 }

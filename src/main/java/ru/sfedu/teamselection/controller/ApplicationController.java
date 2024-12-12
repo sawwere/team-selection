@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.ApplicationDto;
-import ru.sfedu.teamselection.mapper.ApplicationDtoMapper;
+import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.mapper.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 
 
@@ -37,16 +37,16 @@ public class ApplicationController {
     public static final String CREATE_APPLICATION = "/api/v1/applications";
 
     private final ApplicationService applicationService;
-    private final ApplicationDtoMapper applicationDtoMapper;
+    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
 
     @Operation(
             method = "GET",
             summary = "Получение списка всех заявок за все время"
     )
     @GetMapping(FIND_ALL) // checked
-    public List<ApplicationDto> findAll() {
+    public List<ApplicationCreationDto> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
-        return applicationService.findAll().stream().map(applicationDtoMapper::mapToDto).toList();
+        return applicationService.findAll().stream().map(applicationCreationDtoMapper::mapToDto).toList();
     }
 
     @Operation(
@@ -55,10 +55,10 @@ public class ApplicationController {
             parameters = { @Parameter(name = "application", description = "сущность заявки")}
     )
     @PostMapping(CREATE_APPLICATION) // checked
-    public ApplicationDto createApplication(@RequestBody ApplicationDto application) {
+    public ApplicationCreationDto createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return applicationDtoMapper.mapToDto(applicationService.create(application, user));
+        return applicationCreationDtoMapper.mapToDto(applicationService.create(application, user));
     }
 
     @Operation(
@@ -69,9 +69,9 @@ public class ApplicationController {
             }
     )
     @GetMapping(FIND_BY_ID) // checked
-    public ApplicationDto findById(@PathVariable(name = "id") Long applicationId) {
+    public ApplicationCreationDto findById(@PathVariable(name = "id") Long applicationId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(applicationId));
-        return applicationDtoMapper.mapToDto(applicationService.findByIdOrElseThrow(applicationId));
+        return applicationCreationDtoMapper.mapToDto(applicationService.findByIdOrElseThrow(applicationId));
     }
 
     @Operation(
