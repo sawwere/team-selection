@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/login", "/registration").anonymous()
                         .requestMatchers(HttpMethod.DELETE).hasAuthority(ADMIN_ROLE_NAME)
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().permitAll()
                 )
 

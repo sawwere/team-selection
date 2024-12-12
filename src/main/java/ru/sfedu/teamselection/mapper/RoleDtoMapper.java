@@ -7,7 +7,7 @@ import ru.sfedu.teamselection.dto.RoleDto;
 
 @Component
 @RequiredArgsConstructor
-public class RoleDtoMapper implements DtoMapper<RoleDto, Role>{
+public class RoleDtoMapper implements DtoMapper<RoleDto, Role> {
 
     @Override
     public Role mapToEntity(RoleDto dto) {

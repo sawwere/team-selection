@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.mapper;
+package ru.sfedu.teamselection.mapper.student;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +7,11 @@ import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.mapper.DtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.UserDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 
 @Component
 @RequiredArgsConstructor

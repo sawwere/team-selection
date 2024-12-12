@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.mapper;
+package ru.sfedu.teamselection.mapper.team;
 
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
@@ -12,6 +12,10 @@ import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.dto.TeamDto;
+import ru.sfedu.teamselection.mapper.DtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 
 @Component
 @RequiredArgsConstructor

@@ -1,6 +1,10 @@
 package ru.sfedu.teamselection.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Value;
 
 /**
  * DTO for {@link ru.sfedu.teamselection.domain.Role}
