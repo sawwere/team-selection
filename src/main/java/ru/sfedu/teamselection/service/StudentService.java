@@ -13,8 +13,9 @@ import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
-import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.student.StudentCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
@@ -30,6 +31,7 @@ public class StudentService {
     private final UserService userService;
 
     private final StudentDtoMapper studentDtoMapper;
+    private final StudentCreationDtoMapper studentCreationDtoMapper;
     private final TechnologyDtoMapper technologyDtoMapper;
 
     private final RoleRepository roleRepository;
@@ -58,7 +60,7 @@ public class StudentService {
     public Student create(StudentCreationDto dto) {
         User newUser = userService.findByIdOrElseThrow(dto.getUserId());
         Role role = roleRepository.findByName("STUDENT").orElseThrow();
-        Student student = studentDtoMapper.mapCreationToEntity(dto);
+        Student student = studentCreationDtoMapper.mapToEntity(dto);
 
         newUser.setIsEnabled(true);
         newUser.setRole(role);

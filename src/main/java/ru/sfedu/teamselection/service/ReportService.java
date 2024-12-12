@@ -1,21 +1,22 @@
 package ru.sfedu.teamselection.service;
 
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
-import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.domain.Track;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.List;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Service;
+import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Track;
 
+@SuppressWarnings({"checkstyle:LineLength", "checkstyle:MultipleStringLiterals", "checkstyle:MagicNumber"})
 @Service
 public class ReportService {
 
@@ -106,6 +107,7 @@ public class ReportService {
         return report;
     }
 
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     private void createStudentHeader(Row row, XSSFWorkbook report) {
         CellStyle style = report.createCellStyle();
         Font newFont = report.createFont();
@@ -151,6 +153,7 @@ public class ReportService {
         row.createCell(5).setCellValue("Тэги");
         row.getCell(5).setCellStyle(style);
     }
+
 
     private XSSFWorkbook createExcelFile() {
         XSSFWorkbook report = new XSSFWorkbook();

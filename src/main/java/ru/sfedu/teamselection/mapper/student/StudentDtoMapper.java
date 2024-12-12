@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
@@ -77,17 +76,6 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .user(userDtoMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
                 .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
-                .build();
-    }
-
-    public Student mapCreationToEntity(StudentCreationDto dto) {
-        return Student.builder()
-                .course(dto.getCourse())
-                .groupNumber(dto.getGroupNumber())
-                .aboutSelf(dto.getAboutSelf())
-                .contacts(dto.getContacts())
-                .currentTeam(null)
-                .user(null)
                 .build();
     }
 }

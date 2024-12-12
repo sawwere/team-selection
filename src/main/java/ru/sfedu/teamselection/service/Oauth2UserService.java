@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.service;
 
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -8,8 +9,6 @@ import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service

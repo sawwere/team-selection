@@ -14,6 +14,7 @@ import ru.sfedu.teamselection.dto.TeamDto;
 import ru.sfedu.teamselection.dto.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
@@ -31,6 +32,7 @@ public class TeamService {
 
     private final TechnologyDtoMapper technologyDtoMapper;
     private final TeamDtoMapper teamDtoMapper;
+    private final TeamCreationDtoMapper teamCreationDtoMapper;
 
     /**
      * Find Team entity by id
@@ -57,7 +59,7 @@ public class TeamService {
      */
     @Transactional
     public Team create(TeamCreationDto teamDto) {
-        Team team = teamDtoMapper.mapCreationToEntity(teamDto);
+        Team team = teamCreationDtoMapper.mapToEntity(teamDto);
         String name = teamDto.getName();
         Long trackId = teamDto.getCurrentTrackId();
         if (teamRepository.existsByNameIgnoreCaseAndCurrentTrackId(name, trackId)) {
@@ -76,11 +78,10 @@ public class TeamService {
         }
 
         team.setTechnologies(technologyRepository.findAllByIdIn(
-                        teamDto.getTechnologies()
-                                .stream()
-                                .map(TechnologyDto::getId)
-                                .toList()
-                )
+                teamDto.getTechnologies()
+                        .stream()
+                        .map(TechnologyDto::getId)
+                        .toList())
         );
         teamRepository.save(team);
         return team;

@@ -6,8 +6,6 @@ import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Student;
 
-import java.util.Locale;
-
 public final class StudentSpecification {
     private StudentSpecification() {}
 

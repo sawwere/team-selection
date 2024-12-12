@@ -73,7 +73,8 @@ public class ApplicationService {
         }
     }
 
-    private Application tryCreateApplication(ApplicationCreationDto dto, User sender) throws  ConstraintViolationException {
+    private Application tryCreateApplication(ApplicationCreationDto dto, User sender)
+            throws  ConstraintViolationException {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
         // Check that there is actually sender's id in the dto
         if (!sender.getId().equals(student.getUser().getId())) {
@@ -111,7 +112,8 @@ public class ApplicationService {
     }
 
     @Transactional
-    private Application tryAcceptApplication(ApplicationCreationDto dto, User sender) throws ConstraintViolationException {
+    private Application tryAcceptApplication(ApplicationCreationDto dto, User sender)
+            throws ConstraintViolationException {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
 
         // Can't apply if student already has team or is captain
@@ -144,7 +146,8 @@ public class ApplicationService {
     }
 
     @Transactional
-    private Application tryRejectApplication(ApplicationCreationDto dto, User sender) throws ConstraintViolationException {
+    private Application tryRejectApplication(ApplicationCreationDto dto, User sender)
+            throws ConstraintViolationException {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
 
         Team team = teamService.findByIdOrElseThrow(dto.getTeamId());
@@ -202,8 +205,7 @@ public class ApplicationService {
         }
     }
 
-    public Application findApplicationByTeamIdAndStudentId(long teamId, long studentId)
-    {
+    public Application findApplicationByTeamIdAndStudentId(long teamId, long studentId) {
         return applicationRepository.findByTeamIdAndStudentId(teamId, studentId);
     }
 }

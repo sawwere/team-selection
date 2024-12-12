@@ -5,19 +5,18 @@ import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.TeamCreationDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
-import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.repository.TrackRepository;
 
 @Component
 @RequiredArgsConstructor
 public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
     private final TechnologyDtoMapper technologyDtoMapper;
-    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
 
     private final EntityManager entityManager;
+    private final TrackRepository trackRepository;
 
     @Override
     public Team mapToEntity(TeamCreationDto dto) {
@@ -29,7 +28,7 @@ public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
                 .students(new ArrayList<>())
                 .applications(new ArrayList<>())
                 .technologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()))
-                .currentTrack(entityManager.getReference(Track.class, dto.getCurrentTrackId()))
+                .currentTrack(trackRepository.findById(dto.getCurrentTrackId()).orElseThrow())
                 .build();
     }
 
