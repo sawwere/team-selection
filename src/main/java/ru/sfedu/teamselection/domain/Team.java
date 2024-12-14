@@ -45,8 +45,8 @@ public class Team {
     @Size(max = 1024)
     private String projectDescription;
 
-    @Column(name = "project_type")
-    private String projectType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ProjectType projectType;
 
     @Column(name = "quantity_of_students")
     @Builder.Default

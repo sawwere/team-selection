@@ -9,8 +9,9 @@ import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Track;
-import ru.sfedu.teamselection.dto.TeamDto;
+import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
+import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
@@ -24,6 +25,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
 
     private final TechnologyDtoMapper technologyDtoMapper;
     private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
+    private final ProjectTypeDtoMapper projectTypeDtoMapper;
 
     private final EntityManager entityManager;
 
@@ -36,7 +38,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .id(dto.getId())
                 .name(dto.getName())
                 .projectDescription(dto.getProjectDescription())
-                .projectType(dto.getProjectType())
+                .projectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()))
                 .quantityOfStudents(dto.getQuantityOfStudents())
                 .captainId(dto.getCaptain().getId())
                 .isFull(dto.getIsFull())
@@ -61,7 +63,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .id(entity.getId())
                 .name(entity.getName())
                 .projectDescription(entity.getProjectDescription())
-                .projectType(entity.getProjectType())
+                .projectType(projectTypeDtoMapper.mapToDto(entity.getProjectType()))
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .captain(captain.isEmpty() ? null : studentDtoMapper.mapToDtoWithoutTeam(captain.get()))
                 .isFull(entity.getIsFull())
@@ -80,7 +82,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .id(entity.getId())
                 .name(entity.getName())
                 .projectDescription(entity.getProjectDescription())
-                .projectType(entity.getProjectType())
+                .projectType(projectTypeDtoMapper.mapToDto(entity.getProjectType()))
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .isFull(entity.getIsFull())
                 .technologies(technologyDtoMapper.mapListToDto(entity.getTechnologies()))

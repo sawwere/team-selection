@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.dto;
+package ru.sfedu.teamselection.dto.team;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -12,6 +12,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 
 
 @Builder
@@ -29,7 +32,7 @@ public class TeamDto {
     private String projectDescription;
 
     @JsonProperty(value = "project_type")
-    private String projectType;
+    private ProjectTypeDto projectType;
 
     @JsonProperty(value = "quantity_of_students", defaultValue = "0")
     @Builder.Default

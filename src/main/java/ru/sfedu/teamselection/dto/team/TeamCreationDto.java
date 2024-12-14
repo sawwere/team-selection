@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.dto;
+package ru.sfedu.teamselection.dto.team;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 
 
 @Builder
@@ -25,7 +26,7 @@ public class TeamCreationDto {
     private String projectDescription;
 
     @JsonProperty(value = "project_type")
-    private String projectType;
+    private ProjectTypeDto projectType;
 
     @JsonProperty(value = "captain_id")
     @NotNull
