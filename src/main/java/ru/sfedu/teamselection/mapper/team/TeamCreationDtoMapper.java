@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.dto.TeamCreationDto;
+import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
+import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.repository.TrackRepository;
 
@@ -14,6 +15,7 @@ import ru.sfedu.teamselection.repository.TrackRepository;
 @RequiredArgsConstructor
 public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
     private final TechnologyDtoMapper technologyDtoMapper;
+    private final ProjectTypeDtoMapper projectTypeDtoMapper;
 
     private final EntityManager entityManager;
     private final TrackRepository trackRepository;
@@ -23,7 +25,7 @@ public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
         return Team.builder()
                 .name(dto.getName())
                 .projectDescription(dto.getProjectDescription())
-                .projectType(dto.getProjectType())
+                .projectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()))
                 .captainId(dto.getCaptainId())
                 .students(new ArrayList<>())
                 .applications(new ArrayList<>())
@@ -37,7 +39,7 @@ public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
         return TeamCreationDto.builder()
                 .name(entity.getName())
                 .projectDescription(entity.getProjectDescription())
-                .projectType(entity.getProjectType())
+                .projectType(projectTypeDtoMapper.mapToDto(entity.getProjectType()))
                 .captainId(entity.getCaptainId())
                 .technologies(technologyDtoMapper.mapListToDto(entity.getTechnologies()))
                 .currentTrackId(entity.getCurrentTrack().getId())

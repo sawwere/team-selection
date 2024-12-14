@@ -81,7 +81,7 @@ public class ReportService {
             rowTeam.createCell(0).setCellValue(team.getName());
             //TODO Убрал пока менял классы сущщностей
             //rowTeam.createCell(1).setCellValue(team.getAbout());
-            rowTeam.createCell(2).setCellValue(team.getProjectType());
+            //rowTeam.createCell(2).setCellValue(team.getProjectType());
             rowTeam.createCell(3).setCellValue(String.valueOf(team.getQuantityOfStudents()));
             rowTeam.createCell(4).setCellValue(String.valueOf(team.getIsFull()));
             //TODO Убрал пока менял классы сущщностей
