@@ -9,7 +9,7 @@ VALUES
   (4, 'CrossPlatform'),
   (5, 'Game'),
   (6, 'Bot'),
-  (7, 'Mod')
+  (7, 'Mod'),
   (8, 'Other');
 
 SELECT pg_catalog.setval('project_types_id_seq', 8, true);
