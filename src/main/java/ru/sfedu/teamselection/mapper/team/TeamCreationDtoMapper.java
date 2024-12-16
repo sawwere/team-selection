@@ -14,13 +14,12 @@ import ru.sfedu.teamselection.repository.TrackRepository;
 @RequiredArgsConstructor
 public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
     private final TechnologyDtoMapper technologyDtoMapper;
-
-    private final EntityManager entityManager;
     private final TrackRepository trackRepository;
 
     @Override
     public Team mapToEntity(TeamCreationDto dto) {
         return Team.builder()
+                .id(dto.getId())
                 .name(dto.getName())
                 .projectDescription(dto.getProjectDescription())
                 .projectType(dto.getProjectType())
@@ -35,6 +34,7 @@ public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
     @Override
     public TeamCreationDto mapToDto(Team entity) {
         return TeamCreationDto.builder()
+                .id(entity.getId())
                 .name(entity.getName())
                 .projectDescription(entity.getProjectDescription())
                 .projectType(entity.getProjectType())

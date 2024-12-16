@@ -169,6 +169,7 @@ public class ApplicationService {
      * @throws NoSuchElementException in case there is no such application
      */
     @Transactional
+    //TODO
     public Application update(ApplicationCreationDto dto, User sender) throws NoSuchElementException {
         Application application = applicationRepository.findByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId());
         if (application == null) {
@@ -187,6 +188,11 @@ public class ApplicationService {
             case "cancelled": {
                 // TODO make security rules for application cancel
                 application.setStatus(ApplicationStatus.Cancelled.name());
+                break;
+            }
+            case "sent":
+            {
+                application.setStatus(ApplicationStatus.Sent.name());
                 break;
             }
             default: {

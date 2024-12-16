@@ -18,22 +18,25 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamCreationDto {
+
+    private Long id;
+
     private String name;
 
-    @JsonProperty(value = "project_description")
+    @JsonProperty(value = "projectDescription")
     @Size(max = 1024)
     private String projectDescription;
 
-    @JsonProperty(value = "project_type")
+    @JsonProperty(value = "projectType")
     private String projectType;
 
-    @JsonProperty(value = "captain_id")
+    @JsonProperty(value = "captainId")
     @NotNull
     private Long captainId;
 
     @Builder.Default
     private List<TechnologyDto> technologies = new ArrayList<>();
 
-    @JsonProperty(value = "current_track")
+    @JsonProperty(value = "currentTrackId")
     private Long currentTrackId;
 }
