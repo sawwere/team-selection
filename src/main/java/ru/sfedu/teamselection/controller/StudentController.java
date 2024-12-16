@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
-import ru.sfedu.teamselection.dto.TeamDto;
+import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.StudentService;
