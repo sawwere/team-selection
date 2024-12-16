@@ -5,21 +5,18 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.ApplicationDto;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 
 
@@ -35,18 +32,21 @@ public class ApplicationController {
     public static final String FIND_ALL = "/api/v1/applications";
     public static final String DELETE_APPLICATION = "/api/v1/applications/{id}";
     public static final String CREATE_APPLICATION = "/api/v1/applications";
+    public static final String UPDATE_APPLICATION = "/api/v1/applications";
 
     private final ApplicationService applicationService;
     private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
+
+    private final ApplicationDtoMapper applicationDtoMapper;
 
     @Operation(
             method = "GET",
             summary = "Получение списка всех заявок за все время"
     )
     @GetMapping(FIND_ALL) // checked
-    public List<ApplicationCreationDto> findAll() {
+    public List<ApplicationDto> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
-        return applicationService.findAll().stream().map(applicationCreationDtoMapper::mapToDto).toList();
+        return applicationService.findAll().stream().map(applicationDtoMapper::mapToDto).toList();
     }
 
     @Operation(
@@ -59,6 +59,24 @@ public class ApplicationController {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return applicationCreationDtoMapper.mapToDto(applicationService.create(application, user));
+    }
+
+    @Operation(
+            method = "PUT",
+            summary = "Обновление статуса заявки",
+            parameters = {@Parameter(name = "application", description = "DTO с обновлённой информацией о заявке")}
+    )
+    @PutMapping(UPDATE_APPLICATION)
+    public ApplicationCreationDto updateApplication(@RequestBody ApplicationCreationDto applicationDto) {
+        LOGGER.info("ENTER updateApplication() endpoint");
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            return applicationCreationDtoMapper.mapToDto(applicationService.update(applicationDto, user));
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found", e);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @Operation(

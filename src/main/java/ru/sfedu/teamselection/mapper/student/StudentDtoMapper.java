@@ -10,6 +10,7 @@ import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.mapper.UserDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 
 @Component
@@ -22,6 +23,8 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
     @Lazy
     @Autowired
     private TeamDtoMapper teamDtoMapper;
+
+    private final ApplicationDtoMapper applicationDtoMapper;
 
     /**
      * {@inheritDoc}
@@ -39,7 +42,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .currentTeam(teamDtoMapper.mapToEntity(dto.getCurrentTeam()))
                 //.user(dto.getUser())
                 .technologies(dto.getTechnologies().stream().map(technologyDtoMapper::mapToEntity).toList())
-                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
+                .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
                 .build();
     }
 
@@ -59,7 +62,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .currentTeam(teamDtoMapper.mapToDtoWithoutStudents(entity.getCurrentTeam()))
                 .user(userDtoMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
-                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
                 .build();
     }
 
@@ -75,7 +78,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .isCaptain(entity.getIsCaptain())
                 .user(userDtoMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
-                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
                 .build();
     }
 }

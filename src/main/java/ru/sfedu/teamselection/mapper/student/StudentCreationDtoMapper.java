@@ -23,6 +23,7 @@ public class StudentCreationDtoMapper implements DtoMapper<StudentCreationDto, S
     @Override
     public Student mapToEntity(StudentCreationDto dto) {
         return Student.builder()
+                .id(dto.getId())
                 .course(dto.getCourse())
                 .groupNumber(dto.getGroupNumber())
                 .aboutSelf(dto.getAboutSelf())
@@ -38,6 +39,8 @@ public class StudentCreationDtoMapper implements DtoMapper<StudentCreationDto, S
     @Override
     public StudentCreationDto mapToDto(Student entity) {
         return StudentCreationDto.builder()
+                .id(entity.getId())
+                .fio(entity.getUser().getFio())
                 .course(entity.getCourse())
                 .groupNumber(entity.getGroupNumber())
                 .aboutSelf(entity.getAboutSelf())
