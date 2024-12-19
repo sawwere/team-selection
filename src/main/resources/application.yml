@@ -40,28 +40,37 @@ spring:
   security:
     oauth2:
       client:
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
         registration:
           github:
             clientId: ${CLIENT_ID}
             clientSecret: ${CLIENT_SECRET}
-# TODO learn how to enable this
+          azure:
+            provider: azure
+            client-id: ${AZURE_CLIENT_ID}
+            client-secret: ${AZURE_CLIENT_SECRET}
+            scope:
+              - openid
+              - email
+              - profile
   cloud:
     azure:
       active-directory:
         enabled: false
         profile:
-          tenant-id:
+          tenant-id: ${AZURE_TENANT_ID}
         credential:
-          client-id:
-          client-secret:
-        redirect-uri-template: https://147.45.108.155:8080/login/oauth2/code/
-#        redirect-uri-template: https://localhost:8080/login/oauth2/code/
+          client-id: ${AZURE_CLIENT_ID}
+          client-secret: ${AZURE_CLIENT_SECRET}
+        redirect-uri-template: http://localhost:8080/login/oauth2/code/azure
+        application-type: WEB_APPLICATION
         authorization-clients:
           graph:
             scopes:
               - https://graph.microsoft.com/User.Read
-#            scopes: https://graph.microsoft.com/User.Read
-#            scopes: https://graph.microsoft.com/Analytics.Read, https://graph.microsoft.com/User.Read
+              - email
 #        b2c:
 #          user-name-attribute-name: email
 app:
@@ -74,7 +83,7 @@ frontend:
   login:
     url: http://localhost:5173/login
 
-
+# /oauth2/authorization/github
 logging:
   level:
     org.springframework.security: DEBUG

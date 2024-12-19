@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import ru.sfedu.teamselection.mapper.UserDtoMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
+import ru.sfedu.teamselection.service.security.OidcUserImpl;
 
 
 @RequiredArgsConstructor
@@ -55,6 +57,10 @@ public class UserService {
      */
     public User getCurrentUser() {
         var username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof OidcUserImpl oidcUser) {
+            return userRepository.findByEmail(oidcUser.getEmail());
+        }
         return findByUsername(username);
     }
 
@@ -73,16 +79,14 @@ public class UserService {
     }
 
     @Transactional
-    public List<Role> getAllRoles()
-    {
+    public List<Role> getAllRoles() {
         return roleRepository.findAll();
     }
 
     @Transactional
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
-        if (Objects.equals(user.getRole().getName(), "USER"))
-        {
+        if (Objects.equals(user.getRole().getName(), "USER")) {
             Student student = Student.builder()
                     .user(user)
                     .build();

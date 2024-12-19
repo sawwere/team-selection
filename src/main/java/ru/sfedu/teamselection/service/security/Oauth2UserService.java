@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.service;
+package ru.sfedu.teamselection.service.security;
 
 
 import java.util.Optional;
@@ -16,7 +16,6 @@ public class Oauth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-
 
     @Override
     public User loadUser(OAuth2UserRequest userRequest) {
@@ -39,4 +38,5 @@ public class Oauth2UserService extends DefaultOAuth2UserService {
         return userInDb.get();
     }
 }
+
 

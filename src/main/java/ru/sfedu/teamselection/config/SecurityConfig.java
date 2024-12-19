@@ -2,6 +2,7 @@ package ru.sfedu.teamselection.config;
 
 import java.util.Arrays;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,15 +16,18 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
-import ru.sfedu.teamselection.service.Oauth2UserService;
+import ru.sfedu.teamselection.service.security.AzureOidcUserService;
+import ru.sfedu.teamselection.service.security.Oauth2UserService;
 import ru.sfedu.teamselection.util.CustomAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final Oauth2UserService oauth2UserService;
+    private final AzureOidcUserService oidcUserService;
     private final SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
     private static final String ADMIN_ROLE_NAME = "ADMIN";
     public static final String LOGOUT_URL = "/api/v1/auth/logout";
@@ -32,12 +36,6 @@ public class SecurityConfig {
     private String frontendUrl;
     @Value("${frontend.login.url}")
     private String frontendLoginUrl;
-
-    public SecurityConfig(Oauth2UserService oauth2UserService,
-                          SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler) {
-        this.oauth2UserService = oauth2UserService;
-        this.simpleAuthenticationSuccessHandler = simpleAuthenticationSuccessHandler;
-    }
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     @Bean
@@ -58,8 +56,10 @@ public class SecurityConfig {
                         .logoutSuccessUrl(frontendUrl + "/login")
                 )
                 .oauth2Login(login -> login
-                        .userInfoEndpoint(endpoint ->
-                                endpoint.userService(oauth2UserService)
+                       // .loginPage("/oauth2/authorization/azure")
+                        .userInfoEndpoint(endpoint -> endpoint
+                                .userService(oauth2UserService)
+                                .oidcUserService(oidcUserService)
                         )
                         .successHandler(simpleAuthenticationSuccessHandler)
                 )

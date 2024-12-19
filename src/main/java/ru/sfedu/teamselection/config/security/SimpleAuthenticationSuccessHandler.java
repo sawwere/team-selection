@@ -7,6 +7,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.service.security.OidcUserImpl;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +32,8 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException {
-        var user = (User) authentication.getPrincipal();
+        var oAuth2User = (OAuth2User) authentication.getPrincipal();
+
         String sessionId = ((WebAuthenticationDetails) authentication.getDetails()).getSessionId();
 
         Cookie sessionCookie = new Cookie("SessionId", sessionId);
@@ -39,10 +42,6 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         sessionCookie.setPath("/");
         sessionCookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(sessionCookie);
-        Cookie userIdCookie = new Cookie("userId", user.getId().toString());
-        userIdCookie.setHttpOnly(true);
-        userIdCookie.setPath("/");
-        response.addCookie(userIdCookie);
 
         Cookie jSessionIdCookie = WebUtils.getCookie(request, "JSESSIONID");
         if (jSessionIdCookie == null) {
@@ -52,6 +51,13 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             jSessionIdCookie.setPath("/");
             jSessionIdCookie.setMaxAge(7 * 24 * 60 * 60);
             response.addCookie(jSessionIdCookie);
+        }
+
+        User user;
+        if (oAuth2User instanceof OidcUserImpl oidcUser) {
+            user = oidcUser.getUser();
+        } else {
+            user = (User) oAuth2User;
         }
 
         if (user.getRole().getName().contains("USER")) {
