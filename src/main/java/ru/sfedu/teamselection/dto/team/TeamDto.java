@@ -1,8 +1,6 @@
 package ru.sfedu.teamselection.dto.team;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
@@ -22,6 +20,7 @@ import ru.sfedu.teamselection.dto.TechnologyDto;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(scope = TeamDto.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class TeamDto {
     private Long id;
 
@@ -40,7 +39,7 @@ public class TeamDto {
 
     @JsonProperty(value = "captain")
     @NotNull
-    @JsonManagedReference
+    //@JsonManagedReference
     private StudentDto captain;
 
     @JsonProperty(value = "is_full")
@@ -48,7 +47,7 @@ public class TeamDto {
     private Boolean isFull = false;
 
     @JsonProperty(value = "current_track")
-    @JsonBackReference
+    //@JsonBackReference
     private Long currentTrackId;
 
     private List<StudentDto> students;

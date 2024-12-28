@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.sfedu.teamselection.domain.User;
@@ -18,6 +19,7 @@ import ru.sfedu.teamselection.dto.ApplicationDto;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
+import ru.sfedu.teamselection.service.UserService;
 
 
 @RestController
@@ -39,6 +41,8 @@ public class ApplicationController {
 
     private final ApplicationDtoMapper applicationDtoMapper;
 
+    private final UserService userService;
+
     @Operation(
             method = "GET",
             summary = "Получение списка всех заявок за все время"
@@ -57,7 +61,8 @@ public class ApplicationController {
     @PostMapping(CREATE_APPLICATION) // checked
     public ApplicationCreationDto createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.getCurrentUser();
+        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return applicationCreationDtoMapper.mapToDto(applicationService.create(application, user));
     }
 
@@ -69,7 +74,8 @@ public class ApplicationController {
     @PutMapping(UPDATE_APPLICATION)
     public ApplicationCreationDto updateApplication(@RequestBody ApplicationCreationDto applicationDto) {
         LOGGER.info("ENTER updateApplication() endpoint");
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.getCurrentUser();
+        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             return applicationCreationDtoMapper.mapToDto(applicationService.update(applicationDto, user));
         } catch (NoSuchElementException e) {

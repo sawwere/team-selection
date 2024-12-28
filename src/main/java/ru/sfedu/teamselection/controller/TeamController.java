@@ -179,7 +179,7 @@ public class TeamController {
     }
 
     @Operation(
-            method = "POST",
+            method = "PUT",
             summary = "Изменить данные команды",
             description = """
                     ВНИМАНИЕ: небезопасный метод.
@@ -189,7 +189,7 @@ public class TeamController {
                     @Parameter(name = "id", description = "сущность команды", in = ParameterIn.PATH),
                     @Parameter(name = "team", description = "сущность команды")
             })
-    @PostMapping(UPDATE_TEAM) // checked
+    @PutMapping(UPDATE_TEAM) // checked
     public TeamDto updateTeam(@PathVariable(value = "id") Long teamId,
                                     @RequestBody TeamDto team) {
         LOGGER.info("ENTER updateTeam(%d) endpoint".formatted(teamId));
