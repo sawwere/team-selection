@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -124,13 +125,13 @@ public class StudentController {
     }
 
     @Operation(
-            method = "POST",
+            method = "PUT",
             summary = "Изменить данные пользователя",
             parameters = {
                     @Parameter(name = "id", description = "сущность студента", in = ParameterIn.PATH),
                     //@Parameter(name = "student", description = "сущность студента")
             })
-    @PutMapping(UPDATE_STUDENT)
+    @PutMapping(value=UPDATE_STUDENT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public StudentDto updateStudent(@PathVariable(value = "id") Long studentId,
                                   @RequestBody StudentDto student) {
         LOGGER.info("ENTER updateStudent(%d) endpoint".formatted(studentId));

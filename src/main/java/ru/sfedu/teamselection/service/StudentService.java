@@ -126,8 +126,7 @@ public class StudentService {
         student.setContacts(dto.getContacts());
         student.setHasTeam(dto.getHasTeam());
         student.setIsCaptain(dto.getIsCaptain());
-        // TODO technologies, applications, team ??
-
+        student.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
         studentRepository.save(student);
         return student;
     }
