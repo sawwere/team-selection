@@ -9,12 +9,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.dto.TeamCreationDto;
-import ru.sfedu.teamselection.dto.TeamDto;
-import ru.sfedu.teamselection.dto.TeamSearchOptionsDto;
-import ru.sfedu.teamselection.mapper.TeamDtoMapper;
+import ru.sfedu.teamselection.dto.TechnologyDto;
+import ru.sfedu.teamselection.dto.team.TeamCreationDto;
+import ru.sfedu.teamselection.dto.team.TeamDto;
+import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
+import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.TeamSpecification;
 
 
@@ -22,12 +27,16 @@ import ru.sfedu.teamselection.repository.specification.TeamSpecification;
 @Service
 public class TeamService {
     private final TeamRepository teamRepository;
+    private final TechnologyRepository technologyRepository;
+    private final ProjectTypeRepository projectTypeRepository;
 
-    private final TeamDtoMapper teamDtoMapper;
-
+    private final TrackService trackService;
     private final StudentService studentService;
 
     private final TechnologyDtoMapper technologyDtoMapper;
+    private final ProjectTypeDtoMapper projectTypeDtoMapper;
+    private final TeamDtoMapper teamDtoMapper;
+    private final TeamCreationDtoMapper teamCreationDtoMapper;
 
     /**
      * Find Team entity by id
@@ -54,19 +63,30 @@ public class TeamService {
      */
     @Transactional
     public Team create(TeamCreationDto teamDto) {
-        Team team = teamDtoMapper.mapCreationToEntity(teamDto);
+        Team team = teamCreationDtoMapper.mapToEntity(teamDto);
         String name = teamDto.getName();
         Long trackId = teamDto.getCurrentTrackId();
         if (teamRepository.existsByNameIgnoreCaseAndCurrentTrackId(name, trackId)) {
             team = teamRepository.findByNameIgnoreCaseAndCurrentTrackId(name, trackId).orElseThrow();
-            //TODO: update fields
+            team.setName(teamDto.getName());
+            team.setProjectDescription(teamDto.getProjectDescription());
+            team.setProjectType(projectTypeDtoMapper.mapToEntity(teamDto.getProjectType()));
         } else {
+            team.setCurrentTrack(trackService.findByIdOrElseThrow(teamDto.getCurrentTrackId()));
             Student captain = studentService.findByIdOrElseThrow(teamDto.getCaptainId());
+
             team = addStudentToTeam(team, captain);
             team.setCaptainId(captain.getId());
             captain.setHasTeam(true);
             captain.setIsCaptain(true);
         }
+
+        team.setTechnologies(technologyRepository.findAllByIdIn(
+                teamDto.getTechnologies()
+                        .stream()
+                        .map(TechnologyDto::getId)
+                        .toList())
+        );
         teamRepository.save(team);
         return team;
     }
@@ -114,18 +134,20 @@ public class TeamService {
         return team;
     }
 
+    /**
+     * Updates entity using data given in dto
+     * # WARNING: unsafe method. No business-logic validation is performed here.
+     * @param id id of entity
+     * @param dto dto containing updated values
+     * @return updated entity
+     * @apiNote   UNSAFE
+     */
     public Team update(Long id, TeamDto dto) {
         Team team = findByIdOrElseThrow(id);
-
-//        student.setFio(dto.getFio());
-//        student.setEmail(dto.getEmail());
-//        student.setCaptain(dto.getCaptain());
-//        student.setStatus(dto.getStatus());
-//        student.setAboutSelf(dto.getAboutSelf());
-//        student.setCourse(dto.getCourse());
-//        student.setContacts(dto.getContacts());
-//        student.setGroupNumber(dto.getGroupNumber());
-//        student.setTags(dto.getTags());
+        team.setName(dto.getName());
+        team.setProjectDescription(dto.getProjectDescription());
+        team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
+        team.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
 
         teamRepository.save(team);
         return team;
@@ -176,8 +198,10 @@ public class TeamService {
     public TeamSearchOptionsDto getSearchOptionsTeams(Long trackId) {
         var teams = search(null, trackId, null, null, null);
         TeamSearchOptionsDto teamSearchOptionsDto = new TeamSearchOptionsDto();
+        teamSearchOptionsDto
+                .getProjectTypes()
+                .addAll(projectTypeDtoMapper.mapListToDto(projectTypeRepository.findAll()));
         for (Team team : teams) {
-            teamSearchOptionsDto.getProjectTypes().add(team.getProjectType());
             teamSearchOptionsDto.getTechnologies().addAll(
                     team.getTechnologies()
                             .stream()

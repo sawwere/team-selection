@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,8 +45,8 @@ public class Team {
     @Size(max = 1024)
     private String projectDescription;
 
-    @Column(name = "project_type")
-    private String projectType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ProjectType projectType;
 
     @Column(name = "quantity_of_students")
     @Builder.Default
@@ -73,7 +74,9 @@ public class Team {
     private Track currentTrack;
 
     @Column
-    @OneToMany(mappedBy = "currentTeam", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "currentTeam",
+            fetch = FetchType.EAGER,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Student> students;
 
     @Column

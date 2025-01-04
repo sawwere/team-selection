@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import ru.sfedu.teamselection.dto.StudentDto;
 @RequestMapping()
 @Tag(name = "TracksController", description = "API для работы со треками")
 @RequiredArgsConstructor
+@CrossOrigin
 public class TracksController {
     private static final Logger LOGGER = Logger.getLogger(TracksController.class.getName());
     public static final String PREFIX = "/api/v1/tracks";

@@ -6,14 +6,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
-import ru.sfedu.teamselection.mapper.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.student.StudentCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
+import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
@@ -28,7 +31,10 @@ public class StudentService {
     private final UserService userService;
 
     private final StudentDtoMapper studentDtoMapper;
+    private final StudentCreationDtoMapper studentCreationDtoMapper;
     private final TechnologyDtoMapper technologyDtoMapper;
+
+    private final RoleRepository roleRepository;
 
     /**
      * Find Student entity by id
@@ -53,10 +59,11 @@ public class StudentService {
     @Transactional
     public Student create(StudentCreationDto dto) {
         User newUser = userService.findByIdOrElseThrow(dto.getUserId());
-
-        Student student = studentDtoMapper.mapCreationToEntity(dto);
+        Role role = roleRepository.findByName("STUDENT").orElseThrow();
+        Student student = studentCreationDtoMapper.mapToEntity(dto);
 
         newUser.setIsEnabled(true);
+        newUser.setRole(role);
         student.setUser(newUser);
         studentRepository.save(student);
         return student;
@@ -119,8 +126,7 @@ public class StudentService {
         student.setContacts(dto.getContacts());
         student.setHasTeam(dto.getHasTeam());
         student.setIsCaptain(dto.getIsCaptain());
-        // TODO technologies, applications, team ??
-
+        student.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
         studentRepository.save(student);
         return student;
     }
@@ -149,5 +155,16 @@ public class StudentService {
                 .toList()
         );
         return studentSearchOptionsDto;
+    }
+
+    @Transactional(readOnly = true)
+    public Long getCurrentStudent()
+    {
+        User currentUser = userService.getCurrentUser();
+        if (studentRepository.existsByUserId(currentUser.getId()))
+        {
+            return studentRepository.findByUserId(currentUser.getId()).getId();
+        }
+        return null;
     }
 }

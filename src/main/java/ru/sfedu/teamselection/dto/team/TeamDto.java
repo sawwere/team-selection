@@ -1,21 +1,18 @@
-package ru.sfedu.teamselection.dto;
+package ru.sfedu.teamselection.dto.team;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import com.fasterxml.jackson.annotation.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.sfedu.teamselection.domain.Application;
-import ru.sfedu.teamselection.domain.Track;
+import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 
 
 @Builder
@@ -23,6 +20,7 @@ import ru.sfedu.teamselection.domain.Track;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(scope = TeamDto.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class TeamDto {
     private Long id;
 
@@ -33,29 +31,29 @@ public class TeamDto {
     private String projectDescription;
 
     @JsonProperty(value = "project_type")
-    private String projectType;
+    private ProjectTypeDto projectType;
 
     @JsonProperty(value = "quantity_of_students", defaultValue = "0")
     @Builder.Default
     private Integer quantityOfStudents = 0;
 
-    @JsonProperty(value = "captain_id")
+    @JsonProperty(value = "captain")
     @NotNull
-    private Long captainId;
+    //@JsonManagedReference
+    private StudentDto captain;
 
     @JsonProperty(value = "is_full")
     @Builder.Default
     private Boolean isFull = false;
 
     @JsonProperty(value = "current_track")
-    @JsonBackReference
+    //@JsonBackReference
     private Long currentTrackId;
 
-    @JsonManagedReference
     private List<StudentDto> students;
 
     @Builder.Default
-    private List<ApplicationDto> applications = new ArrayList<>();
+    private List<ApplicationCreationDto> applications = new ArrayList<>();
 
     @Builder.Default
     private List<TechnologyDto> technologies = new ArrayList<>();

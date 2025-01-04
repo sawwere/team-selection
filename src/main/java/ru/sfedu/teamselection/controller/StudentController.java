@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
-import ru.sfedu.teamselection.dto.TeamDto;
-import ru.sfedu.teamselection.mapper.StudentDtoMapper;
-import ru.sfedu.teamselection.mapper.TeamDtoMapper;
+import ru.sfedu.teamselection.dto.team.TeamDto;
+import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
 
@@ -32,12 +34,14 @@ import ru.sfedu.teamselection.service.TeamService;
 @RequestMapping()
 @Tag(name = "StudentController", description = "API для работы со студентами")
 @RequiredArgsConstructor
+@CrossOrigin
 public class StudentController {
     private static final Logger LOGGER = Logger.getLogger(StudentController.class.getName());
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_BY_ID = "/api/v1/students/{id}";
     public static final String SEARCH_STUDENTS = "/api/v1/students/search";
+    public static final String GET_STUDENT_ID_BY_CURRENT_USER = "/api/v1/students/me";
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_ALL = "/api/v1/students";
     public static final String CREATE_STUDENT = "/api/v1/students";
@@ -121,13 +125,13 @@ public class StudentController {
     }
 
     @Operation(
-            method = "POST",
+            method = "PUT",
             summary = "Изменить данные пользователя",
             parameters = {
                     @Parameter(name = "id", description = "сущность студента", in = ParameterIn.PATH),
                     //@Parameter(name = "student", description = "сущность студента")
             })
-    @PutMapping(UPDATE_STUDENT)
+    @PutMapping(value=UPDATE_STUDENT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public StudentDto updateStudent(@PathVariable(value = "id") Long studentId,
                                   @RequestBody StudentDto student) {
         LOGGER.info("ENTER updateStudent(%d) endpoint".formatted(studentId));
@@ -178,5 +182,10 @@ public class StudentController {
     public List<TeamDto> getTeamHistory(@PathVariable(value = "id") Long studentId) {
         LOGGER.info("ENTER getTeamHistory(%d) endpoint".formatted(studentId));
         return teamService.getTeamHistoryForStudent(studentId).stream().map(teamDtoMapper::mapToDto).toList();
+    }
+
+    @GetMapping(GET_STUDENT_ID_BY_CURRENT_USER)
+    public Long getCurrentStudent() {
+        return studentService.getCurrentStudent();
     }
 }

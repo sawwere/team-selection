@@ -6,11 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.sfedu.teamselection.domain.Application;
+import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 
-/**
- * DTO for {@link Application}
- */
 @Builder
 @Getter
 @Setter
@@ -19,11 +16,11 @@ import ru.sfedu.teamselection.domain.Application;
 public class ApplicationDto {
     private Long id;
 
-    @JsonProperty(value = "student_id")
-    private long studentId;
+    @JsonProperty(value = "student")
+    private StudentCreationDto student;
 
-    @JsonProperty(value = "team_id")
-    private long teamId;
+    @JsonProperty(value = "team")
+    private TeamCreationDto team;
 
     private String status;
 

@@ -1,6 +1,6 @@
 package ru.sfedu.teamselection.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
@@ -11,8 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.team.TeamDto;
 
 
 /**
@@ -23,6 +22,7 @@ import ru.sfedu.teamselection.domain.User;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(scope = StudentDto.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class StudentDto {
     private Long id;
 

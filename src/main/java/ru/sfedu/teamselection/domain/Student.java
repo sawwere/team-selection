@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,7 +56,8 @@ public class Student {
     @Builder.Default
     private Boolean hasTeam = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Team currentTeam;
 
     @Column(name = "is_captain", nullable = false)

@@ -20,6 +20,10 @@ import ru.sfedu.teamselection.domain.Student;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentCreationDto {
+
+    private Long id;
+    private String fio;
+
     private Integer course;
 
     @JsonProperty(value = "group_number")

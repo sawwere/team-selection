@@ -7,12 +7,15 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
+import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.service.security.OidcUserImpl;
 
 @Component
 @RequiredArgsConstructor
@@ -23,23 +26,21 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontendUrl}")
     private String frontendUrl;
 
-    @SuppressWarnings({"checkstyle:MagicNumber", "checkstyle:MultipleStringLiterals"})
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException {
-        var user = authentication.getPrincipal();
-        String sessionId = ((WebAuthenticationDetails) authentication.getDetails()).getSessionId();
+        var oAuth2User = (OAuth2User) authentication.getPrincipal();
 
+        String sessionId = ((WebAuthenticationDetails) authentication.getDetails()).getSessionId();
 
         Cookie sessionCookie = new Cookie("SessionId", sessionId);
         sessionCookie.setHttpOnly(true);
         sessionCookie.setSecure(true);
         sessionCookie.setPath("/");
         sessionCookie.setMaxAge(7 * 24 * 60 * 60);
-
-
         response.addCookie(sessionCookie);
 
         Cookie jSessionIdCookie = WebUtils.getCookie(request, "JSESSIONID");
@@ -52,7 +53,19 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             response.addCookie(jSessionIdCookie);
         }
 
+        User user;
+        if (oAuth2User instanceof OidcUserImpl oidcUser) {
+            user = oidcUser.getUser();
+        } else {
+            user = (User) oAuth2User;
+        }
 
-        redirectStrategy.sendRedirect(request, response, frontendUrl + "/teams");
+        if (user.getRole().getName().contains("USER")) {
+            redirectStrategy.sendRedirect(request, response, frontendUrl + "/registration");
+        } else {
+            redirectStrategy.sendRedirect(request, response, frontendUrl + "/teams");
+        }
     }
+
+
 }

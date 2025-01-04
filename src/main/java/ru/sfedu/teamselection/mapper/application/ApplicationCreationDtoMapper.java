@@ -1,15 +1,16 @@
-package ru.sfedu.teamselection.mapper;
+package ru.sfedu.teamselection.mapper.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.dto.ApplicationDto;
+import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.mapper.DtoMapper;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Application> {
+public class ApplicationCreationDtoMapper implements DtoMapper<ApplicationCreationDto, Application> {
     /**
      * Map Dto to Entity
      *
@@ -17,7 +18,7 @@ public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Applicati
      * @return mapped entity
      */
     @Override
-    public Application mapToEntity(ApplicationDto dto) {
+    public Application mapToEntity(ApplicationCreationDto dto) {
         return Application.builder()
                 .id(dto.getId())
                 .team(Team.builder().id(dto.getTeamId()).build())
@@ -33,8 +34,8 @@ public class ApplicationDtoMapper implements DtoMapper<ApplicationDto, Applicati
      * @return mapped dto
      */
     @Override
-    public ApplicationDto mapToDto(Application entity) {
-        return ApplicationDto.builder()
+    public ApplicationCreationDto mapToDto(Application entity) {
+        return ApplicationCreationDto.builder()
                 .id(entity.getId())
                 .teamId(entity.getTeam().getId())
                 .status(entity.getStatus())

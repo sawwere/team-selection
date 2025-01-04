@@ -2,7 +2,6 @@ package ru.sfedu.teamselection.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.repository.RoleRepository;
@@ -11,6 +10,7 @@ import ru.sfedu.teamselection.repository.RoleRepository;
 @RequiredArgsConstructor
 public class UserDtoMapper implements DtoMapper<UserDto, User> {
     private final RoleRepository roleRepository;
+
     /**
      * Map Dto to Entity
      *
