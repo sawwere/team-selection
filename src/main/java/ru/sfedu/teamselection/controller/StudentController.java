@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentCreationDto;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
@@ -28,6 +29,7 @@ import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
+import ru.sfedu.teamselection.service.UserService;
 
 
 @RestController
@@ -52,7 +54,7 @@ public class StudentController {
 
     private final TeamService teamService;
     private final StudentService studentService;
-
+    private final  UserService userService;
 
     private final StudentDtoMapper studentDtoMapper;
     private final TeamDtoMapper teamDtoMapper;
@@ -77,7 +79,7 @@ public class StudentController {
                     @Parameter(name = "course",
                             description = "Курс обучения студента",
                             in = ParameterIn.QUERY),
-                    @Parameter(name = "course",
+                    @Parameter(name = "group_number",
                             description = "Номер группы студента",
                             in = ParameterIn.QUERY),
                     @Parameter(name = "has_team",
@@ -115,9 +117,10 @@ public class StudentController {
 
     @Operation(
             method = "POST",
-            summary = "Регистрация пользователя",
-            parameters = { @Parameter(name = "student", description = "сущность студента")}
-            )
+            summary = "Создание студента",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Сущность студента"
+            ))
     @PostMapping(CREATE_STUDENT) // checked
     public StudentDto createStudent(@RequestBody StudentCreationDto student) {
         LOGGER.info("ENTER createUser() endpoint");
@@ -126,25 +129,41 @@ public class StudentController {
 
     @Operation(
             method = "PUT",
-            summary = "Изменить данные пользователя",
+            summary = "Изменить данные студента",
+            description = """
+                Используется для модификации данных определенного пользователя.
+
+                Эта операция может быть выполнена самим пользователем (редактирование информации о себе),
+                либо администратором ресурса.
+
+                Недоступные для обновления поля будут проигнорированы.
+
+                ВНИМАНИЕ: Список обновляемых полей отличается от того, кто отправил запрос -
+                администратору доступны для изменения все поля, включая те, что зависят от состояния других таблиц,
+                поэтому редактировать их нужно ОСТОРОЖНО.
+                """,
+            tags = {"UNSAFE"},
             parameters = {
-                    @Parameter(name = "id", description = "сущность студента", in = ParameterIn.PATH),
-                    //@Parameter(name = "student", description = "сущность студента")
-            })
-    @PutMapping(value=UPDATE_STUDENT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+                    @Parameter(name = "id", description = "Id студента", in = ParameterIn.PATH)
+            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Сущность студента"
+            ))
+    @PutMapping(value = UPDATE_STUDENT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public StudentDto updateStudent(@PathVariable(value = "id") Long studentId,
                                   @RequestBody StudentDto student) {
         LOGGER.info("ENTER updateStudent(%d) endpoint".formatted(studentId));
-        return studentDtoMapper.mapToDto(studentService.update(studentId, student));
+        User user = userService.getCurrentUser();
+        return studentDtoMapper.mapToDto(studentService.update(studentId, student, user));
     }
-
-
 
     @Operation(
             method = "GET",
             summary = "Получение студента по его id",
             parameters = {
-                    @Parameter(name = "id", description = "id студента", in = ParameterIn.PATH),
+                    @Parameter(name = "id", description = "Id студента", in = ParameterIn.PATH),
             }
     )
     @GetMapping(FIND_BY_ID) // checked
@@ -156,6 +175,11 @@ public class StudentController {
     @Operation(
             method = "DELETE",
             summary = "Удалить студента по его id",
+            description = """
+                Используется для удаления определенного студента (но не соответствующего ему пользователя!).
+
+                Эта операция может быть выполнена только администратором ресурса.
+                """,
             parameters = {
                     @Parameter(name = "id", description = "id студента", in = ParameterIn.PATH),
             }
@@ -175,7 +199,7 @@ public class StudentController {
             method = "DELETE",
             summary = "Найти все команды, в которых когда либо состоял студент",
             parameters = {
-                    @Parameter(name = "id", description = "id студента", in = ParameterIn.PATH),
+                    @Parameter(name = "id", description = "Id студента", in = ParameterIn.PATH),
             }
     )
     @GetMapping(FIND_TEAM_HISTORY) // checked

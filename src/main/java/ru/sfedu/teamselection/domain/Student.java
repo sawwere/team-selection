@@ -79,6 +79,6 @@ public class Student {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
-    @OneToOne()
+    @OneToOne(cascade = {CascadeType.MERGE})
     private User user;
 }

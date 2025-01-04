@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: team-selection-test
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/team-selection-test
+  flyway:
+    schemas: public
+    baselineOnMigrate: true
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      client:
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/19ba435d-e46c-436a-84f2-1b01e693e480/v2.0
+        registration:
+          github:
+            clientId: CLIENT_ID
+            clientSecret: CLIENT_SECRET
+          azure:
+            provider: azure
+            client-id: AZURE_CLIENT_ID
+            client-secret: AZURE_CLIENT_SECRET
+            scope:
+              - openid
+              - email
+              - profile
+  cloud:
+    azure:
+      active-directory:
+        enabled: false
+        profile:
+          tenant-id: AZURE_TENANT_ID
+        credential:
+          client-id: AZURE_CLIENT_ID
+          client-secret: AZURE_CLIENT_SECRET
+        redirect-uri-template: http://localhost:8080/login/oauth2/code/azure
+        application-type: WEB_APPLICATION
+        authorization-clients:
+          graph:
+            scopes:
+              - https://graph.microsoft.com/User.Read
+              - email
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 15m
+
+app:
+  frontendUrl: http://localhost:5173
+cors:
+  allowed-origins: http://localhost:8080
+frontend:
+  login:
+    url: http://localhost:5173/login

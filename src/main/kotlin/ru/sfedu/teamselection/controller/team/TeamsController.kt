@@ -60,32 +60,6 @@ class TeamsController(
     }
     @Operation(
         method = "DELETE",
-        summary = "Удалить студента из команды",
-        parameters = [
-            Parameter(name = "studentId", description = "id студента"),
-            Parameter(name = "teamId", description = "id команды"),
-        ]
-    )
-    @DeleteMapping("/deleteStudent") // checked
-    fun deleteStudent(@RequestParam studentId: Long, @RequestParam teamId: Long) = try {
-        val team = teamRepository.findById(teamId).get()
-        val student = studentRepository.findById(studentId).get()
-        student.status = false
-        student.currentTeam = null
-        team.students?.removeIf { it.id == studentId }
-        team.quantityOfStudents = team.quantityOfStudents?.minus(1)
-        if (team.quantityOfStudents!! < team.currentTrack!!.maxConstraint!!)
-            team.fullFlag = false
-        teamRepository.save(team)
-        studentRepository.save(student)
-        ResponseEntity<Any>(HttpStatus.OK)
-    } catch (ex: Exception){
-        log.info { "Error occurred while writing team to DB: ${ex.message}" }
-        ResponseEntity<Any>(HttpStatus.METHOD_NOT_ALLOWED)
-    }
-
-    @Operation(
-        method = "DELETE",
         summary = "Удалить команду по id",
         parameters = [
             Parameter(name = "teamId", description = "id команды"),
