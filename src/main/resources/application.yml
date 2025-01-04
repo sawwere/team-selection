@@ -15,15 +15,9 @@ spring:
     name: team-selection
   datasource:
     driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/team-selection
     username: postgres
-    password:
-    hikari:
-      maximum-pool-size: 50
-      jdbc-url: jdbc:postgresql://localhost:5432/team-selection
-      username: postgres
-      password: 1234
-      driver-class-name: org.postgresql.Driver
-    url: http://localhost:5432
+    password: 1234
   flyway:
     user: postgres
     password: 1234

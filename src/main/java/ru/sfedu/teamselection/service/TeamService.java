@@ -13,6 +13,7 @@ import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
@@ -123,6 +124,22 @@ public class TeamService {
 
         student.setHasTeam(true);
         student.setCurrentTeam(team);
+        return team;
+    }
+
+    @Transactional
+    public Team removeStudentFromTeam(Team team, Student student) {
+        if (team.getCaptainId().equals(student.getId())) {
+            throw new ConstraintViolationException("Can't remove captain from their team.");
+        }
+        team.getStudents().removeIf(x -> x.getId().equals(student.getId()));
+        team.setQuantityOfStudents(team.getQuantityOfStudents() - 1);
+        // If the team was full, it isn't now because 1 member has been removed,
+        // otherwise the property is not changed.
+        team.setIsFull(false);
+
+        student.setCurrentTeam(null);
+        student.setHasTeam(false);
         return team;
     }
 

@@ -1,11 +1,11 @@
-name: Build and push application image
+name: Build and test application
 
 on:
-  push:
+  pull_request:
     branches: [ "master" ]
     paths:
       - 'src/**'
-      - '.github/workflows/build_and_push.yml'
+      - '.github/workflows/build_and_test.yml'
 
 
 jobs:
@@ -38,12 +38,3 @@ jobs:
       - name: Run tests
         working-directory: .
         run: mvn -am verify
-
-      - name: Login to docker.io
-        run: echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
-
-      - name: Build application image
-        run:  docker build -t $LOGIN/$NAME:latest .
-
-      - name: Push image to docker.io
-        run: docker push $LOGIN/$NAME:latest

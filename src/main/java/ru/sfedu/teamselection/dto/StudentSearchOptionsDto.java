@@ -15,11 +15,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentSearchOptionsDto {
+    @Builder.Default
     private Set<Integer> courses = new HashSet<>();
+    @Builder.Default
     private Set<Integer> groups = new HashSet<>();
-
+    @Builder.Default
     private List<Boolean> hasTeam = List.of(true, false);
+    @Builder.Default
     private List<Boolean> isCaptain = List.of(true, false);
-
+    @Builder.Default
     private Set<TechnologyDto> technologies = new HashSet<>();
 }

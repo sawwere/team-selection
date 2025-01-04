@@ -1,6 +1,8 @@
 package ru.sfedu.teamselection.dto;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
@@ -49,8 +51,10 @@ public class StudentDto {
     @JsonProperty(value = "current_team")
     private TeamDto currentTeam;
 
+    @Builder.Default
     private List<TechnologyDto> technologies = new ArrayList<>();
 
+    @Builder.Default
     private List<ApplicationDto> applications = new ArrayList<>();
 
     private UserDto user;
