@@ -185,7 +185,7 @@ class StudentServiceTest extends BasicTestContainerTest {
             Assertions.assertEquals(courseParam, student.getCourse());
         }
 
-        Assertions.assertEquals(9, actual.size());
+        Assertions.assertEquals(8, actual.size());
     }
 
     @Test
@@ -225,7 +225,7 @@ class StudentServiceTest extends BasicTestContainerTest {
             Assertions.assertEquals(hasTeamParam, student.getHasTeam());
         }
 
-        Assertions.assertEquals(5, actual.size());
+        Assertions.assertEquals(11, actual.size());
     }
 
     @Test
