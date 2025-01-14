@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
@@ -27,6 +28,7 @@ import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.TeamService;
+import ru.sfedu.teamselection.service.UserService;
 
 @RestController
 @RequestMapping()
@@ -36,6 +38,8 @@ import ru.sfedu.teamselection.service.TeamService;
 public class TeamController {
 
     private final TeamService teamService;
+    private final UserService userService;
+
     private final TeamDtoMapper teamDtoMapper;
     private final StudentDtoMapper studentDtoMapper;
 
@@ -169,8 +173,7 @@ public class TeamController {
 
     @Operation(
             method = "PUT",
-            summary = "Добавление студента к команде",
-            parameters = { @Parameter(name = "teamId", description = "id команды")}
+            summary = "Добавление студента к команде"
     )
     @PutMapping(ADD_STUDENT_TO_TEAM)
     public TeamDto addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
@@ -182,17 +185,29 @@ public class TeamController {
             method = "PUT",
             summary = "Изменить данные команды",
             description = """
-                    ВНИМАНИЕ: небезопасный метод.
-                    Не осуществляются проверки на логическую целостность таблиц после обновления данных.
-                    """,
+                Используется для модификации данных определенной команды.
+
+                Эта операция может быть выполнена капитаном команды,
+                либо администратором ресурса.
+
+                Недоступные для обновления поля будут проигнорированы.
+
+                ВНИМАНИЕ: Список обновляемых полей отличается в зависимости от того, кто отправил запрос -
+                администратору доступны для изменения все поля, включая те, что зависят от состояния других таблиц,
+                поэтому редактировать их нужно ОСТОРОЖНО.
+                """,
+            tags = {"UNSAFE"},
             parameters = {
-                    @Parameter(name = "id", description = "сущность команды", in = ParameterIn.PATH),
-                    @Parameter(name = "team", description = "сущность команды")
-            })
+                    @Parameter(name = "id", description = "Id команды", in = ParameterIn.PATH)
+            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Сущность команды"
+            ))
     @PutMapping(UPDATE_TEAM) // checked
     public TeamDto updateTeam(@PathVariable(value = "id") Long teamId,
                                     @RequestBody TeamDto team) {
         LOGGER.info("ENTER updateTeam(%d) endpoint".formatted(teamId));
-        return teamDtoMapper.mapToDto(teamService.update(teamId, team));
+        User user = userService.getCurrentUser();
+        return teamDtoMapper.mapToDto(teamService.update(teamId, team, user));
     }
 }

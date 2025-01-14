@@ -5,6 +5,7 @@ import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Team;
 
+@SuppressWarnings("checkstyle:MultipleStringLiterals")
 public final class TeamSpecification {
 
     private TeamSpecification() {}
@@ -33,8 +34,8 @@ public final class TeamSpecification {
     public static Specification<Team> byProjectType(String projectType) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(
-                        root.get("projectType"),
-                        projectType
+                        criteriaBuilder.lower(root.get("projectType").get("name")),
+                        projectType.toLowerCase()
                 );
     }
 

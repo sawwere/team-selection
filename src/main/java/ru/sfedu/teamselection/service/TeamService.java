@@ -5,10 +5,12 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
@@ -36,7 +38,6 @@ public class TeamService {
 
     private final TechnologyDtoMapper technologyDtoMapper;
     private final ProjectTypeDtoMapper projectTypeDtoMapper;
-    private final TeamDtoMapper teamDtoMapper;
     private final TeamCreationDtoMapper teamCreationDtoMapper;
 
     /**
@@ -96,7 +97,17 @@ public class TeamService {
      * Delete team
      * @param id team id
      */
+    @Transactional
     public void delete(Long id) {
+        for (Student teamMember: findByIdOrElseThrow(id).getStudents()) {
+            // there is no need to clean up information about the current team
+            // if the student WAS a member of it earlier, but now belongs to ANOTHER one.
+            if (teamMember.getCurrentTeam().getId().equals(id)) {
+                teamMember.setHasTeam(false);
+                teamMember.setCurrentTeam(null);
+                teamMember.setIsCaptain(false);
+            }
+        }
         teamRepository.deleteById(id);
     }
 
@@ -114,7 +125,7 @@ public class TeamService {
                 throw new RuntimeException("Cannot add second year student to the team");
             }
         }
-        if (team.getStudents().contains(student)) {
+        if (team.getStudents().stream().anyMatch(x -> x.getId().equals(student.getId()))) {
             throw new RuntimeException("Student is already in the team");
         }
         //All checks are ok, now we can add student
@@ -143,6 +154,7 @@ public class TeamService {
         return team;
     }
 
+    @Transactional
     public Team addStudentToTeam(Long teamId, Long studentId) {
         Team team = findByIdOrElseThrow(teamId);
         Student student = studentService.findByIdOrElseThrow(studentId);
@@ -153,18 +165,41 @@ public class TeamService {
 
     /**
      * Updates entity using data given in dto
-     * # WARNING: unsafe method. No business-logic validation is performed here.
+     * # WARNING: unsafe method. No business-logic validation is performed here depending on sender authorities.
      * @param id id of entity
      * @param dto dto containing updated values
      * @return updated entity
-     * @apiNote   UNSAFE
+     * @apiNote   possibly UNSAFE
      */
-    public Team update(Long id, TeamDto dto) {
+    public Team update(Long id, TeamDto dto, User sender) {
+        boolean isUnsafeAllowed = false;
         Team team = findByIdOrElseThrow(id);
-        team.setName(dto.getName());
+        if (sender.getRole().getName().equals("ADMIN")) {
+            isUnsafeAllowed = true;
+        } else if (!sender.getId().equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId())) {
+            throw new AccessDeniedException("Team info can be modified only by its captain");
+        }
+
+        if (isUnsafeAllowed) {
+            team.setName(dto.getName());
+            team.setQuantityOfStudents(dto.getQuantityOfStudents());
+            team.setIsFull(dto.getIsFull());
+            // do only if not equals thus saving database calls
+            if (!Objects.equals(dto.getCurrentTrackId(), team.getCurrentTrack().getId())) {
+                team.setCurrentTrack(trackService.findByIdOrElseThrow(dto.getCurrentTrackId()));
+            }
+            team.setCaptainId(dto.getCaptain().getId());
+        }
+
         team.setProjectDescription(dto.getProjectDescription());
         team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
-        team.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
+        team.setTechnologies(technologyRepository.findAllByIdIn(
+                dto.getTechnologies()
+                        .stream()
+                        .map(TechnologyDto::getId)
+                        .toList())
+        );
+
 
         teamRepository.save(team);
         return team;
@@ -212,6 +247,7 @@ public class TeamService {
         return res;
     }
 
+    @Transactional(readOnly = true)
     public TeamSearchOptionsDto getSearchOptionsTeams(Long trackId) {
         var teams = search(null, trackId, null, null, null);
         TeamSearchOptionsDto teamSearchOptionsDto = new TeamSearchOptionsDto();
