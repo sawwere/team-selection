@@ -24,6 +24,7 @@ public class UserDtoMapper implements DtoMapper<UserDto, User> {
                 .fio(dto.getFio())
                 .email(dto.getEmail())
                 .role(roleRepository.findByName(dto.getRole()).orElseThrow())
+                .isRemindEnabled(dto.getIsRemindEnabled())
                 .build();
     }
 
@@ -40,6 +41,7 @@ public class UserDtoMapper implements DtoMapper<UserDto, User> {
                 .fio(entity.getFio())
                 .email(entity.getEmail())
                 .role(entity.getRole().getAuthority())
+                .isRemindEnabled(entity.getIsRemindEnabled())
                 .build();
     }
 }

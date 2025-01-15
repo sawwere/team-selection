@@ -11,7 +11,7 @@ import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;

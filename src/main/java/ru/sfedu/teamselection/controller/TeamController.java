@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;

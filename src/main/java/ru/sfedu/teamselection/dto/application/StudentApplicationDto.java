@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.dto;
+package ru.sfedu.teamselection.dto.application;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
@@ -10,18 +10,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.domain.Student;
 
-
 /**
- * DTO for creation of {@link Student}
+ * DTO for {@link Student} field of the {@link ApplicationDto}
  */
 @Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentCreationDto {
-
+public class StudentApplicationDto {
     private Long id;
+
     private String fio;
 
     private Integer course;

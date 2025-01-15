@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.dto;
+package ru.sfedu.teamselection.dto.application;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

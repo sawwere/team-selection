@@ -1,24 +1,20 @@
 package ru.sfedu.teamselection.mapper.team;
 
-import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
-import ru.sfedu.teamselection.repository.TrackRepository;
 
 @Component
 @RequiredArgsConstructor
 public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
     private final TechnologyDtoMapper technologyDtoMapper;
     private final ProjectTypeDtoMapper projectTypeDtoMapper;
-
-    private final EntityManager entityManager;
-    private final TrackRepository trackRepository;
 
     @Override
     public Team mapToEntity(TeamCreationDto dto) {
@@ -30,7 +26,7 @@ public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
                 .students(new ArrayList<>())
                 .applications(new ArrayList<>())
                 .technologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()))
-                .currentTrack(trackRepository.findById(dto.getCurrentTrackId()).orElseThrow())
+                .currentTrack(Track.builder().id(dto.getCurrentTrackId()).build())
                 .build();
     }
 
