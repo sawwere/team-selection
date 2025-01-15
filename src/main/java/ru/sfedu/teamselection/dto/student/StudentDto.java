@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.dto;
+package ru.sfedu.teamselection.dto.student;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,6 +13,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.dto.application.ApplicationDto;
+import ru.sfedu.teamselection.dto.TechnologyDto;
+import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 
 
@@ -42,11 +45,11 @@ public class StudentDto {
 
     @NotNull
     @JsonProperty(value = "has_team")
-    private Boolean hasTeam = false;
+    private Boolean hasTeam;
 
     @NotNull
     @JsonProperty(value = "is_captain")
-    private Boolean isCaptain = false;
+    private Boolean isCaptain;
 
     @JsonProperty(value = "current_team")
     private TeamDto currentTeam;

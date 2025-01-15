@@ -5,11 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.dto.StudentDto;
+import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.mapper.UserDtoMapper;
-import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 
@@ -17,14 +16,12 @@ import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 @RequiredArgsConstructor
 public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
     private final TechnologyDtoMapper technologyDtoMapper;
-    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
+    private final ApplicationDtoMapper applicationDtoMapper;
     @Autowired
     private UserDtoMapper userDtoMapper;
     @Lazy
     @Autowired
     private TeamDtoMapper teamDtoMapper;
-
-    private final ApplicationDtoMapper applicationDtoMapper;
 
     /**
      * {@inheritDoc}

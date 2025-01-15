@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
 import ru.sfedu.teamselection.dto.UserDto;
-import ru.sfedu.teamselection.mapper.RoleDtoMapper;
+import ru.sfedu.teamselection.mapper.user.RoleDtoMapper;
 import ru.sfedu.teamselection.mapper.UserDtoMapper;
 import ru.sfedu.teamselection.service.UserService;
 
