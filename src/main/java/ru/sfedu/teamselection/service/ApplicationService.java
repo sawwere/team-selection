@@ -138,7 +138,7 @@ public class ApplicationService {
             throw new ConstraintViolationException("Can't apply because team is already full of second year students");
         }
         teamService.addStudentToTeam(team, student);
-        Application application = applicationRepository.findByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId());
+        Application application = findByIdOrElseThrow(dto.getId());
         application.setStatus(ApplicationStatus.Accepted.name());
         // TODO mark other applications as cancelled
 
@@ -148,16 +148,14 @@ public class ApplicationService {
     @Transactional
     private Application tryRejectApplication(ApplicationCreationDto dto, User sender)
             throws ConstraintViolationException {
-        Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
-
         Team team = teamService.findByIdOrElseThrow(dto.getTeamId());
         // Check if sender is captain of the team.
         // Only captain can reject application
         if (!checkSenderIsCaptain(team, sender)) {
             throw new ConstraintViolationException("Only captain of the team can reject application");
         }
-        teamService.addStudentToTeam(team, student);
-        Application application = applicationRepository.findByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId());
+
+        Application application = findByIdOrElseThrow(dto.getId());
         application.setStatus(ApplicationStatus.Rejected.name());
         return applicationRepository.save(application);
     }
@@ -171,12 +169,12 @@ public class ApplicationService {
     @Transactional
     //TODO
     public Application update(ApplicationCreationDto dto, User sender) throws NoSuchElementException {
-        Application application = applicationRepository.findByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId());
+        Application application = findByIdOrElseThrow(dto.getId());
         if (application == null) {
             throw new NoSuchElementException("There is no application with such data");
         }
         if (application.getStatus().equals(ApplicationStatus.Accepted.name().toLowerCase())) {
-            throw new RuntimeException("Can update only applications in status 'Sent'");
+            throw new RuntimeException("Can not update Accepted applications");
         }
         switch (dto.getStatus().toLowerCase()) {
             case "accepted": {
@@ -190,8 +188,7 @@ public class ApplicationService {
                 application.setStatus(ApplicationStatus.Cancelled.name());
                 break;
             }
-            case "sent":
-            {
+            case "sent": {
                 application.setStatus(ApplicationStatus.Sent.name());
                 break;
             }
@@ -204,10 +201,12 @@ public class ApplicationService {
 
     @Transactional
     public Application create(ApplicationCreationDto dto, User sender) {
-        if (applicationRepository.existsByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId())) {
+        if (dto.getId() == null) {
+            return tryCreateApplication(dto, sender);
+        } else if (applicationRepository.existsById(dto.getId())) {
             return update(dto, sender);
         } else {
-            return tryCreateApplication(dto, sender);
+            throw new NoSuchElementException("There is no such application to be updated");
         }
     }
 

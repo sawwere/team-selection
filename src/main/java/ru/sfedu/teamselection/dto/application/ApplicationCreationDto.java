@@ -18,7 +18,7 @@ import ru.sfedu.teamselection.domain.Application;
 @NoArgsConstructor
 public class ApplicationCreationDto {
 
-    private long id;
+    private Long id;
     @JsonProperty(value = "student_id")
     private long studentId;
 
