@@ -3,13 +3,9 @@ package ru.sfedu.teamselection.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -23,7 +19,6 @@ import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
-import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)
@@ -67,10 +62,6 @@ class ApplicationServiceTest extends BasicTestContainerTest {
         List<Application> actual = underTest.findAll();
 
         Assertions.assertEquals(expected.size(), actual.size());
-    }
-
-    @Test
-    void findTeamApplications() {
     }
 
     /**
@@ -313,7 +304,77 @@ class ApplicationServiceTest extends BasicTestContainerTest {
         Assertions.assertEquals(expected.getStatus(), actual.getStatus());
     }
 
-//    @Test
-//    void findApplicationByTeamIdAndStudentId() {
-//    }
+    @Test
+    void updateCancelFromForeignUserShouldFail() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(6L)
+                .status("cancelled")
+                .studentId(6L)
+                .teamId(2L)
+                .build();
+
+        Assertions.assertThrows(AccessDeniedException.class,
+                () -> underTest.update(dto, userRepository.findById(17L).orElseThrow())
+        );
+    }
+
+    @Test
+    void updateCancelAllowedOnlyForSentApplication() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(9L)
+                .status("cancelled")
+                .studentId(16L)
+                .teamId(3L)
+                .build();
+
+        Assertions.assertThrows(ConstraintViolationException.class,
+                () -> underTest.update(dto, userRepository.findById(15L).orElseThrow())
+        );
+    }
+
+    @Test
+    void updateCancel() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(6L)
+                .status("cancelled")
+                .studentId(6L)
+                .teamId(2L)
+                .build();
+
+        Application expected = Application.builder()
+                .status("cancelled")
+                .student(Student.builder().id(dto.getStudentId()).build())
+                .team(Team.builder().id(dto.getTeamId()).build())
+                .build();
+
+        Application actual = underTest.update(dto, userRepository.findById(7L).orElseThrow());
+
+        Assertions.assertEquals(expected.getTeam().getId(), actual.getTeam().getId());
+
+        Assertions.assertEquals(expected.getStudent().getId(), actual.getStudent().getId());
+        // student has team now
+
+        Assertions.assertEquals(expected.getStatus(), actual.getStatus());
+    }
+
+    @Test
+    void findTeamApplications() {
+        Long teamId = 4L;
+
+        var actual = underTest.findTeamApplications(teamId);
+
+        Assertions.assertEquals(2, actual.size());
+        var resultedStudentIds = actual.stream().map(Student::getId).sorted().toList();
+        Assertions.assertEquals(List.of(16L, 19L), resultedStudentIds);
+    }
+
+    @Test
+    @Sql(value = "/sql-scripts/create_team_for_history.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void findTeamApplicationsForTeamWithoutApplications() {
+        Long teamId = 1003L;
+
+        var actual = underTest.findTeamApplications(teamId);
+
+        Assertions.assertEquals(0, actual.size());
+    }
 }

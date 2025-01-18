@@ -152,6 +152,23 @@ public class ApplicationService {
         return applicationRepository.save(application);
     }
 
+    @Transactional
+    private Application trCancelApplication(ApplicationCreationDto dto, User sender)
+            throws ConstraintViolationException {
+        Application application = findByIdOrElseThrow(dto.getId());
+        // Check if sender is the sender of the application.
+        if (!application.getStudent().getUser().getId().equals(sender.getId())) {
+            throw new AccessDeniedException("Only sender of the application can reject application");
+        }
+        if (!application.getStatus().equalsIgnoreCase(ApplicationStatus.Sent.toString())) {
+            throw new ConstraintViolationException("Can not cancel application with the status other than SENT");
+        }
+
+
+        application.setStatus(ApplicationStatus.Cancelled.toString().toLowerCase());
+        return applicationRepository.save(application);
+    }
+
     /**
      * Updates application entity status based in dto
      * @param dto containing info about application
@@ -166,27 +183,12 @@ public class ApplicationService {
             throw new ConstraintViolationException("Can not update Accepted applications");
         }
 
-        switch (dto.getStatus().toLowerCase()) {
-            case "accepted": {
-                return tryAcceptApplication(dto, sender);
-            }
-            case "rejected": {
-                return tryRejectApplication(dto, sender);
-            }
-            case "cancelled": {
-                // TODO make security rules for application cancel
-                application.setStatus(ApplicationStatus.Cancelled.toString().toLowerCase());
-                break;
-            }
-            case "sent": {
-                application.setStatus(ApplicationStatus.Sent.toString().toLowerCase());
-                break;
-            }
-            default: {
-                throw new RuntimeException("Unexpected application status '%s'".formatted(dto.getStatus()));
-            }
-        }
-        return applicationRepository.save(application);
+        return switch (dto.getStatus().toLowerCase()) {
+            case "accepted" -> tryAcceptApplication(dto, sender);
+            case "rejected" -> tryRejectApplication(dto, sender);
+            case "cancelled" -> trCancelApplication(dto, sender);
+            default -> throw new RuntimeException("Unexpected application status '%s'".formatted(dto.getStatus()));
+        };
     }
 
     @Transactional
