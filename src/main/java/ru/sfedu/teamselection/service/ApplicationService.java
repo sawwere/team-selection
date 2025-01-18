@@ -39,29 +39,20 @@ public class ApplicationService {
         return applicationRepository.findAll();
     }
 
+    /**
+     * Deletes application by id
+     * @param id id of the application
+     * @deprecated for future removal
+     */
     public void delete(Long id) {
         applicationRepository.deleteById(id);
     }
 
     /**
-     * Returns a list of teams for which student is subscribed
-     * @param id student id
-     * @return the new list
+     *
+     * @param teamId
+     * @return
      */
-    public List<Team> getUserApplications(Long id) {
-        Student student = studentService.findByIdOrElseThrow(id);
-        if (student.getApplications().isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return student.getApplications().stream()
-                    .map(application ->
-                            teamService.findByIdOrElseThrow(application.getTeam().getId())
-                    )
-                    .toList();
-        }
-    }
-
-
     public List<Student> findTeamApplications(Long teamId) {
         Team team = teamService.findByIdOrElseThrow(teamId);
         if (team.getApplications().isEmpty()) {
@@ -81,9 +72,9 @@ public class ApplicationService {
             throw new AccessDeniedException("Tried to create application for another user!");
         }
 
-        // Can't apply if student already has team or is captain
+        // Can't apply if student already has team
         if (student.getHasTeam() || student.getIsCaptain()) {
-            throw new ConstraintViolationException("Captains and students with team cannot create applications");
+            throw new ConstraintViolationException("Students with team cannot create applications");
         }
         Team team = teamService.findByIdOrElseThrow(dto.getTeamId());
         // Check if team is full
@@ -102,7 +93,7 @@ public class ApplicationService {
 
         // Creating new application with default status
         Application application = applicationCreationDtoMapper.mapToEntity(dto);
-        application.setStatus(ApplicationStatus.Sent.name());
+        application.setStatus(ApplicationStatus.Sent.toString().toLowerCase());
         return applicationRepository.save(application);
     }
 
@@ -114,7 +105,8 @@ public class ApplicationService {
     @Transactional
     private Application tryAcceptApplication(ApplicationCreationDto dto, User sender)
             throws ConstraintViolationException {
-        Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
+        Application application = findByIdOrElseThrow(dto.getId());
+        Student student = studentService.findByIdOrElseThrow(application.getStudent().getId());
 
         // Can't apply if student already has team or is captain
         if (student.getHasTeam()) {
@@ -126,7 +118,7 @@ public class ApplicationService {
         // Check if sender is captain of the team.
         // Only captain can accept application
         if (!checkSenderIsCaptain(team, sender)) {
-            throw new ConstraintViolationException("Only captain of the team can accept application");
+            throw new AccessDeniedException("Only captain of the team can accept application");
         }
         // Check if team is full
         if (team.getIsFull()) {
@@ -138,8 +130,8 @@ public class ApplicationService {
             throw new ConstraintViolationException("Can't apply because team is already full of second year students");
         }
         teamService.addStudentToTeam(team, student);
-        Application application = findByIdOrElseThrow(dto.getId());
-        application.setStatus(ApplicationStatus.Accepted.name());
+
+        application.setStatus(ApplicationStatus.Accepted.toString().toLowerCase());
         // TODO mark other applications as cancelled
 
         return applicationRepository.save(application);
@@ -148,15 +140,15 @@ public class ApplicationService {
     @Transactional
     private Application tryRejectApplication(ApplicationCreationDto dto, User sender)
             throws ConstraintViolationException {
-        Team team = teamService.findByIdOrElseThrow(dto.getTeamId());
+        Application application = findByIdOrElseThrow(dto.getId());
+        Team team = teamService.findByIdOrElseThrow(application.getTeam().getId());
         // Check if sender is captain of the team.
         // Only captain can reject application
         if (!checkSenderIsCaptain(team, sender)) {
-            throw new ConstraintViolationException("Only captain of the team can reject application");
+            throw new AccessDeniedException("Only captain of the team can reject application");
         }
 
-        Application application = findByIdOrElseThrow(dto.getId());
-        application.setStatus(ApplicationStatus.Rejected.name());
+        application.setStatus(ApplicationStatus.Rejected.toString().toLowerCase());
         return applicationRepository.save(application);
     }
 
@@ -168,14 +160,12 @@ public class ApplicationService {
      */
     @Transactional
     //TODO
-    public Application update(ApplicationCreationDto dto, User sender) throws NoSuchElementException {
+    public Application update(ApplicationCreationDto dto, User sender) {
         Application application = findByIdOrElseThrow(dto.getId());
-        if (application == null) {
-            throw new NoSuchElementException("There is no application with such data");
+        if (application.getStatus().equals(ApplicationStatus.Accepted.toString().toLowerCase())) {
+            throw new ConstraintViolationException("Can not update Accepted applications");
         }
-        if (application.getStatus().equals(ApplicationStatus.Accepted.name().toLowerCase())) {
-            throw new RuntimeException("Can not update Accepted applications");
-        }
+
         switch (dto.getStatus().toLowerCase()) {
             case "accepted": {
                 return tryAcceptApplication(dto, sender);
@@ -185,11 +175,11 @@ public class ApplicationService {
             }
             case "cancelled": {
                 // TODO make security rules for application cancel
-                application.setStatus(ApplicationStatus.Cancelled.name());
+                application.setStatus(ApplicationStatus.Cancelled.toString().toLowerCase());
                 break;
             }
             case "sent": {
-                application.setStatus(ApplicationStatus.Sent.name());
+                application.setStatus(ApplicationStatus.Sent.toString().toLowerCase());
                 break;
             }
             default: {
@@ -210,6 +200,13 @@ public class ApplicationService {
         }
     }
 
+    /**
+     * Returns applications of the given pair of student and team
+     * @param teamId id of the team
+     * @param studentId id of the student
+     * @return new list
+     * @deprecated no usages, should be removed in the future
+     */
     public Application findApplicationByTeamIdAndStudentId(long teamId, long studentId) {
         return applicationRepository.findByTeamIdAndStudentId(teamId, studentId);
     }

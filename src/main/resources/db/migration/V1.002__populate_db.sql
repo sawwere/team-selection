@@ -25,7 +25,7 @@ VALUES
     (20, 1, 'user20_mail', 'Мелихов Петр Андреевич', true, false, false, '2024-12-20 18:28:15.047117', '2024-12-20 18:28:15.047117'),
     (21, 1, 'user21_mail', 'Мелихов Павел Ога', true, false, false, '2024-12-20 18:28:15.047117', '2024-12-20 18:28:15.047117')
 ON CONFLICT DO NOTHING;
-SELECT pg_catalog.setval('users_id_seq', 19, true);
+SELECT pg_catalog.setval('users_id_seq', 21, true);
 
 INSERT
 INTO
