@@ -109,9 +109,13 @@ public class ApplicationService {
         }
     }
 
-    private boolean checkSenderIsNotCaptain(Team team, User sender) {
+    private void validateSenderIsCaptain(Team team, User sender) {
         Student actualCaptain = studentService.findByIdOrElseThrow(team.getCaptainId());
-        return !actualCaptain.getUser().getId().equals(sender.getId());
+        if (actualCaptain.getCurrentTeam() == null
+                || !actualCaptain.getCurrentTeam().getId().equals(team.getId())
+                || !actualCaptain.getUser().getId().equals(sender.getId())) {
+            throw new AccessDeniedException("Only captain of the team can modify this application");
+        }
     }
 
     @Transactional
@@ -121,12 +125,10 @@ public class ApplicationService {
         Student student = studentService.findByIdOrElseThrow(application.getStudent().getId());
 
         validateStudentHasNoCurrentTeam(student);
-        Team team = teamService.findByIdOrElseThrow(dto.getTeamId());
+        Team team = teamService.findByIdOrElseThrow(application.getTeam().getId());
         // Check if sender is captain of the team.
         // Only captain can accept application
-        if (checkSenderIsNotCaptain(team, sender)) {
-            throw new AccessDeniedException("Only captain of the team can accept application");
-        }
+        validateSenderIsCaptain(team, sender);
         // Check if team is full
         if (team.getIsFull()) {
             throw new ConstraintViolationException("Can't apply because team is already full");
@@ -149,9 +151,7 @@ public class ApplicationService {
         Team team = teamService.findByIdOrElseThrow(application.getTeam().getId());
         // Check if sender is captain of the team.
         // Only captain can reject application
-        if (checkSenderIsNotCaptain(team, sender)) {
-            throw new AccessDeniedException("Only captain of the team can reject application");
-        }
+        validateSenderIsCaptain(team, sender);
 
         application.setStatus(ApplicationStatus.REJECTED.toString());
         return applicationRepository.save(application);

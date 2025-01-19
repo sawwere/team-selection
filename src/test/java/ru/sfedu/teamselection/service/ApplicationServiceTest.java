@@ -282,6 +282,45 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Sql(value = {
+            "/sql-scripts/create_team_for_history.sql"},
+            statements = """
+                    UPDATE students
+                    SET current_team_id = null, has_team = false
+                    WHERE id = 2;
+                    """,
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void updateAcceptFromCaptainWhoHasNoTeamNowShouldFail() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(1004L)
+                .status(ApplicationStatus.ACCEPTED)
+                .studentId(9L)
+                .teamId(1004L)
+                .build();
+
+        Assertions.assertThrows(AccessDeniedException.class,
+                () -> underTest.update(dto, userRepository.findById(3L).orElseThrow())
+        );
+    }
+
+    @Test
+    @Sql(value = {
+            "/sql-scripts/create_team_for_history.sql"},
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void updateAcceptFromCaptainWhoIsNowMemberOfAnotherTeamShouldFail() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(1004L)
+                .status(ApplicationStatus.ACCEPTED)
+                .studentId(9L)
+                .teamId(1004L)
+                .build();
+
+        Assertions.assertThrows(AccessDeniedException.class,
+                () -> underTest.update(dto, userRepository.findById(3L).orElseThrow())
+        );
+    }
+
+    @Test
     void updateAccept() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(5L)
@@ -343,14 +382,13 @@ class ApplicationServiceTest extends BasicTestContainerTest {
 
     @Test
     @Sql(value = {
-            "/sql-scripts/create_team_for_history.sql",
-            "/sql-scripts/create_application_for_full_team.sql"},
+            "/sql-scripts/create_full_team_with_captain.sql"},
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void updateAcceptForFullTeamShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .id(102L)
+                .id(1004L)
                 .status(ApplicationStatus.ACCEPTED)
-                .studentId(6L)
+                .studentId(9L)
                 .teamId(1004L)
                 .build();
 
@@ -361,19 +399,19 @@ class ApplicationServiceTest extends BasicTestContainerTest {
 
     @Test
     @Sql(value = {
-            "/sql-scripts/create_team_for_history.sql",
-            "/sql-scripts/create_application_for_full_team.sql"},
+            "/sql-scripts/create_team_full_of_second_year.sql",
+            "/sql-scripts/create_application_for_team_full_of_second_years.sql"},
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void updateAcceptFromSecondYearForTeamFullOfSecondYearsShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(101L)
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(6L)
-                .teamId(1003L)
+                .teamId(5L)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
-                () -> underTest.update(dto, userRepository.findById(2L).orElseThrow())
+                () -> underTest.update(dto, userRepository.findById(22L).orElseThrow())
         );
     }
 
