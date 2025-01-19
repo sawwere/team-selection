@@ -86,14 +86,16 @@ public class UserService {
     @Transactional
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
-        if (Objects.equals(user.getRole().getName(), "USER")) {
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new NoSuchElementException("Role not found"));
+
+        if (roleName.equals("STUDENT")) {
             Student student = Student.builder()
                     .user(user)
                     .build();
             studentRepository.save(student);
         }
-        Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new NoSuchElementException("Role not found"));
+
         user.setRole(role);
         return userRepository.save(user);
     }

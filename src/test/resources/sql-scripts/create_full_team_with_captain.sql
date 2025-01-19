@@ -7,6 +7,10 @@ VALUES
     (1004, 2, true, 'Old name xQc', 'мобильное приложение', 1, 7, 1, '2024-11-21 20:24:36.402366', '2024-11-21 20:24:36.402366')
 ON CONFLICT DO NOTHING;
 
+UPDATE students
+SET current_team_id = 1004, has_team = true
+WHERE id = 2;
+
 INSERT
 INTO
   teams_students

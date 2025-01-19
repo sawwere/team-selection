@@ -60,7 +60,6 @@ public class ApplicationController {
     public ApplicationCreationDto createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = userService.getCurrentUser();
-        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return applicationCreationDtoMapper.mapToDto(applicationService.create(application, user));
     }
 
@@ -73,7 +72,6 @@ public class ApplicationController {
     public ApplicationCreationDto updateApplication(@RequestBody ApplicationCreationDto applicationDto) {
         LOGGER.info("ENTER updateApplication() endpoint");
         User user = userService.getCurrentUser();
-        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             return applicationCreationDtoMapper.mapToDto(applicationService.update(applicationDto, user));
         } catch (NoSuchElementException e) {
@@ -106,16 +104,7 @@ public class ApplicationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_APPLICATION) // checked
     public void deleteApplication(@PathVariable(value = "id") Long applicationId) {
-        LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(applicationId));
+        LOGGER.info("ENTER deleteApplication(%d) endpoint".formatted(applicationId));
         applicationService.delete(applicationId);
     }
-
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PostMapping(DELETE_APPLICATION)
-    public void findApplicationByTeamIdAndStudentId(@PathVariable(value = "id") Long applicationId) {
-        LOGGER.info("ENTER findApplicationByTeamIdAndStudentId(%d) endpoint".formatted(applicationId));
-        applicationService.delete(applicationId);
-    }
-
 }

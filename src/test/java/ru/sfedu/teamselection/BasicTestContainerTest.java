@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -10,17 +11,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
-@Testcontainers
 public class BasicTestContainerTest {
-    @Container
-    public static PostgreSQLContainer<?> POSTGRES;
 
-
-    static {
-        POSTGRES = new PostgreSQLContainer<>("postgres:16")
+    public static PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16")
                 .withDatabaseName("team-selection-test")
                 .withUsername("TestUser")
                 .withPassword("1234");
+
+    @BeforeAll
+    public static void beforeAll() {
         POSTGRES.start();
     }
 

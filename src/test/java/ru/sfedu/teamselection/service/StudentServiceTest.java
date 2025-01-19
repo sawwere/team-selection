@@ -40,7 +40,6 @@ import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
 class StudentServiceTest extends BasicTestContainerTest {
@@ -77,6 +76,7 @@ class StudentServiceTest extends BasicTestContainerTest {
         }).when (studentRepository).save(Mockito.notNull());
     }
 
+    @Transactional
     @Test
     void findByIdOrElseThrow() {
         Student expected = studentRepository.findById(1L).orElseThrow();
@@ -90,6 +90,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void findAll() {
         List<Student> expected = studentRepository.findAll();
 
@@ -99,6 +100,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void create() {
         StudentCreationDto studentDto = StudentCreationDto.builder()
                 .aboutSelf("about self")
@@ -117,6 +119,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void deleteStudentWithoutTeam() {
         underTest.delete(1L);
     }
@@ -146,6 +149,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByLike() {
         String like = "Серг";
 
@@ -166,6 +170,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByCourse() {
         Integer courseParam = 1;
 
@@ -186,6 +191,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByGroup() {
         Integer groupParam = 1;
 
@@ -206,6 +212,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByHasTeam() {
         Boolean hasTeamParam = true;
 
@@ -226,6 +233,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByIsCaptain() {
         Boolean isCaptainParam = true;
 
@@ -349,6 +357,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void typeOfStudentTrack() {
 
         for (int i = 0; i < 10; i++) {
@@ -365,6 +374,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void getSearchOptionsStudents() {
         StudentSearchOptionsDto actual = underTest.getSearchOptionsStudents();
 
@@ -381,6 +391,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void getCurrentStudent() {
         Authentication authentication = Mockito.mock(Authentication.class);
         // Mockito.whens() for your authorization object
@@ -433,6 +444,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void getCurrentStudentReturnNullForNonStudentUser() {
         Authentication authentication = Mockito.mock(Authentication.class);
         // Mockito.whens() for your authorization object

@@ -4,6 +4,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/team-selection-test
+    hikari:
+      maximum-pool-size: 5
   flyway:
     schemas: public
     baselineOnMigrate: true

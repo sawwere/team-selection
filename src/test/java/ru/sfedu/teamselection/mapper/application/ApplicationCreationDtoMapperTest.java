@@ -6,6 +6,7 @@ import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 
 class ApplicationCreationDtoMapperTest {
 
@@ -18,14 +19,14 @@ class ApplicationCreationDtoMapperTest {
                 .id(1L)
                 .studentId(10L)
                 .teamId(24L)
-                .status("status")
+                .status(ApplicationStatus.CANCELLED)
                 .build();
 
         Application expected = Application.builder()
                 .id(1L)
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
-                .status("status")
+                .status(dto.getStatus().toString())
                 .build();
 
         Application actual = underTest.mapToEntity(dto);
@@ -41,14 +42,14 @@ class ApplicationCreationDtoMapperTest {
                 .id(1L)
                 .student(Student.builder().id(12L).build())
                 .team(Team.builder().id(32L).build())
-                .status("status")
+                .status("Sent")
                 .build();
 
         ApplicationCreationDto expected = ApplicationCreationDto.builder()
                 .id(1L)
                 .studentId(entity.getStudent().getId())
                 .teamId(entity.getTeam().getId())
-                .status("status")
+                .status(ApplicationStatus.SENT)
                 .build();
 
         ApplicationCreationDto actual = underTest.mapToDto(entity);
