@@ -13,8 +13,3 @@ INSERT INTO applications (id, student_id, team_id, status) VALUES
     (4, 1, 3, 'sent');
 
 SELECT pg_catalog.setval('applications_id_seq', 12, true);
-
-
-
-
-

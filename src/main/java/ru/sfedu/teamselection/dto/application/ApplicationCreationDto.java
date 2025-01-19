@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.domain.Application;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 
 /**
  * DTO for {@link Application}
@@ -25,6 +26,6 @@ public class ApplicationCreationDto {
     @JsonProperty(value = "team_id")
     private long teamId;
 
-    private String status;
+    private ApplicationStatus status;
 
 }

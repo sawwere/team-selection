@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 
 @Builder
 @Getter
@@ -22,6 +23,6 @@ public class ApplicationDto {
     @JsonProperty(value = "team")
     private TeamCreationDto team;
 
-    private String status;
+    private ApplicationStatus status;
 
 }

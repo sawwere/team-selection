@@ -6,17 +6,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.sfedu.teamselection.BasicTestContainerTest;
 import ru.sfedu.teamselection.TeamSelectionApplication;
 import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
@@ -26,22 +29,17 @@ import ru.sfedu.teamselection.repository.UserRepository;
 //@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
+@Testcontainers
 class ApplicationServiceTest extends BasicTestContainerTest {
     @Autowired
     private ApplicationService underTest;
 
     @Autowired
+    @SpyBean
     private ApplicationRepository applicationRepository;
 
     @Autowired
     private UserRepository userRepository;
-
-
-//    @BeforeEach
-//    public void beforeEach() {
-//        MockitoAnnotations.openMocks(this);
-//
-//    }
 
     @Test
     void findByIdOrElseThrow() {
@@ -71,15 +69,9 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     @Test
     void createForInappropriateTrackShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .status("sent")
+                .status(ApplicationStatus.SENT)
                 .studentId(18L)
                 .teamId(1L)
-                .build();
-
-        Application expected = Application.builder()
-                .status("sent")
-                .student(Student.builder().id(dto.getStudentId()).build())
-                .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -90,15 +82,9 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     @Test
     void createForAnotherUserShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .status("sent")
+                .status(ApplicationStatus.SENT)
                 .studentId(18L)
                 .teamId(1L)
-                .build();
-
-        Application expected = Application.builder()
-                .status("sent")
-                .student(Student.builder().id(dto.getStudentId()).build())
-                .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
 
         Assertions.assertThrows(AccessDeniedException.class,
@@ -109,7 +95,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     @Test
     void createIfHasTeamShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .status("sent")
+                .status(ApplicationStatus.SENT)
                 .studentId(4L)
                 .teamId(1L)
                 .build();
@@ -123,7 +109,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     @Sql(value = {"/sql-scripts/create_team_for_history.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void createForFullTeamShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .status("sent")
+                .status(ApplicationStatus.SENT)
                 .studentId(9L)
                 .teamId(1004L)
                 .build();
@@ -137,7 +123,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     @Sql(value = {"/sql-scripts/create_team_for_history.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void createFromSecondYearForTeamWithMaxOfSecondYearsShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .status("sent")
+                .status(ApplicationStatus.SENT)
                 .studentId(13L)
                 .teamId(1003L)
                 .build();
@@ -150,7 +136,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     @Test
     void create() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .status("sent")
+                .status(ApplicationStatus.SENT)
                 .studentId(18L)
                 .teamId(3L)
                 .build();
@@ -169,10 +155,34 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     }
 
     @Test
-    void creteWithIdShouldUpdate() {
+    @Sql(value = {"/sql-scripts/create_almost_full_team_without_1_second_year.sql"},
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    void createForSecondYear() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .status(ApplicationStatus.SENT)
+                .studentId(6L)
+                .teamId(5L)
+                .build();
+
+        Application expected = Application.builder()
+                .status("sent")
+                .student(Student.builder().id(dto.getStudentId()).build())
+                .team(Team.builder().id(dto.getTeamId()).build())
+                .build();
+
+        Application actual = underTest.create(dto, userRepository.findById(7L).orElseThrow());
+
+        Assertions.assertEquals(expected.getTeam().getId(), actual.getTeam().getId());
+        Assertions.assertEquals(expected.getStudent().getId(), actual.getStudent().getId());
+        Assertions.assertEquals(expected.getStatus(), actual.getStatus());
+    }
+
+    @Test
+    void createWithIdShouldUpdate() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(6L)
-                .status("rejected")
+                .status(ApplicationStatus.REJECTED)
                 .studentId(6L)
                 .teamId(2L)
                 .build();
@@ -193,7 +203,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void createWithNonExistentIdShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(666L)
-                .status("sent")
+                .status(ApplicationStatus.SENT)
                 .studentId(4L)
                 .teamId(1L)
                 .build();
@@ -207,7 +217,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void updateAcceptedShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(1L)
-                .status("rejected")
+                .status(ApplicationStatus.REJECTED)
                 .studentId(19L)
                 .teamId(4L)
                 .build();
@@ -221,15 +231,9 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void updateRejectAllowedOnlyFromCaptain() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(4L)
-                .status("rejected")
+                .status(ApplicationStatus.REJECTED)
                 .studentId(1L)
                 .teamId(1L)
-                .build();
-
-        Application expected = Application.builder()
-                .status("rejected")
-                .student(Student.builder().id(dto.getStudentId()).build())
-                .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
 
         Assertions.assertThrows(AccessDeniedException.class,
@@ -241,7 +245,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void updateReject() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(6L)
-                .status("rejected")
+                .status(ApplicationStatus.REJECTED)
                 .studentId(6L)
                 .teamId(2L)
                 .build();
@@ -267,7 +271,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void updateAcceptAllowedOnlyFromCaptain() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(4L)
-                .status("accepted")
+                .status(ApplicationStatus.ACCEPTED)
                 .studentId(1L)
                 .teamId(1L)
                 .build();
@@ -280,10 +284,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     @Test
     void updateAccept() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .id(6L)
-                .status("accepted")
-                .studentId(6L)
-                .teamId(2L)
+                .id(5L)
+                .status(ApplicationStatus.ACCEPTED)
+                .studentId(5L)
+                .teamId(1L)
                 .build();
 
         Application expected = Application.builder()
@@ -292,7 +296,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
 
-        Application actual = underTest.update(dto, userRepository.findById(4L).orElseThrow());
+        Application actual = underTest.update(dto, userRepository.findById(3L).orElseThrow());
 
         Assertions.assertEquals(expected.getTeam().getId(), actual.getTeam().getId());
 
@@ -305,10 +309,79 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Sql(value = {
+            "/sql-scripts/create_almost_full_team_without_1_second_year.sql",
+            "/sql-scripts/create_application_from_second_year.sql"
+        },
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    void updateAcceptForSecondYear() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(101L)
+                .status(ApplicationStatus.ACCEPTED)
+                .studentId(6L)
+                .teamId(5L)
+                .build();
+
+        Application expected = Application.builder()
+                .status("accepted")
+                .student(Student.builder().id(dto.getStudentId()).build())
+                .team(Team.builder().id(dto.getTeamId()).build())
+                .build();
+
+        Application actual = underTest.update(dto, userRepository.findById(22L).orElseThrow());
+
+        Assertions.assertEquals(expected.getTeam().getId(), actual.getTeam().getId());
+
+        Assertions.assertEquals(expected.getStudent().getId(), actual.getStudent().getId());
+        // student has team now
+        Assertions.assertTrue(actual.getStudent().getHasTeam());
+        Assertions.assertEquals(dto.getTeamId(), actual.getStudent().getCurrentTeam().getId());
+
+        Assertions.assertEquals(expected.getStatus(), actual.getStatus());
+    }
+
+    @Test
+    @Sql(value = {
+            "/sql-scripts/create_team_for_history.sql",
+            "/sql-scripts/create_application_for_full_team.sql"},
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void updateAcceptForFullTeamShouldFail() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(102L)
+                .status(ApplicationStatus.ACCEPTED)
+                .studentId(6L)
+                .teamId(1004L)
+                .build();
+
+        Assertions.assertThrows(ConstraintViolationException.class,
+                () -> underTest.update(dto, userRepository.findById(3L).orElseThrow())
+        );
+    }
+
+    @Test
+    @Sql(value = {
+            "/sql-scripts/create_team_for_history.sql",
+            "/sql-scripts/create_application_for_full_team.sql"},
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void updateAcceptFromSecondYearForTeamFullOfSecondYearsShouldFail() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(101L)
+                .status(ApplicationStatus.ACCEPTED)
+                .studentId(6L)
+                .teamId(1003L)
+                .build();
+
+        Assertions.assertThrows(ConstraintViolationException.class,
+                () -> underTest.update(dto, userRepository.findById(2L).orElseThrow())
+        );
+    }
+
+    @Test
     void updateCancelFromForeignUserShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(6L)
-                .status("cancelled")
+                .status(ApplicationStatus.CANCELLED)
                 .studentId(6L)
                 .teamId(2L)
                 .build();
@@ -322,8 +395,22 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void updateCancelAllowedOnlyForSentApplication() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(9L)
-                .status("cancelled")
+                .status(ApplicationStatus.CANCELLED)
                 .studentId(16L)
+                .teamId(3L)
+                .build();
+
+        Assertions.assertThrows(ConstraintViolationException.class,
+                () -> underTest.update(dto, userRepository.findById(15L).orElseThrow())
+        );
+    }
+
+    @Test
+    void updateSentShouldFail() {
+        ApplicationCreationDto dto = ApplicationCreationDto.builder()
+                .id(4L)
+                .status(ApplicationStatus.SENT)
+                .studentId(1L)
                 .teamId(3L)
                 .build();
 
@@ -336,7 +423,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void updateCancel() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(6L)
-                .status("cancelled")
+                .status(ApplicationStatus.CANCELLED)
                 .studentId(6L)
                 .teamId(2L)
                 .build();
@@ -376,5 +463,13 @@ class ApplicationServiceTest extends BasicTestContainerTest {
         var actual = underTest.findTeamApplications(teamId);
 
         Assertions.assertEquals(0, actual.size());
+    }
+
+    @Test
+    void delete() {
+        Long applicationId = 1L;
+        underTest.delete(applicationId);
+
+        Assertions.assertFalse(applicationRepository.existsById(applicationId));
     }
 }

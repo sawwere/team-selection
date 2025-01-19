@@ -39,5 +39,5 @@ public class Application {
     private Team team;
 
     @Builder.Default
-    private String status = ApplicationStatus.Sent.name();
+    private String status = ApplicationStatus.SENT.name();
 }
