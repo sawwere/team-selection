@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -21,6 +20,7 @@ import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 
@@ -87,7 +87,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .teamId(1L)
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.create(dto, userRepository.findById(3L).orElseThrow())
         );
     }
@@ -236,7 +236,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .teamId(1L)
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.create(dto, userRepository.findById(4L).orElseThrow())
         );
     }
@@ -276,7 +276,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .teamId(1L)
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.update(dto, userRepository.findById(4L).orElseThrow())
         );
     }
@@ -298,7 +298,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .teamId(1004L)
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.update(dto, userRepository.findById(3L).orElseThrow())
         );
     }
@@ -315,7 +315,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .teamId(1004L)
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.update(dto, userRepository.findById(3L).orElseThrow())
         );
     }
@@ -424,7 +424,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .teamId(2L)
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.update(dto, userRepository.findById(17L).orElseThrow())
         );
     }

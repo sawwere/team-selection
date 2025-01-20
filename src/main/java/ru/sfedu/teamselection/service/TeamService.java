@@ -1,11 +1,9 @@
 package ru.sfedu.teamselection.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
@@ -16,6 +14,8 @@ import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
+import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
@@ -44,9 +44,9 @@ public class TeamService {
      * Find Team entity by id
      * @param id team id
      * @return entity with given id
-     * @throws NoSuchElementException in case there is no team with such id
+     * @throws ru.sfedu.teamselection.exception.NotFoundException in case there is no team with such id
      */
-    public Team findByIdOrElseThrow(Long id) throws NoSuchElementException {
+    public Team findByIdOrElseThrow(Long id) throws NotFoundException {
         return teamRepository.findById(id).orElseThrow();
     }
 
@@ -177,7 +177,7 @@ public class TeamService {
         if (sender.getRole().getName().equals("ADMIN")) {
             isUnsafeAllowed = true;
         } else if (!sender.getId().equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId())) {
-            throw new AccessDeniedException("Team info can be modified only by its captain");
+            throw new ForbiddenException("Team info can be modified only by its captain");
         }
 
         if (isUnsafeAllowed) {

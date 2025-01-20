@@ -11,10 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -34,6 +32,7 @@ import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
@@ -350,7 +349,7 @@ class StudentServiceTest extends BasicTestContainerTest {
                 .isCaptain(!beforeUpdateStudent.getHasTeam())
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class, () -> underTest.update(beforeUpdateStudent.getId(),
+        Assertions.assertThrows(ForbiddenException.class, () -> underTest.update(beforeUpdateStudent.getId(),
                 studentDto,
                 userService.findByIdOrElseThrow(10L)
         ));

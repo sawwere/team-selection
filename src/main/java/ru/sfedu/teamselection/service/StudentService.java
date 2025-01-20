@@ -1,12 +1,10 @@
 package ru.sfedu.teamselection.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Role;
@@ -17,6 +15,8 @@ import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
+import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.mapper.student.StudentCreationDtoMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
@@ -46,10 +46,10 @@ public class StudentService {
      * Find Student entity by id
      * @param id student id
      * @return entity with given id
-     * @throws NoSuchElementException in case there is no student with such id
+     * @throws ru.sfedu.teamselection.exception.NotFoundException in case there is no student with such id
      */
     @Transactional(readOnly = true)
-    public Student findByIdOrElseThrow(Long id) throws NoSuchElementException {
+    public Student findByIdOrElseThrow(Long id) throws NotFoundException {
         return studentRepository.findById(id).orElseThrow();
     }
 
@@ -82,7 +82,7 @@ public class StudentService {
     /**
      * Deletes student entity
      * @param id student id
-     * @throws NoSuchElementException in case there is no student with such id
+     * @throws NotFoundException in case there is no student with such id
      */
     @Transactional
     public void delete(Long id) {
@@ -149,7 +149,7 @@ public class StudentService {
         if (sender.getRole().getName().equals("ADMIN")) {
             isUnsafeAllowed = true;
         } else if (!sender.getId().equals(student.getUser().getId())) {
-            throw new AccessDeniedException("Attempted to modify other student's info");
+            throw new ForbiddenException("Attempted to modify other student's info");
         }
 
         if (isUnsafeAllowed) {

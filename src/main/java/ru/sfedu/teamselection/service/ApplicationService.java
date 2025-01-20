@@ -2,10 +2,8 @@ package ru.sfedu.teamselection.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Application;
@@ -15,6 +13,8 @@ import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
+import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
 
@@ -33,7 +33,7 @@ public class ApplicationService {
     private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
 
 
-    public Application findByIdOrElseThrow(Long id) throws NoSuchElementException {
+    public Application findByIdOrElseThrow(Long id) throws NotFoundException {
         return applicationRepository.findById(id).orElseThrow();
     }
 
@@ -71,7 +71,7 @@ public class ApplicationService {
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
         // Check that there is actually sender's id in the dto
         if (!sender.getId().equals(student.getUser().getId())) {
-            throw new AccessDeniedException("Tried to create application for another user!");
+            throw new ForbiddenException("Tried to create application for another user!");
         }
 
         validateStudentHasNoCurrentTeam(student);
@@ -114,7 +114,7 @@ public class ApplicationService {
         if (actualCaptain.getCurrentTeam() == null
                 || !actualCaptain.getCurrentTeam().getId().equals(team.getId())
                 || !actualCaptain.getUser().getId().equals(sender.getId())) {
-            throw new AccessDeniedException("Only captain of the team can modify this application");
+            throw new ForbiddenException("Only captain of the team can modify this application");
         }
     }
 
@@ -163,7 +163,7 @@ public class ApplicationService {
         Application application = findByIdOrElseThrow(dto.getId());
         // Check if sender is the sender of the application.
         if (!application.getStudent().getUser().getId().equals(sender.getId())) {
-            throw new AccessDeniedException("Only sender of the application can reject application");
+            throw new ForbiddenException("Only sender of the application can reject application");
         }
 
         application.setStatus(ApplicationStatus.CANCELLED.toString());
@@ -174,7 +174,7 @@ public class ApplicationService {
      * Updates application entity status based in dto
      * @param dto containing info about application
      * @return updated entity
-     * @throws NoSuchElementException in case there is no such application
+     * @throws NotFoundException in case there is no such application
      */
     @Transactional
     public Application update(ApplicationCreationDto dto, User sender) {
@@ -200,7 +200,7 @@ public class ApplicationService {
         } else if (applicationRepository.existsById(dto.getId())) {
             return update(dto, sender);
         } else {
-            throw new NoSuchElementException("There is no such application to be updated");
+            throw new NotFoundException("There is no such application to be updated");
         }
     }
 }

@@ -2,8 +2,6 @@ package ru.sfedu.teamselection.service;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +11,7 @@ import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
+import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.UserDtoMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
@@ -37,9 +36,9 @@ public class UserService {
      * Find User entity by id
      * @param id user id
      * @return user with given id
-     * @throws NoSuchElementException in case there is no user with such id
+     * @throws NotFoundException in case there is no user with such id
      */
-    public User findByIdOrElseThrow(Long id) throws NoSuchElementException {
+    public User findByIdOrElseThrow(Long id) throws NotFoundException {
         return userRepository.findById(id).orElseThrow();
     }
 
@@ -87,7 +86,7 @@ public class UserService {
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new NoSuchElementException("Role not found"));
+                .orElseThrow(() -> new NotFoundException("Role not found"));
 
         if (roleName.equals("STUDENT")) {
             Student student = Student.builder()

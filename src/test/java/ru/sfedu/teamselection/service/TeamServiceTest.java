@@ -9,10 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -28,6 +26,7 @@ import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 
@@ -209,7 +208,7 @@ class TeamServiceTest extends BasicTestContainerTest {
                 .quantityOfStudents(22) // should not be updated
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class, () -> underTest.update(beforeUpdateTeam.getId(),
+        Assertions.assertThrows(ForbiddenException.class, () -> underTest.update(beforeUpdateTeam.getId(),
                 teamDto,
                 userService.findByIdOrElseThrow(2L)
         ));
