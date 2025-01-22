@@ -13,9 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Build
     environment: Testing
-    permissions:
-      packages: write
-      pull-requests: write
 
     steps:
       - name: checkout code
