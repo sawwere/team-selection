@@ -15,6 +15,11 @@ jobs:
     environment: Testing
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+      repository-projects: write
 
     steps:
       - name: checkout code
