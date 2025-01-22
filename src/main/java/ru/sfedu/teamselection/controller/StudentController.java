@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -149,6 +150,7 @@ public class StudentController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность студента"
             ))
+    @PreAuthorize("hasAuthority('ADMIN') or @studentService.getCurrentStudent().equals(#studentId)")
     @PutMapping(value = UPDATE_STUDENT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -156,7 +158,8 @@ public class StudentController {
                                   @RequestBody StudentDto student) {
         LOGGER.info("ENTER updateStudent(%d) endpoint".formatted(studentId));
         User user = userService.getCurrentUser();
-        return studentDtoMapper.mapToDto(studentService.update(studentId, student, user));
+        boolean isUnsafeAllowed = user.getRole().getName().equals("ADMIN");
+        return studentDtoMapper.mapToDto(studentService.update(studentId, student, isUnsafeAllowed));
     }
 
     @Operation(
@@ -196,7 +199,7 @@ public class StudentController {
      * @return new list
      */
     @Operation(
-            method = "DELETE",
+            method = "GET",
             summary = "Найти все команды, в которых когда либо состоял студент",
             parameters = {
                     @Parameter(name = "id", description = "Id студента", in = ParameterIn.PATH),

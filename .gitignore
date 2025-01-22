@@ -41,3 +41,4 @@ src/main/resources/keystore/ts.p12
 .env
 .gigaide/gigaide.properties
 amplicode.xml
+src/test/resources/application-secure-test.yml

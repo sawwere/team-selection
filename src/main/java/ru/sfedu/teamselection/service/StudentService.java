@@ -15,7 +15,6 @@ import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
-import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.mapper.student.StudentCreationDtoMapper;
@@ -139,18 +138,12 @@ public class StudentService {
      * Updates student by id using given data.
      * @param id id of the user.
      * @param dto DTO containing new data.
-     * @param sender user initiating operation. Must be admin or student themselves.
+     * @param isUnsafeAllowed is update limited to safe fields
      * @return updated student
      */
     @Transactional
-    public Student update(Long id, StudentDto dto, User sender) {
-        boolean isUnsafeAllowed = false;
+    public Student update(Long id, StudentDto dto, Boolean isUnsafeAllowed) {
         Student student = findByIdOrElseThrow(id);
-        if (sender.getRole().getName().equals("ADMIN")) {
-            isUnsafeAllowed = true;
-        } else if (!sender.getId().equals(student.getUser().getId())) {
-            throw new ForbiddenException("Attempted to modify other student's info");
-        }
 
         if (isUnsafeAllowed) {
             student.setHasTeam(dto.getHasTeam());
