@@ -293,7 +293,7 @@ class StudentServiceTest extends BasicTestContainerTest {
 
         Student actual = underTest.update(beforeUpdateStudent.getId(),
                 studentDto,
-                userService.findByIdOrElseThrow(beforeUpdateStudent.getUser().getId())
+                false
         );
 
         Assertions.assertEquals(studentDto.getAboutSelf(), actual.getAboutSelf());
@@ -322,7 +322,7 @@ class StudentServiceTest extends BasicTestContainerTest {
 
         Student actual = underTest.update(beforeUpdateStudent.getId(),
                 studentDto,
-                userService.findByIdOrElseThrow(1L)
+                true
         );
 
         Assertions.assertEquals(studentDto.getAboutSelf(), actual.getAboutSelf());
@@ -333,26 +333,6 @@ class StudentServiceTest extends BasicTestContainerTest {
         // should be updated
         Assertions.assertEquals(studentDto.getHasTeam(), actual.getHasTeam());
         Assertions.assertEquals(studentDto.getIsCaptain(), actual.getIsCaptain());
-    }
-
-    @Test
-    @Transactional
-    void updateFromForeignUser() {
-        Student beforeUpdateStudent = studentRepository.findById(2L).orElseThrow();
-
-        StudentDto studentDto = StudentDto.builder()
-                .aboutSelf("about self")
-                .contacts("contacts")
-                .course(2)
-                .groupNumber(2)
-                .hasTeam(!beforeUpdateStudent.getHasTeam())
-                .isCaptain(!beforeUpdateStudent.getHasTeam())
-                .build();
-
-        Assertions.assertThrows(ForbiddenException.class, () -> underTest.update(beforeUpdateStudent.getId(),
-                studentDto,
-                userService.findByIdOrElseThrow(10L)
-        ));
     }
 
     @Test
