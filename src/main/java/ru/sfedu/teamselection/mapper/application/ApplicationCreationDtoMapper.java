@@ -5,7 +5,8 @@ import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.dto.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.mapper.DtoMapper;
 
 @Component
@@ -22,7 +23,7 @@ public class ApplicationCreationDtoMapper implements DtoMapper<ApplicationCreati
         return Application.builder()
                 .id(dto.getId())
                 .team(Team.builder().id(dto.getTeamId()).build())
-                .status(dto.getStatus())
+                .status(dto.getStatus().toString())
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .build();
     }
@@ -38,7 +39,7 @@ public class ApplicationCreationDtoMapper implements DtoMapper<ApplicationCreati
         return ApplicationCreationDto.builder()
                 .id(entity.getId())
                 .teamId(entity.getTeam().getId())
-                .status(entity.getStatus())
+                .status(ApplicationStatus.of(entity.getStatus()))
                 .studentId(entity.getStudent().getId())
                 .build();
     }

@@ -9,13 +9,11 @@ import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.ApplicationCreationDto;
-import ru.sfedu.teamselection.dto.ApplicationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationDto;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
@@ -62,7 +60,6 @@ public class ApplicationController {
     public ApplicationCreationDto createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = userService.getCurrentUser();
-        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return applicationCreationDtoMapper.mapToDto(applicationService.create(application, user));
     }
 
@@ -75,7 +72,6 @@ public class ApplicationController {
     public ApplicationCreationDto updateApplication(@RequestBody ApplicationCreationDto applicationDto) {
         LOGGER.info("ENTER updateApplication() endpoint");
         User user = userService.getCurrentUser();
-        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             return applicationCreationDtoMapper.mapToDto(applicationService.update(applicationDto, user));
         } catch (NoSuchElementException e) {
@@ -108,16 +104,7 @@ public class ApplicationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_APPLICATION) // checked
     public void deleteApplication(@PathVariable(value = "id") Long applicationId) {
-        LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(applicationId));
+        LOGGER.info("ENTER deleteApplication(%d) endpoint".formatted(applicationId));
         applicationService.delete(applicationId);
     }
-
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PostMapping(DELETE_APPLICATION)
-    public void findApplicationByTeamIdAndStudentId(@PathVariable(value = "id") Long applicationId) {
-        LOGGER.info("ENTER findApplicationByTeamIdAndStudentId(%d) endpoint".formatted(applicationId));
-        applicationService.delete(applicationId);
-    }
-
 }

@@ -1,4 +1,4 @@
-package ru.sfedu.teamselection.dto;
+package ru.sfedu.teamselection.dto.student;
 
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 
 @Getter
 @Setter

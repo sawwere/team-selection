@@ -74,9 +74,14 @@ public class Team {
     private Track currentTrack;
 
     @Column
-    @OneToMany(mappedBy = "currentTeam",
+    @OneToMany(
             fetch = FetchType.EAGER,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "teams_students",
+            joinColumns = @JoinColumn(name = "team_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
     private List<Student> students;
 
     @Column

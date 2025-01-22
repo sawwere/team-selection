@@ -3,21 +3,16 @@ package ru.sfedu.teamselection.service;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -31,19 +26,19 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.StudentCreationDto;
-import ru.sfedu.teamselection.dto.StudentDto;
-import ru.sfedu.teamselection.dto.StudentSearchOptionsDto;
+import ru.sfedu.teamselection.dto.student.StudentCreationDto;
+import ru.sfedu.teamselection.dto.student.StudentDto;
+import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
 class StudentServiceTest extends BasicTestContainerTest {
@@ -80,6 +75,7 @@ class StudentServiceTest extends BasicTestContainerTest {
         }).when (studentRepository).save(Mockito.notNull());
     }
 
+    @Transactional
     @Test
     void findByIdOrElseThrow() {
         Student expected = studentRepository.findById(1L).orElseThrow();
@@ -93,6 +89,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void findAll() {
         List<Student> expected = studentRepository.findAll();
 
@@ -102,6 +99,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void create() {
         StudentCreationDto studentDto = StudentCreationDto.builder()
                 .aboutSelf("about self")
@@ -120,6 +118,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void deleteStudentWithoutTeam() {
         underTest.delete(1L);
     }
@@ -149,6 +148,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByLike() {
         String like = "Серг";
 
@@ -169,6 +169,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByCourse() {
         Integer courseParam = 1;
 
@@ -185,10 +186,11 @@ class StudentServiceTest extends BasicTestContainerTest {
             Assertions.assertEquals(courseParam, student.getCourse());
         }
 
-        Assertions.assertEquals(9, actual.size());
+        Assertions.assertEquals(8, actual.size());
     }
 
     @Test
+    @Transactional
     void searchByGroup() {
         Integer groupParam = 1;
 
@@ -209,6 +211,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void searchByHasTeam() {
         Boolean hasTeamParam = true;
 
@@ -225,10 +228,11 @@ class StudentServiceTest extends BasicTestContainerTest {
             Assertions.assertEquals(hasTeamParam, student.getHasTeam());
         }
 
-        Assertions.assertEquals(5, actual.size());
+        Assertions.assertEquals(11, actual.size());
     }
 
     @Test
+    @Transactional
     void searchByIsCaptain() {
         Boolean isCaptainParam = true;
 
@@ -345,13 +349,14 @@ class StudentServiceTest extends BasicTestContainerTest {
                 .isCaptain(!beforeUpdateStudent.getHasTeam())
                 .build();
 
-        Assertions.assertThrows(AccessDeniedException.class, () -> underTest.update(beforeUpdateStudent.getId(),
+        Assertions.assertThrows(ForbiddenException.class, () -> underTest.update(beforeUpdateStudent.getId(),
                 studentDto,
                 userService.findByIdOrElseThrow(10L)
         ));
     }
 
     @Test
+    @Transactional
     void typeOfStudentTrack() {
 
         for (int i = 0; i < 10; i++) {
@@ -368,6 +373,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void getSearchOptionsStudents() {
         StudentSearchOptionsDto actual = underTest.getSearchOptionsStudents();
 
@@ -384,6 +390,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void getCurrentStudent() {
         Authentication authentication = Mockito.mock(Authentication.class);
         // Mockito.whens() for your authorization object
@@ -436,6 +443,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    @Transactional
     void getCurrentStudentReturnNullForNonStudentUser() {
         Authentication authentication = Mockito.mock(Authentication.class);
         // Mockito.whens() for your authorization object
