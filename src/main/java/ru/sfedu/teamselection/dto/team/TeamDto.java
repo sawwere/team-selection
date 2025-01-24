@@ -1,6 +1,8 @@
 package ru.sfedu.teamselection.dto.team;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
@@ -10,9 +12,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
-import ru.sfedu.teamselection.dto.TechnologyDto;
 
 
 @Builder

@@ -297,7 +297,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void getCurrentStudent() throws Exception {
+    public void getCurrentStudentId() throws Exception {
         Mockito.doReturn(genericStudent.getId()).when(studentService).getCurrentStudent();
 
         mockMvc.perform(get(StudentController.GET_STUDENT_ID_BY_CURRENT_USER)

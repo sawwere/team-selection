@@ -183,8 +183,9 @@ public class StudentController {
 
                 Эта операция может быть выполнена только администратором ресурса.
                 """,
+            tags = {"ADMIN"},
             parameters = {
-                    @Parameter(name = "id", description = "id студента", in = ParameterIn.PATH),
+                    @Parameter(name = "id", description = "Id студента", in = ParameterIn.PATH),
             }
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -212,7 +213,7 @@ public class StudentController {
     }
 
     @GetMapping(GET_STUDENT_ID_BY_CURRENT_USER)
-    public Long getCurrentStudent() {
+    public Long getCurrentStudentId() {
         return studentService.getCurrentStudent();
     }
 }

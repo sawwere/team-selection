@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +40,7 @@ public class TeamController {
 
     private final TeamService teamService;
     private final UserService userService;
+    private final ApplicationService applicationService;
 
     private final TeamDtoMapper teamDtoMapper;
     private final StudentDtoMapper studentDtoMapper;
@@ -54,8 +56,8 @@ public class TeamController {
     public static final String UPDATE_TEAM = "/api/v1/teams/{id}";
     public static final String DELETE_TEAM = "/api/v1/teams/{id}";
 
-    public static final String FIND_SUBSCRIPTIONS_BY_ID = "/api/v1/teams/{id}/subscriptions";
-    public static final String ADD_STUDENT_TO_TEAM = "api/v1/teams/{teamId}/students/{studentId}";
+    public static final String FIND_APPLICANTS_BY_ID = "/api/v1/teams/{id}/subscriptions";
+    public static final String ADD_STUDENT_TO_TEAM = "/api/v1/teams/{teamId}/students/{studentId}";
 
     public static final String GET_SEARCH_OPTIONS = "/api/v1/teams/filters";
 
@@ -65,13 +67,9 @@ public class TeamController {
             summary = "Получение списка возможных опций для поиска среди команд заданного трека"
     )
     @GetMapping(GET_SEARCH_OPTIONS)
-
     public TeamSearchOptionsDto getSearchOptionsTeams(@RequestParam(value = "track_id") Long trackId) {
         return teamService.getSearchOptionsTeams(trackId);
     }
-
-    private final ApplicationService applicationService;
-
 
     @Operation(
             method = "GET",
@@ -147,13 +145,13 @@ public class TeamController {
 
     @Operation(
             method = "GET",
-            summary = "Найти заявки в команду",
+            summary = "Найти всех студентов, которые когда либо подавали заявку в команду",
             parameters = {
                     @Parameter(name = "id", description = "id команды", in = ParameterIn.PATH),
             })
-    @GetMapping(FIND_SUBSCRIPTIONS_BY_ID) //checked
-    public List<StudentDto> findSubscriptionsById(@PathVariable(value = "id") Long teamId) {
-        LOGGER.info("ENTER findSubscriptionsById(%d) endpoint".formatted(teamId));
+    @GetMapping(FIND_APPLICANTS_BY_ID)
+    public List<StudentDto> findApplicantsById(@PathVariable(value = "id") Long teamId) {
+        LOGGER.info("ENTER findApplicantsById(%d) endpoint".formatted(teamId));
         return applicationService.findTeamApplications(teamId)
                 .stream()
                 .map(studentDtoMapper::mapToDto)
@@ -163,18 +161,34 @@ public class TeamController {
     @Operation(
             method = "POST",
             summary = "Создание команды",
-            parameters = { @Parameter(name = "team", description = "сущность команды")}
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Сущность команды"
+            )
     )
     @PostMapping(CREATE_TEAM)
     public TeamDto createTeam(@RequestBody TeamCreationDto team) {
-        LOGGER.info("ENTER createUser() endpoint");
+        LOGGER.info("ENTER createTeam() endpoint");
         return teamDtoMapper.mapToDto(teamService.create(team));
     }
 
     @Operation(
             method = "PUT",
-            summary = "Добавление студента к команде"
+            summary = "Добавление студента к команде",
+            description = """
+                Используется для принудительного добавления студента к определенной команды.
+
+                Эта операция может быть выполнена только администратором ресурса.
+
+                ВНИМАНИЕ: Данная операция не гарантирует изменения статуса заявок выбранного студента.
+                При необходимости их статусы необходимо изменить вручную.
+                """,
+            tags = {"UNSAFE", "ADMIN"},
+            parameters = {
+                    @Parameter(name = "teamId", description = "Id команды", in = ParameterIn.PATH),
+                    @Parameter(name = "studentId", description = "Id студента", in = ParameterIn.PATH),
+            }
     )
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping(ADD_STUDENT_TO_TEAM)
     public TeamDto addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
@@ -203,7 +217,7 @@ public class TeamController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность команды"
             ))
-    @PutMapping(UPDATE_TEAM) // checked
+    @PutMapping(UPDATE_TEAM)
     public TeamDto updateTeam(@PathVariable(value = "id") Long teamId,
                                     @RequestBody TeamDto team) {
         LOGGER.info("ENTER updateTeam(%d) endpoint".formatted(teamId));
