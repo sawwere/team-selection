@@ -26,10 +26,8 @@ import ru.sfedu.teamselection.repository.UserRepository;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)
 @Transactional
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
-@Testcontainers
 class ApplicationServiceTest extends BasicTestContainerTest {
     @Autowired
     private ApplicationService underTest;

@@ -11,8 +11,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
+@Testcontainers
 public class BasicTestContainerTest {
-
+    @Container
     public static PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16")
                 .withDatabaseName("team-selection-test")
                 .withUsername("TestUser")
