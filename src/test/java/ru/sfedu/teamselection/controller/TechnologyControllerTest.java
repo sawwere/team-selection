@@ -23,10 +23,7 @@ import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.exception.CustomExceptionHandler;
 import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
-import ru.sfedu.teamselection.mapper.UserDtoMapper;
-import ru.sfedu.teamselection.mapper.user.RoleDtoMapper;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
-import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
 

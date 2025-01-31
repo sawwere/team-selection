@@ -11,12 +11,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.sfedu.teamselection.BasicTestContainerTest;
 import ru.sfedu.teamselection.TeamSelectionApplication;
-import ru.sfedu.teamselection.domain.Application;
+import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.application.ApplicationType;
+import ru.sfedu.teamselection.domain.application.TeamRequest;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
@@ -70,6 +71,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(18L)
                 .teamId(1L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -83,6 +85,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(18L)
                 .teamId(1L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -96,6 +99,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(4L)
                 .teamId(1L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -110,6 +114,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(9L)
                 .teamId(1004L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -124,6 +129,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(13L)
                 .teamId(1003L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -137,9 +143,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(18L)
                 .teamId(3L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
-        Application expected = Application.builder()
+        Application expected = TeamRequest.builder()
                 .status("sent")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
@@ -161,9 +168,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(6L)
                 .teamId(5L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
-        Application expected = Application.builder()
+        Application expected = TeamRequest.builder()
                 .status("sent")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
@@ -183,9 +191,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.REJECTED)
                 .studentId(6L)
                 .teamId(2L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
-        Application expected = Application.builder()
+        Application expected = TeamRequest.builder()
                 .status("rejected")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
@@ -204,6 +213,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(4L)
                 .teamId(1L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(NoSuchElementException.class,
@@ -218,6 +228,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.REJECTED)
                 .studentId(19L)
                 .teamId(4L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -232,6 +243,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.REJECTED)
                 .studentId(1L)
                 .teamId(1L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -246,9 +258,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.REJECTED)
                 .studentId(6L)
                 .teamId(2L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
-        Application expected = Application.builder()
+        Application expected = TeamRequest.builder()
                 .status("rejected")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
@@ -272,6 +285,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(1L)
                 .teamId(1L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -294,6 +308,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(9L)
                 .teamId(1004L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -311,6 +326,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(9L)
                 .teamId(1004L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -325,9 +341,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(5L)
                 .teamId(1L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
-        Application expected = Application.builder()
+        Application expected = TeamRequest.builder()
                 .status("accepted")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
@@ -358,9 +375,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(6L)
                 .teamId(5L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
-        Application expected = Application.builder()
+        Application expected = TeamRequest.builder()
                 .status("accepted")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
@@ -388,6 +406,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(9L)
                 .teamId(1004L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -406,6 +425,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.ACCEPTED)
                 .studentId(6L)
                 .teamId(5L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -420,6 +440,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.CANCELLED)
                 .studentId(6L)
                 .teamId(2L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -434,6 +455,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.CANCELLED)
                 .studentId(16L)
                 .teamId(3L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -448,6 +470,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.SENT)
                 .studentId(1L)
                 .teamId(3L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class,
@@ -462,9 +485,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .status(ApplicationStatus.CANCELLED)
                 .studentId(6L)
                 .teamId(2L)
+                .type(ApplicationType.REQUEST)
                 .build();
 
-        Application expected = Application.builder()
+        Application expected = TeamRequest.builder()
                 .status("cancelled")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())

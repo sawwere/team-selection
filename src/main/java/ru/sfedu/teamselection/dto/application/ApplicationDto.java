@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.domain.application.ApplicationType;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 
@@ -25,4 +26,5 @@ public class ApplicationDto {
 
     private ApplicationStatus status;
 
+    private ApplicationType type;
 }

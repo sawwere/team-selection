@@ -32,6 +32,6 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO applications
-    (id, team_id, student_id, status)
+    (id, team_id, student_id, status, type)
 VALUES
-    (1004, 1004, 9, 'sent');
+    (1004, 1004, 9, 'sent', 'request');
