@@ -54,10 +54,19 @@ public abstract class Application {
     private ApplicationType type;
 
     /**
-     * Returns the id of the student who send this application.
-     * For invite, it would be the id of the captain,
-     * for request - id of the student applying for the team
-     * @return the id of the student
+     * Возвращает id студента, которого можно считать отправителем для этой заявки
+     * (то есть тот, кто ее отправил и может отменить).
+     * Например, в случае заявки в команду это будет сам студент, отправивший заявку,
+     * а в случае приглашения - капитан команды.
+     * @return id студента
      */
     public abstract Long getSenderId();
+
+    /**
+     * Возвращает id студента, являющегося целевым для этой заявки
+     * (то есть тот, кто может ее принять или отклонить).
+     * Например, в случае приглашения в команду это будет приглашаемый студент.
+     * @return id студента
+     */
+    public abstract Long getTargetId();
 }
