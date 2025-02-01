@@ -1,15 +1,18 @@
 package ru.sfedu.teamselection.service;
 
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.domain.application.Application;
+import ru.sfedu.teamselection.domain.application.TeamInvite;
+import ru.sfedu.teamselection.domain.application.TeamRequest;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
@@ -17,6 +20,7 @@ import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
+import ru.sfedu.teamselection.repository.StudentRepository;
 
 
 @Service
@@ -24,6 +28,7 @@ import ru.sfedu.teamselection.repository.ApplicationRepository;
 public class ApplicationService {
     private static final Logger LOGGER = Logger.getLogger(ApplicationService.class.getName());
 
+    private final EntityManager entityManager;
     private final ApplicationRepository applicationRepository;
 
     private final StudentService studentService;
@@ -31,6 +36,8 @@ public class ApplicationService {
     private final TeamService teamService;
 
     private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
+
+    private final StudentRepository studentRepository;
 
 
     public Application findByIdOrElseThrow(Long id) throws NotFoundException {
@@ -68,9 +75,16 @@ public class ApplicationService {
 
     private Application tryCreateApplication(ApplicationCreationDto dto, User sender)
             throws  ConstraintViolationException {
+        // Creating new application with default status
+        Application application = applicationCreationDtoMapper.mapToEntity(dto);
+        application.setStatus(ApplicationStatus.SENT.toString());
+        application.setStudent(entityManager.getReference(Student.class, dto.getStudentId()));
+        application.setTeam(entityManager.getReference(Team.class, dto.getTeamId()));
+
         Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
         // Check that there is actually sender's id in the dto
-        if (!sender.getId().equals(student.getUser().getId())) {
+        if (!studentService.findByIdOrElseThrow(application.getSenderId()).getUser().getId()
+                .equals(sender.getId())) {
             throw new ForbiddenException("Tried to create application for another user!");
         }
 
@@ -88,9 +102,6 @@ public class ApplicationService {
             throw new ConstraintViolationException("Cannot apply, wrong track");
         }
 
-        // Creating new application with default status
-        Application application = applicationCreationDtoMapper.mapToEntity(dto);
-        application.setStatus(ApplicationStatus.SENT.toString());
         return applicationRepository.save(application);
     }
 
@@ -109,12 +120,17 @@ public class ApplicationService {
         }
     }
 
-    private void validateSenderIsCaptain(Team team, User sender) {
-        Student actualCaptain = studentService.findByIdOrElseThrow(team.getCaptainId());
-        if (actualCaptain.getCurrentTeam() == null
-                || !actualCaptain.getCurrentTeam().getId().equals(team.getId())
-                || !actualCaptain.getUser().getId().equals(sender.getId())) {
-            throw new ForbiddenException("Only captain of the team can modify this application");
+    private void validateSenderIsTarget(Application application, User sender) {
+        Student actualTarget = studentService.findByIdOrElseThrow(application.getTargetId());
+        if (!actualTarget.getUser().getId().equals(sender.getId())) {
+            throw new ForbiddenException();
+        }
+        // TODO возможно стоит сделать покрасивее?
+        if (application instanceof TeamRequest) {
+            if (actualTarget.getCurrentTeam() == null
+                    || !actualTarget.getCurrentTeam().getId().equals(application.getTeam().getId())) {
+                throw new ForbiddenException();
+            }
         }
     }
 
@@ -126,9 +142,9 @@ public class ApplicationService {
 
         validateStudentHasNoCurrentTeam(student);
         Team team = teamService.findByIdOrElseThrow(application.getTeam().getId());
-        // Check if sender is captain of the team.
-        // Only captain can accept application
-        validateSenderIsCaptain(team, sender);
+        // Only target can accept application
+        validateSenderIsTarget(application, sender);
+
         // Check if team is full
         if (team.getIsFull()) {
             throw new ConstraintViolationException("Can't apply because team is already full");
@@ -148,10 +164,9 @@ public class ApplicationService {
     private Application tryRejectApplication(ApplicationCreationDto dto, User sender)
             throws ConstraintViolationException {
         Application application = findByIdOrElseThrow(dto.getId());
-        Team team = teamService.findByIdOrElseThrow(application.getTeam().getId());
-        // Check if sender is captain of the team.
-        // Only captain can reject application
-        validateSenderIsCaptain(team, sender);
+
+        // Only target can reject application
+        validateSenderIsTarget(application, sender);
 
         application.setStatus(ApplicationStatus.REJECTED.toString());
         return applicationRepository.save(application);
@@ -161,8 +176,9 @@ public class ApplicationService {
     private Application trCancelApplication(ApplicationCreationDto dto, User sender)
             throws ConstraintViolationException {
         Application application = findByIdOrElseThrow(dto.getId());
+        Student applicationSender = studentService.findByIdOrElseThrow(application.getSenderId());
         // Check if sender is the sender of the application.
-        if (!application.getStudent().getUser().getId().equals(sender.getId())) {
+        if (!applicationSender.getUser().getId().equals(sender.getId())) {
             throw new ForbiddenException("Only sender of the application can reject application");
         }
 
