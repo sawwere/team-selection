@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>3.4.2</version>
     </parent>
 
     <groupId>ru.sfedu</groupId>
@@ -37,7 +37,8 @@
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- Spring -->
-        <spring-boot.version>3.3.2</spring-boot.version>
+        <spring-boot.version>3.4.2</spring-boot.version>
+        <spring-security-version>6.4.2</spring-security-version>
 
         <!-- Plugins -->
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
@@ -62,22 +63,34 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <!-- Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
-            <version>3.2.4</version>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
+            <version>${spring-security-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring-security-version}</version>
         </dependency>
         <dependency>
             <groupId>com.azure.spring</groupId>
             <artifactId>spring-cloud-azure-starter-active-directory</artifactId>
-            <version>5.17.1</version>
+            <version>5.19.0</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.graph</groupId>
@@ -85,52 +98,38 @@
             <version>6.24.0</version>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.graph</groupId>
-            <artifactId>microsoft-graph-beta</artifactId>
-            <version>[6.0,)</version>
-        </dependency>
-        <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-identity</artifactId>
-            <version>[1.11,)</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-client -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-client</artifactId>
-            <version>6.3.4</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>6.3.4</version>
+            <version>1.14.0</version>
         </dependency>
 
         <!-- Database -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+            <version>10.10.0</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+            <version>10.10.0</version>
         </dependency>
 
         <!-- Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <!-- Excel -->
@@ -142,12 +141,12 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>5.2.0</version>
+            <version>5.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.2.0</version>
+            <version>5.4.0</version>
         </dependency>
 
         <!-- Swagger -->
@@ -169,28 +168,32 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
+            <version>${spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <version>6.3.3</version>
+            <version>${spring-security-version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>1.19.8</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
+            <version>1.19.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -209,14 +212,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <configuration>
-                    <mainClass>MainKt</mainClass>
-                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -264,6 +259,15 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco-maven-plugin.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>ru/sfedu/teamselection/dto/**/*</exclude>
+                            <exclude>ru/sfedu/teamselection/domain/**/*</exclude>
+                            <exclude>ru/sfedu/teamselection/exception/**/*Exception.class</exclude>
+                            <exclude>ru/sfedu/teamselection/config/**</exclude>
+                            <exclude>ru/sfedu/teamselection/TeamSelectionApplication.class</exclude>
+                        </excludes>
+                    </configuration>
                     <executions>
                         <execution>
                             <goals>
