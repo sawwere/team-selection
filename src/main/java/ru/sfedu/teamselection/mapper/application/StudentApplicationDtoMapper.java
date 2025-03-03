@@ -5,12 +5,12 @@ import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.dto.application.StudentApplicationDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
-import ru.sfedu.teamselection.mapper.UserDtoMapper;
+import ru.sfedu.teamselection.mapper.user.UserMapper;
 
 @Component
 public class StudentApplicationDtoMapper implements DtoMapper<StudentApplicationDto, Student> {
     @Autowired
-    private UserDtoMapper userDtoMapper;
+    private UserMapper userMapper;
 
     /**
      * {@inheritDoc}

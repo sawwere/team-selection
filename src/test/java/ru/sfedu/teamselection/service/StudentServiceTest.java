@@ -12,13 +12,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.BasicTestContainerTest;
 import ru.sfedu.teamselection.TeamSelectionApplication;
@@ -26,14 +26,13 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
-import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
-import ru.sfedu.teamselection.exception.ForbiddenException;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
@@ -52,14 +51,14 @@ class StudentServiceTest extends BasicTestContainerTest {
     private TeamRepository teamRepository;
 
     @Autowired
-    @SpyBean
+    @MockitoSpyBean
     private StudentRepository studentRepository;
 
     @Autowired
     private TechnologyRepository technologyRepository;
 
     @Autowired
-    private TechnologyDtoMapper technologyDtoMapper;
+    private TechnologyMapper technologyDtoMapper;
 
 
     @BeforeEach

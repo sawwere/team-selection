@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.dto.RoleDto;
-import ru.sfedu.teamselection.mapper.user.RoleDtoMapper;
+import ru.sfedu.teamselection.mapper.user.RoleMapper;
 
 class RoleDtoMapperTest {
 
-    private final RoleDtoMapper underTest = new RoleDtoMapper();
+    private final RoleMapper underTest = RoleMapper.INSTANCE;
 
     @Test
     void mapToEntity() {

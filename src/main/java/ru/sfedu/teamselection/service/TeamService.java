@@ -16,8 +16,8 @@ import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
-import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
@@ -35,8 +35,8 @@ public class TeamService {
     private final TrackService trackService;
     private final StudentService studentService;
 
-    private final TechnologyDtoMapper technologyDtoMapper;
-    private final ProjectTypeDtoMapper projectTypeDtoMapper;
+    private final TechnologyMapper technologyDtoMapper;
+    private final ProjectTypeMapper projectTypeDtoMapper;
     private final TeamCreationDtoMapper teamCreationDtoMapper;
 
     /**

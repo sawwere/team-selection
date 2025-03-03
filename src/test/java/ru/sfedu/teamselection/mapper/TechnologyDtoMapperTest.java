@@ -7,7 +7,7 @@ import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 
 class TechnologyDtoMapperTest {
-    private final TechnologyDtoMapper underTest = new TechnologyDtoMapper();
+    private final TechnologyMapper underTest = TechnologyMapper.INSTANCE;
 
     @Test
     void mapToEntity() {

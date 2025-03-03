@@ -1,7 +1,6 @@
 package ru.sfedu.teamselection.mapper.team;
 
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,24 +9,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import ru.sfedu.teamselection.domain.ProjectType;
-import ru.sfedu.teamselection.domain.Role;
-import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.Track;
-import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
-import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
-import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 
 class TeamCreationDtoMapperTest {
     @Mock
-    private final TechnologyDtoMapper technologyDtoMapper = Mockito.mock(TechnologyDtoMapper.class);
+    private final TechnologyMapper technologyDtoMapper = Mockito.mock(TechnologyMapper.class);
     @Mock
-    private final ProjectTypeDtoMapper projectTypeDtoMapper = Mockito.mock(ProjectTypeDtoMapper.class);
+    private final ProjectTypeMapper projectTypeDtoMapper = Mockito.mock(ProjectTypeMapper.class);
 
 
     @InjectMocks

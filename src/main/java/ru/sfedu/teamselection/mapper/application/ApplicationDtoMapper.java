@@ -2,8 +2,6 @@ package ru.sfedu.teamselection.mapper.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.domain.application.TeamInvite;
 import ru.sfedu.teamselection.domain.application.TeamRequest;

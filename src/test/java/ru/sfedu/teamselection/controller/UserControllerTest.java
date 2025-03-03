@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -21,8 +21,8 @@ import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.exception.CustomExceptionHandler;
 import ru.sfedu.teamselection.exception.NotFoundException;
-import ru.sfedu.teamselection.mapper.UserDtoMapper;
-import ru.sfedu.teamselection.mapper.user.RoleDtoMapper;
+import ru.sfedu.teamselection.mapper.user.RoleMapper;
+import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
@@ -34,20 +34,20 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 @Import(SecurityConfig.class)
 @WebMvcTest({UserController.class, CustomExceptionHandler.class})
 public class UserControllerTest {
-    @MockBean(name = "userService")
+    @MockitoBean(name = "userService")
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
-    @MockBean
+    @MockitoBean
     private Oauth2UserService oauth2UserService;
-    @MockBean
+    @MockitoBean
     private AzureOidcUserService azureOidcUserService;
 
-    @MockBean
-    private UserDtoMapper userDtoMapper;
-    @MockBean
-    private RoleDtoMapper roleDtoMapper;
+    @MockitoBean
+    private final UserMapper userMapper = UserMapper.INSTANCE;
+    @MockitoBean
+    private RoleMapper roleDtoMapper;
 
     @Autowired
     private MockMvc mockMvc;

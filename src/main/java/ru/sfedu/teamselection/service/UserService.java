@@ -12,7 +12,7 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.exception.NotFoundException;
-import ru.sfedu.teamselection.mapper.UserDtoMapper;
+import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
@@ -25,7 +25,7 @@ public class UserService {
     private final EntityManager entityManager;
     private final UserRepository userRepository;
 
-    private final UserDtoMapper userDtoMapper;
+    private final UserMapper userMapper;
 
     private final RoleRepository roleRepository;
 
@@ -65,7 +65,7 @@ public class UserService {
 
     @Transactional
     public User createOrUpdate(UserDto userDto) {
-        User user = userDtoMapper.mapToEntity(userDto);
+        User user = userMapper.mapToEntity(userDto);
         if (userDto.getId() != null) {
             user = entityManager.getReference(User.class, userDto.getId());
             user.setFio(userDto.getFio());

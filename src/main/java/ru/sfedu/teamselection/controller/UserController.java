@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
 import ru.sfedu.teamselection.dto.UserDto;
-import ru.sfedu.teamselection.mapper.UserDtoMapper;
-import ru.sfedu.teamselection.mapper.user.RoleDtoMapper;
+import ru.sfedu.teamselection.mapper.user.RoleMapper;
+import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.service.UserService;
 
 @RestController
@@ -38,8 +38,8 @@ public class UserController {
     public static final String GRANT_ROLE = "/api/v1/users/{id}/assign-role";
 
     private final UserService userService;
-    private final UserDtoMapper userDtoMapper;
-    private final RoleDtoMapper roleDtoMapper;
+    private final UserMapper userMapper;
+    private final RoleMapper roleDtoMapper;
 
 
     @Operation(
@@ -66,7 +66,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public UserDto putUser(@RequestBody @Valid UserDto userDto) {
-        return userDtoMapper.mapToDto(userService.createOrUpdate(userDto));
+        return userMapper.mapToDto(userService.createOrUpdate(userDto));
     }
 
     /**
@@ -80,7 +80,7 @@ public class UserController {
     @GetMapping(CURRENT_USER)
     public UserDto getCurrentUser() {
         User currentUser = userService.getCurrentUser();
-        return userDtoMapper.mapToDto(currentUser);
+        return userMapper.mapToDto(currentUser);
     }
 
     /**
