@@ -1,10 +1,8 @@
 package ru.sfedu.teamselection.service;
 
 import java.util.List;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -86,7 +84,6 @@ class UserServiceTest extends BasicTestContainerTest {
     }
 
     @Test
-    @Disabled
     void create() {
         UserDto dto = UserDto.builder()
                 .fio("n e w")

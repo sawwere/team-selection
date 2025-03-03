@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.mapper.student;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,7 @@ import ru.sfedu.teamselection.mapper.user.UserMapper;
 public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
     private final TechnologyMapper technologyDtoMapper;
     private final ApplicationDtoMapper applicationDtoMapper;
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
     @Lazy
     @Autowired
     private TeamDtoMapper teamDtoMapper;
