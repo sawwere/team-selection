@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,16 +34,16 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 @Import(SecurityConfig.class)
 @WebMvcTest({TechnologyController.class, CustomExceptionHandler.class})
 public class TechnologyControllerTest {
-    @MockBean
+    @MockitoBean
     private SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
-    @MockBean
+    @MockitoBean
     private Oauth2UserService oauth2UserService;
-    @MockBean
+    @MockitoBean
     private AzureOidcUserService azureOidcUserService;
 
-    @MockBean
+    @MockitoBean
     private TechnologyRepository technologyRepository;
-    @MockBean
+    @MockitoBean
     private TechnologyMapper technologyDtoMapper;
 
     @Autowired

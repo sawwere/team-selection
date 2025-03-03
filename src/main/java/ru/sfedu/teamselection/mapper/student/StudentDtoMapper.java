@@ -1,7 +1,6 @@
 package ru.sfedu.teamselection.mapper.student;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;

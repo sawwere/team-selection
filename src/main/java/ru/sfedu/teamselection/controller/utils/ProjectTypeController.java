@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.sfedu.teamselection.domain.ProjectType;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
-import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 

@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,23 +41,23 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 @Import(SecurityConfig.class)
 @WebMvcTest({StudentController.class})
 public class StudentControllerTest {
-    @MockBean
+    @MockitoBean
     private TeamService teamService;
-    @MockBean(name = "studentService")
+    @MockitoBean(name = "studentService")
     private StudentService studentService;
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
-    @MockBean
+    @MockitoBean
     private Oauth2UserService oauth2UserService;
-    @MockBean
+    @MockitoBean
     private AzureOidcUserService azureOidcUserService;
 
-    @MockBean
+    @MockitoBean
     private TeamDtoMapper teamDtoMapper;
-    @MockBean
+    @MockitoBean
     private StudentDtoMapper studentDtoMapper;
 
     @Autowired

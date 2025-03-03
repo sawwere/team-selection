@@ -10,9 +10,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.BasicTestContainerTest;
@@ -43,7 +43,7 @@ class TeamServiceTest extends BasicTestContainerTest {
     private UserService userService;
 
     @Autowired
-    @SpyBean
+    @MockitoSpyBean
     private TeamRepository teamRepository;
 
     @Autowired
