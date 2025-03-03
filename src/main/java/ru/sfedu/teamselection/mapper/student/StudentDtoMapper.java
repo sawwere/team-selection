@@ -7,18 +7,18 @@ import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
-import ru.sfedu.teamselection.mapper.UserDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.mapper.user.UserMapper;
 
 @Component
 @RequiredArgsConstructor
 public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
-    private final TechnologyDtoMapper technologyDtoMapper;
+    private final TechnologyMapper technologyDtoMapper;
     private final ApplicationDtoMapper applicationDtoMapper;
     @Autowired
-    private UserDtoMapper userDtoMapper;
+    private UserMapper userMapper;
     @Lazy
     @Autowired
     private TeamDtoMapper teamDtoMapper;
@@ -57,7 +57,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .hasTeam(entity.getHasTeam())
                 .isCaptain(entity.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToDtoWithoutStudents(entity.getCurrentTeam()))
-                .user(userDtoMapper.mapToDto(entity.getUser()))
+                .user(userMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
                 .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
                 .build();
@@ -73,7 +73,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .contacts(entity.getContacts())
                 .hasTeam(entity.getHasTeam())
                 .isCaptain(entity.getIsCaptain())
-                .user(userDtoMapper.mapToDto(entity.getUser()))
+                .user(userMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
                 .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
                 .build();

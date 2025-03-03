@@ -11,16 +11,14 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.domain.application.Application;
-import ru.sfedu.teamselection.domain.application.TeamInvite;
 import ru.sfedu.teamselection.domain.application.TeamRequest;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
-import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
-import ru.sfedu.teamselection.repository.StudentRepository;
 
 
 @Service
@@ -35,9 +33,7 @@ public class ApplicationService {
 
     private final TeamService teamService;
 
-    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
-
-    private final StudentRepository studentRepository;
+    private final ApplicationMapper applicationMapper;
 
 
     public Application findByIdOrElseThrow(Long id) throws NotFoundException {
@@ -76,7 +72,7 @@ public class ApplicationService {
     private Application tryCreateApplication(ApplicationCreationDto dto, User sender)
             throws  ConstraintViolationException {
         // Creating new application with default status
-        Application application = applicationCreationDtoMapper.mapToEntity(dto);
+        Application application = applicationMapper.mapToEntity(dto);
         application.setStatus(ApplicationStatus.SENT.toString());
         application.setStudent(entityManager.getReference(Student.class, dto.getStudentId()));
         application.setTeam(entityManager.getReference(Team.class, dto.getTeamId()));

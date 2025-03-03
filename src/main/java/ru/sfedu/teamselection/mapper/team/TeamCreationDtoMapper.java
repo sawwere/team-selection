@@ -7,14 +7,14 @@ import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
-import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 
 @Component
 @RequiredArgsConstructor
 public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
-    private final TechnologyDtoMapper technologyDtoMapper;
-    private final ProjectTypeDtoMapper projectTypeDtoMapper;
+    private final TechnologyMapper technologyDtoMapper;
+    private final ProjectTypeMapper projectTypeDtoMapper;
 
     @Override
     public Team mapToEntity(TeamCreationDto dto) {

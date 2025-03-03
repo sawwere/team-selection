@@ -13,7 +13,7 @@ import ru.sfedu.teamselection.enums.ApplicationStatus;
 
 class ApplicationCreationDtoMapperTest {
 
-    private final ApplicationCreationDtoMapper underTest = new ApplicationCreationDtoMapper();
+    private final ApplicationMapper underTest = ApplicationMapper.INSTANCE;
 
 
     @Test

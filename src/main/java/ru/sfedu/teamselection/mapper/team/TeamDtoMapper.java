@@ -11,9 +11,9 @@ import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
-import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
-import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 
 @Component
@@ -23,9 +23,9 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
     @Autowired
     private StudentDtoMapper studentDtoMapper;
 
-    private final TechnologyDtoMapper technologyDtoMapper;
-    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
-    private final ProjectTypeDtoMapper projectTypeDtoMapper;
+    private final TechnologyMapper technologyDtoMapper;
+    private final ApplicationMapper applicationMapper;
+    private final ProjectTypeMapper projectTypeDtoMapper;
 
     private final EntityManager entityManager;
 
@@ -45,7 +45,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .technologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()))
                 .currentTrack(entityManager.getReference(Track.class, dto.getCurrentTrackId()))
                 .students(dto.getStudents().stream().map(studentDtoMapper::mapToEntity).toList())
-                .applications(dto.getApplications().stream().map(applicationCreationDtoMapper::mapToEntity).toList())
+                .applications(dto.getApplications().stream().map(applicationMapper::mapToEntity).toList())
                 .build();
     }
 
@@ -68,7 +68,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .captain(captain.isEmpty() ? null : studentDtoMapper.mapToDtoWithoutTeam(captain.get()))
                 .isFull(entity.getIsFull())
                 .technologies(technologyDtoMapper.mapListToDto(entity.getTechnologies()))
-                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationMapper::mapToDto).toList())
                 .currentTrackId(entity.getCurrentTrack().getId())
                 .students(entity.getStudents().stream().map(studentDtoMapper::mapToDtoWithoutTeam).toList())
                 .build();
@@ -86,7 +86,7 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
                 .quantityOfStudents(entity.getQuantityOfStudents())
                 .isFull(entity.getIsFull())
                 .technologies(technologyDtoMapper.mapListToDto(entity.getTechnologies()))
-                .applications(entity.getApplications().stream().map(applicationCreationDtoMapper::mapToDto).toList())
+                .applications(entity.getApplications().stream().map(applicationMapper::mapToDto).toList())
                 .currentTrackId(entity.getCurrentTrack().getId())
                 .build();
     }

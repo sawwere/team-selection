@@ -16,7 +16,7 @@ import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.NotFoundException;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.student.StudentCreationDtoMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
@@ -33,7 +33,7 @@ public class StudentService {
     private final UserService userService;
 
     private final StudentCreationDtoMapper studentCreationDtoMapper;
-    private final TechnologyDtoMapper technologyDtoMapper;
+    private final TechnologyMapper technologyDtoMapper;
 
     private final RoleRepository roleRepository;
 

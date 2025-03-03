@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.TechnologyDto;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 
 @Slf4j
@@ -30,7 +30,7 @@ public class TechnologyController {
 
     private final TechnologyRepository technologyRepository;
 
-    private final TechnologyDtoMapper technologyDtoMapper;
+    private final TechnologyMapper technologyDtoMapper;
 
     @Operation(
             method = "GET",

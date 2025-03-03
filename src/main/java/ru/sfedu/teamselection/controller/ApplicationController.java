@@ -22,8 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
-import ru.sfedu.teamselection.mapper.application.ApplicationCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
+import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.UserService;
 
@@ -43,7 +43,7 @@ public class ApplicationController {
     public static final String UPDATE_APPLICATION = "/api/v1/applications";
 
     private final ApplicationService applicationService;
-    private final ApplicationCreationDtoMapper applicationCreationDtoMapper;
+    private final ApplicationMapper applicationMapper;
 
     private final ApplicationDtoMapper applicationDtoMapper;
 
@@ -68,7 +68,7 @@ public class ApplicationController {
     public ApplicationCreationDto createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = userService.getCurrentUser();
-        return applicationCreationDtoMapper.mapToDto(applicationService.create(application, user));
+        return applicationMapper.mapToDto(applicationService.create(application, user));
     }
 
     @Operation(
@@ -81,7 +81,7 @@ public class ApplicationController {
         LOGGER.info("ENTER updateApplication() endpoint");
         User user = userService.getCurrentUser();
         try {
-            return applicationCreationDtoMapper.mapToDto(applicationService.update(applicationDto, user));
+            return applicationMapper.mapToDto(applicationService.update(applicationDto, user));
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found", e);
         } catch (RuntimeException e) {
@@ -99,7 +99,7 @@ public class ApplicationController {
     @GetMapping(FIND_BY_ID) // checked
     public ApplicationCreationDto findById(@PathVariable(name = "id") Long applicationId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(applicationId));
-        return applicationCreationDtoMapper.mapToDto(applicationService.findByIdOrElseThrow(applicationId));
+        return applicationMapper.mapToDto(applicationService.findByIdOrElseThrow(applicationId));
     }
 
     @Operation(

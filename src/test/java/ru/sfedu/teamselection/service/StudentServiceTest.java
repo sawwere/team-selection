@@ -26,14 +26,13 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
-import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
-import ru.sfedu.teamselection.exception.ForbiddenException;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
@@ -59,7 +58,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     private TechnologyRepository technologyRepository;
 
     @Autowired
-    private TechnologyDtoMapper technologyDtoMapper;
+    private TechnologyMapper technologyDtoMapper;
 
 
     @BeforeEach

@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
+import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 
 class UserDtoMapperTest {
@@ -18,7 +19,7 @@ class UserDtoMapperTest {
     private RoleRepository roleRepository;
 
     @InjectMocks
-    private UserDtoMapper underTest;
+    private UserMapper underTest = UserMapper.INSTANCE;
 
 
     @BeforeEach

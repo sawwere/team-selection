@@ -7,7 +7,7 @@ import ru.sfedu.teamselection.domain.ProjectType;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 
 class ProjectTypeDtoMapperTest {
-    private final ProjectTypeDtoMapper underTest = new ProjectTypeDtoMapper();
+    private final ProjectTypeMapper underTest = ProjectTypeMapper.INSTANCE;
 
     @Test
     void mapToEntity() {

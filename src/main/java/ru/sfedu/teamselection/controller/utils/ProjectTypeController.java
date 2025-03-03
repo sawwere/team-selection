@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.domain.ProjectType;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
-import ru.sfedu.teamselection.mapper.ProjectTypeDtoMapper;
+import ru.sfedu.teamselection.mapper.DtoMapper;
+import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 
 @RestController
@@ -23,7 +25,7 @@ import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 @CrossOrigin
 public class ProjectTypeController {
     private final ProjectTypeRepository projectTypeRepository;
-    private final ProjectTypeDtoMapper projectTypeDtoMapper;
+    private final ProjectTypeMapper projectTypeDtoMapper;
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String CREATE = "/api/v1/projectTypes";

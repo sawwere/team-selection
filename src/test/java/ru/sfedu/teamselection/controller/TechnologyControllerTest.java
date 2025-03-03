@@ -22,7 +22,7 @@ import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.exception.CustomExceptionHandler;
-import ru.sfedu.teamselection.mapper.TechnologyDtoMapper;
+import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
@@ -44,7 +44,7 @@ public class TechnologyControllerTest {
     @MockBean
     private TechnologyRepository technologyRepository;
     @MockBean
-    private TechnologyDtoMapper technologyDtoMapper;
+    private TechnologyMapper technologyDtoMapper;
 
     @Autowired
     private MockMvc mockMvc;
