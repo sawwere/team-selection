@@ -151,7 +151,10 @@ public class ApplicationService {
         teamService.addStudentToTeam(team, student);
 
         application.setStatus(ApplicationStatus.ACCEPTED.toString());
-        // TODO mark other applications as cancelled
+        if (team.getIsFull()) {
+            applicationRepository.updateStatusByTeam(ApplicationStatus.CANCELLED.toString(), team);
+            applicationRepository.updateStatusByStudent(ApplicationStatus.CANCELLED.toString(), student);
+        }
 
         return applicationRepository.save(application);
     }

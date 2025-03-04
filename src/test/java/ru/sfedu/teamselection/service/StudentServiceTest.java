@@ -37,7 +37,8 @@ import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 
-@SpringBootTest(classes = TeamSelectionApplication.class)
+@SpringBootTest(classes = TeamSelectionApplication.class,
+        properties = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration")
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
 class StudentServiceTest extends BasicTestContainerTest {

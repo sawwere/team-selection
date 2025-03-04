@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection.exception;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,7 @@ import ru.sfedu.teamselection.dto.exception.ErrorInfo;
  * Глобальный обработчик возникающих в процессе работы приложения исключений.
  * Служит для возвращение сообщений об ошибках в едином формате при их возникновении.
  */
+@Hidden
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
