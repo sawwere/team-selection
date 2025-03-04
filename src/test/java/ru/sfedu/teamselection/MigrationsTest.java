@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringBootTest
+@SpringBootTest("spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration")
 public class MigrationsTest extends BasicTestContainerTest{
     @Test
     void migrate() {

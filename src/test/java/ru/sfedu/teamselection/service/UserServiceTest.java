@@ -19,7 +19,8 @@ import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 
-@SpringBootTest(classes = TeamSelectionApplication.class)
+@SpringBootTest(classes = TeamSelectionApplication.class,
+        properties = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration")
 @Transactional
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")

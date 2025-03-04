@@ -1,6 +1,5 @@
 server:
   port: 8080
-# TODO enable ssl
   forward-headers-strategy: native
 #  ssl:
 #    key-store-type: PKCS12
@@ -8,8 +7,6 @@ server:
 #    key-store-password:
 #    key-alias: ts
 #    enabled: true
-
-
 spring:
   application:
     name: team-selection
@@ -69,6 +66,13 @@ spring:
 #          user-name-attribute-name: email
 app:
   frontendUrl: http://localhost:5173
+  kafka:
+    enabled: true
+    bootstrap-server: localhost:9092
+    topic-name: update-messages-topic
+    group-id: update
+    partitions-count: 1
+    replication-count: 1
 
 cors:
   allowed-origins: http://localhost:8080
