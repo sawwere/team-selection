@@ -62,8 +62,19 @@ spring:
             scopes:
               - https://graph.microsoft.com/User.Read
               - email
-#        b2c:
-#          user-name-attribute-name: email
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+
 app:
   frontendUrl: http://localhost:5173
   kafka:
