@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.text.SimpleDateFormat;
+import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -14,48 +16,25 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.Track;
 
-@SuppressWarnings({"checkstyle:LineLength", "checkstyle:MultipleStringLiterals", "checkstyle:MagicNumber"})
+@SuppressWarnings({"checkstyle:MultipleStringLiterals", "checkstyle:MagicNumber"})
 @Service
 public class ReportService {
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    public final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    //TODO
-//    @Bean
-//    public byte[] test() throws IOException {
-//        Team team1 = Team.builder()
-//                    .name("test")
-//                    .students(List.of(
-//                                Student.builder().fio("testfio1").build(),
-//                                Student.builder().fio("testfio2").build()
-//                            ))
-//                    .build();
-//
-//        Team team2 = Team.builder()
-//                .name("test2")
-//                .students(List.of(
-//                        Student.builder().fio("testfio3").build(),
-//                        Student.builder().fio("testfio4").build()
-//                ))
-//                .build();
-//
-//
-//
-//        List<Team> teams = List.of(team1, team2);
-//        return trackToExcelFile(
-//                Track.builder().name("first track").currentTeams(teams
-//                ).startDate(LocalDate.of(2024, 10, 22)).endDate(LocalDate.of(2025, 10, 22)).type("bachelor").maxThirdCourseConstraint(1).build()
-//                        );
-//    }
-
-    public byte[] trackToExcelFile(Track track) throws IOException {
+    public byte[] trackToExcelFile(Path path, Track track) throws IOException {
         XSSFWorkbook report = createExcelReport(track);
-        File file = new File(track.getName() + ".xlsx");
+        File file = new File(String.valueOf(path.resolve(track.getName() + ".xlsx")));
         report.write(new FileOutputStream(file));
         report.close();
         return Files.readAllBytes(file.toPath());
+    }
+
+    public byte[] trackToExcelFile(Track track) throws IOException {
+        return trackToExcelFile(Path.of("/"), track);
     }
 
     public XSSFWorkbook createExcelReport(Track track) {
@@ -65,13 +44,12 @@ public class ReportService {
 
         firstRow.createCell(0).setCellValue(track.getName());
         firstRow.createCell(1).setCellValue(track.getAbout());
-        firstRow.createCell(2).setCellValue(sdf.format(track.getStartDate()));
-        firstRow.createCell(3).setCellValue(sdf.format(track.getEndDate()));
-        //firstRow.createCell(4).setCellValue(track.getType());
+        firstRow.createCell(2).setCellValue(track.getStartDate().format(dtf));
+        firstRow.createCell(3).setCellValue(track.getEndDate().format(dtf));
+        firstRow.createCell(4).setCellValue(track.getType().toString());
         firstRow.createCell(5).setCellValue(String.valueOf(track.getMinConstraint()));
         firstRow.createCell(6).setCellValue(String.valueOf(track.getMaxConstraint()));
-        //TODO Убрал пока менял классы сущщностей
-        //firstRow.createCell(7).setCellValue(String.valueOf(track.getMaxThirdCourseConstraint()));
+        firstRow.createCell(7).setCellValue(String.valueOf(track.getMaxSecondCourseConstraint()));
 
         int rowIndex = 2;
         for (Team team : track.getCurrentTeams()) {
@@ -79,29 +57,32 @@ public class ReportService {
             createTeamHeader(headerTeam, report);
             Row rowTeam = sheet.createRow(rowIndex++);
             rowTeam.createCell(0).setCellValue(team.getName());
-            //TODO Убрал пока менял классы сущщностей
-            //rowTeam.createCell(1).setCellValue(team.getAbout());
-            //rowTeam.createCell(2).setCellValue(team.getProjectType());
+            rowTeam.createCell(1).setCellValue(team.getProjectDescription());
+            rowTeam.createCell(2).setCellValue(team.getProjectType().getName());
             rowTeam.createCell(3).setCellValue(String.valueOf(team.getQuantityOfStudents()));
             rowTeam.createCell(4).setCellValue(String.valueOf(team.getIsFull()));
-            //TODO Убрал пока менял классы сущщностей
-            //rowTeam.createCell(5).setCellValue(team.getTags());
+            rowTeam.createCell(5).setCellValue(
+                    team.getTechnologies()
+                            .stream()
+                            .map(Technology::getName)
+                            .collect(Collectors.joining(","))
+            );
 
             Row headerStudent = sheet.createRow(rowIndex++);
             createStudentHeader(headerStudent, report);
             for (Student student : team.getStudents()) {
                 Row rowStudent = sheet.createRow(rowIndex++);
-                //TODO Убрал пока менял классы сущщностей
-                //rowStudent.createCell(0).setCellValue(student.getFio());
-                //TODO Убрал пока менял классы сущщностей
-                //rowStudent.createCell(1).setCellValue(student.getEmail());
+                rowStudent.createCell(0).setCellValue(student.getUser().getFio());
+                rowStudent.createCell(1).setCellValue(student.getUser().getEmail());
                 rowStudent.createCell(2).setCellValue(String.valueOf(student.getCourse()));
                 rowStudent.createCell(3).setCellValue(String.valueOf(student.getGroupNumber()));
                 rowStudent.createCell(4).setCellValue(student.getAboutSelf());
-                //TODO Убрал пока менял классы сущщностей
-                //rowStudent.createCell(5).setCellValue(student.getTags());
-                //TODO Убрал пока менял классы сущщностей
-                //rowStudent.createCell(6).setCellValue(String.valueOf(student.getCaptain()));
+                rowStudent.createCell(5).setCellValue(student.getTechnologies()
+                        .stream()
+                        .map(Technology::getName)
+                        .collect(Collectors.joining(","))
+                );
+                rowStudent.createCell(6).setCellValue(String.valueOf(student.getIsCaptain()));
             }
         }
         return report;
@@ -180,7 +161,7 @@ public class ReportService {
         header.getCell(5).setCellStyle(style);
         header.createCell(6).setCellValue("Максимум человек в команде");
         header.getCell(6).setCellStyle(style);
-        header.createCell(7).setCellValue("Максимум студентов 3 курса (для бакалавров)");
+        header.createCell(7).setCellValue("Максимум студентов 2 курса (для бакалавров)");
         header.getCell(7).setCellStyle(style);
 
         return report;
