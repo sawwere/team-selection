@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.service.report;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,8 +45,10 @@ public class TrackExcelExporterTest {
         Track track = createTestTrack();
         ReportService exporter = new ReportService();
 
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        exporter.createExcelReport(track).write(byteArrayOutputStream);
         // Вызываем тестируемый метод
-        byte[] excelBytes = exporter.trackToExcelFile(track);
+        byte[] excelBytes = byteArrayOutputStream.toByteArray();
 
         // Проверяем, что массив байтов не пустой
         assertNotNull(excelBytes);
