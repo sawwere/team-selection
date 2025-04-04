@@ -77,13 +77,6 @@ management:
 
 app:
   frontendUrl: http://localhost:5173
-  kafka:
-    enabled: true
-    bootstrap-server: localhost:9092
-    topic-name: update-messages-topic
-    group-id: update
-    partitions-count: 1
-    replication-count: 1
 
 cors:
   allowed-origins: http://localhost:8080

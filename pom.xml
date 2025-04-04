@@ -129,13 +129,6 @@
             <version>10.10.0</version>
         </dependency>
 
-        <!--- KAFKA -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-            <version>3.3.2</version>
-        </dependency>
-
         <!-- Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -234,6 +227,50 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>6.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <inputSpec>./src/main/resources/openapi.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <importMappings>
+                                <importMapping>UserDto=ru.sfedu.teamselection.dto.UserDto</importMapping>
+                                <importMapping>TechnologyDto=ru.sfedu.teamselection.dto.TechnologyDto</importMapping>
+                                <importMapping>RoleDto=ru.sfedu.teamselection.dto.RoleDto</importMapping>
+                                <importMapping>StudentCreationDto=ru.sfedu.teamselection.dto.student.StudentCreationDto</importMapping>
+                                <importMapping>StudentDto=ru.sfedu.teamselection.dto.student.StudentDto</importMapping>
+                                <importMapping>StudentSearchOptionsDto=ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto</importMapping>
+                                <importMapping>ProjectTypeDto=ru.sfedu.teamselection.dto.team.ProjectTypeDto</importMapping>
+                                <importMapping>TeamCreationDto=ru.sfedu.teamselection.dto.team.TeamCreationDto</importMapping>
+                                <importMapping>TeamDto=ru.sfedu.teamselection.dto.team.TeamDto</importMapping>
+                                <importMapping>TeamSearchOptionsDto=ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto</importMapping>
+                                <importMapping>ApplicationCreationDto=ru.sfedu.teamselection.dto.application.ApplicationCreationDto</importMapping>
+                                <importMapping>ApplicationDto=ru.sfedu.teamselection.dto.application.ApplicationDto</importMapping>
+                                <importMapping>StudentApplicationDto=ru.sfedu.teamselection.dto.application.StudentApplicationDto</importMapping>
+                                <importMapping>ErrorInfo=ru.sfedu.teamselection.dto.exception.ErrorInfo</importMapping>
+                                <importMapping>ConstraintViolation=ru.sfedu.teamselection.dto.exception.ConstraintViolation</importMapping>
+                            </importMappings>
+                            <configOptions>
+                                <openApiNullable>false</openApiNullable>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>false</skipDefaultInterface>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useResponseEntity>false</useResponseEntity>
+                                <useSpringController>true</useSpringController>
+                                <documentationProvider>springdoc</documentationProvider>
+                                <useTags>true</useTags>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

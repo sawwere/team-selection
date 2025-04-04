@@ -1,0 +1,821 @@
+openapi: 3.0.1
+info:
+  title: TeamSelection Api
+  description: 'Api приложения для поиска команд для проектной деятельности '
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+tags:
+  - name: ProjectTypeController
+    description: API для операций с типами проектов
+  - name: ApplicationController
+    description: API для работы с заявками
+  - name: UserController
+    description: API для работы со пользователями
+  - name: StudentController
+    description: API для работы со студентами
+  - name: TechnologyController
+    description: API для взаимодействия с возможными технологиями студентов и проектов
+  - name: TracksController
+    description: API для работы со треками
+  - name: TeamController
+    description: API для работы с командами
+paths:
+  /api/v1/users:
+    put:
+      tags:
+        - UserController
+      summary: Изменить данные пользователя
+      description: Используется для модификации данных определенного пользователя.
+      operationId: putUser
+      requestBody:
+        description: Сущность пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+  /api/v1/teams/{teamId}/students/{studentId}:
+    put:
+      tags:
+        - TeamController
+      summary: Добавление студента к команде
+      description: |
+        Используется для принудительного добавления студента к определенной команды.
+
+        Эта операция может быть выполнена только администратором ресурса.
+
+        ВНИМАНИЕ: Данная операция не гарантирует изменения статуса заявок выбранного студента.
+        При необходимости их статусы необходимо изменить вручную.
+      operationId: addStudentToTeam
+      parameters:
+        - name: teamId
+          in: path
+          description: Id команды
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: studentId
+          in: path
+          description: Id студента
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TeamDto'
+  /api/v1/teams/{id}:
+    get:
+      tags:
+        - TeamController
+      summary: Получение команды по ее id
+      operationId: findById
+      parameters:
+        - name: id
+          in: path
+          description: id команды
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TeamDto'
+    put:
+      tags:
+        - TeamController
+      summary: Изменить данные команды
+      description: |
+        Используется для модификации данных определенной команды.
+
+        Эта операция может быть выполнена капитаном команды,
+        либо администратором ресурса.
+
+        Недоступные для обновления поля будут проигнорированы.
+
+        ВНИМАНИЕ: Список обновляемых полей отличается в зависимости от того, кто отправил запрос -
+        администратору доступны для изменения все поля, включая те, что зависят от состояния других таблиц,
+        поэтому редактировать их нужно ОСТОРОЖНО.
+      operationId: updateTeam
+      parameters:
+        - name: id
+          in: path
+          description: Id команды
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Сущность команды
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TeamDto'
+    delete:
+      tags:
+        - TeamController
+      summary: Удалить команду по ее id
+      operationId: deleteTeam
+      parameters:
+        - name: id
+          in: path
+          description: id команды
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+  /api/v1/students/{id}:
+    get:
+      tags:
+        - StudentController
+      summary: Получение студента по его id
+      operationId: findById_1
+      parameters:
+        - name: id
+          in: path
+          description: Id студента
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/StudentDto'
+    put:
+      tags:
+        - StudentController
+      summary: Изменить данные студента
+      description: |
+        Используется для модификации данных определенного пользователя.
+
+        Эта операция может быть выполнена самим пользователем (редактирование информации о себе),
+        либо администратором ресурса.
+
+        Недоступные для обновления поля будут проигнорированы.
+
+        ВНИМАНИЕ: Список обновляемых полей отличается от того, кто отправил запрос -
+        администратору доступны для изменения все поля, включая те, что зависят от состояния других таблиц,
+        поэтому редактировать их нужно ОСТОРОЖНО.
+      operationId: updateStudent
+      parameters:
+        - name: id
+          in: path
+          description: Id студента
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Сущность студента
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDto'
+    delete:
+      tags:
+        - StudentController
+      summary: Удалить студента по его id
+      description: |
+        Используется для удаления определенного студента (но не соответствующего ему пользователя!).
+
+        Эта операция может быть выполнена только администратором ресурса.
+      operationId: deleteStudent
+      parameters:
+        - name: id
+          in: path
+          description: Id студента
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+  /api/v1/applications:
+    get:
+      tags:
+        - ApplicationController
+      summary: Получение списка всех заявок за все время
+      operationId: findAll
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationDto'
+    put:
+      tags:
+        - ApplicationController
+      summary: Обновление статуса заявки
+      operationId: updateApplication
+      requestBody:
+        description: DTO с обновлённой информацией о заявке
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreationDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ApplicationCreationDto'
+    post:
+      tags:
+        - ApplicationController
+      summary: Создание заявки
+      operationId: createApplication
+      requestBody:
+        description: сущность заявки
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreationDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ApplicationCreationDto'
+  /api/v1/users/{id}/assign-role:
+    post:
+      tags:
+        - UserController
+      summary: Изменить роль пользователя
+      description: |
+        Используется для изменения роли пользователя.
+
+        Эта операция может быть выполнена только администратором ресурса.
+      operationId: assignRole
+      parameters:
+        - name: id
+          in: path
+          description: Id пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Сущность роли пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: object
+  /api/v1/technologies:
+    get:
+      tags:
+        - TechnologyController
+      summary: Получение списка всех технологий
+      operationId: findAll_1
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TechnologyDto'
+    post:
+      tags:
+        - TechnologyController
+      summary: Создание новой технологии
+      operationId: createTechnology
+      requestBody:
+        description: Сущность технологии
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TechnologyDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TechnologyDto'
+  /api/v1/teams:
+    get:
+      tags:
+        - TeamController
+      summary: Получение списка всех команд за все время
+      operationId: findAll_2
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamDto'
+    post:
+      tags:
+        - TeamController
+      summary: Создание команды
+      operationId: createTeam
+      requestBody:
+        description: Сущность команды
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamCreationDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TeamDto'
+  /api/v1/students:
+    get:
+      tags:
+        - StudentController
+      summary: Получение списка всех студентов за все время
+      operationId: findAll_3
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDto'
+    post:
+      tags:
+        - StudentController
+      summary: Создание студента
+      operationId: createStudent
+      requestBody:
+        description: Сущность студента
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentCreationDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/StudentDto'
+  /api/v1/projectTypes:
+    get:
+      tags:
+        - ProjectTypeController
+      summary: Получение списка всех возможных типов проектов
+      operationId: findAll_4
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectTypeDto'
+    post:
+      tags:
+        - ProjectTypeController
+      summary: Создание нового типа проекта
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectTypeDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ProjectTypeDto'
+  /findByTagAndTrackId:
+    get:
+      tags:
+        - TracksController
+      summary: Найти студентов по их навыкам(тегам)
+      operationId: findStudentByTag
+      parameters:
+        - name: tags
+          in: query
+          description: склеенная строка из тегов через пробелы
+          required: true
+          schema:
+            type: string
+        - name: trackId
+          in: query
+          description: id текущего трека
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDto'
+  /api/v1/users/me:
+    get:
+      tags:
+        - UserController
+      summary: Получение текущего пользователя
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserDto'
+  /api/v1/tracks/{trackType}/students:
+    get:
+      tags:
+        - TracksController
+      summary: 'Получение списка всех студентов по текущему треку в зависимости от типа: bachelor/master'
+      operationId: findStudentsByTrackType
+      parameters:
+        - name: trackType
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDto'
+  /api/v1/tracks/{trackId}:
+    get:
+      tags:
+        - TracksController
+      summary: 'Найти студентов по их статусу: состоят в команде или нет'
+      operationId: findStudentByStatusInTrack
+      parameters:
+        - name: trackId
+          in: path
+          description: id текущего трека
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          description: true/false
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDto'
+  /api/v1/tracks/{trackId}/captains:
+    get:
+      tags:
+        - TracksController
+      summary: Получение списка всех капитанов команд по id трека
+      operationId: findCaptainsInTrack
+      parameters:
+        - name: trackId
+          in: path
+          description: id трека
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDto'
+  /api/v1/teams/{id}/subscriptions:
+    get:
+      tags:
+        - TeamController
+      summary: Найти всех студентов, которые когда либо подавали заявку в команду
+      operationId: findApplicantsById
+      parameters:
+        - name: id
+          in: path
+          description: id команды
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDto'
+  /api/v1/teams/search:
+    get:
+      tags:
+        - TeamController
+      summary: Поиск студентов с фильтрацией по полям
+      operationId: search
+      parameters:
+        - name: input
+          in: query
+          description: строка из поиска, разделенная пробелами
+          required: false
+          schema:
+            type: string
+        - name: track_id
+          in: query
+          description: К какому треку принадлежит команда
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: is_full
+          in: query
+          description: Полностью ли ли укомплектована команда
+          required: false
+          schema:
+            type: boolean
+        - name: project_type
+          in: query
+          description: Тип проекта, указанный капитаном
+          required: false
+          schema:
+            type: string
+        - name: technologies
+          in: query
+          description: Список технологий(умений) команды
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamDto'
+  /api/v1/teams/filters:
+    get:
+      tags:
+        - TeamController
+      summary: Получение списка возможных опций для поиска среди команд заданного трека
+      operationId: getSearchOptionsTeams
+      parameters:
+        - name: track_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TeamSearchOptionsDto'
+  /api/v1/students/{id}/teams:
+    get:
+      tags:
+        - StudentController
+      summary: Найти все команды, в которых когда либо состоял студент
+      operationId: getTeamHistory
+      parameters:
+        - name: id
+          in: path
+          description: Id студента
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamDto'
+  /api/v1/students/search:
+    get:
+      tags:
+        - StudentController
+      summary: Поиск студентов с фильтрацией по полям
+      operationId: search_1
+      parameters:
+        - name: input
+          in: query
+          description: строка из поиска, разделенная пробелами
+          required: false
+          schema:
+            type: string
+        - name: course
+          in: query
+          description: Курс обучения студента
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: group_number
+          in: query
+          description: Номер группы студента
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: has_team
+          in: query
+          description: Состоит ли в команде
+          required: false
+          schema:
+            type: boolean
+        - name: technologies
+          in: query
+          description: Список технологий(умений) студента
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+        - name: is_captain
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDto'
+  /api/v1/students/me:
+    get:
+      tags:
+        - StudentController
+      operationId: getCurrentStudentId
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: integer
+                format: int64
+  /api/v1/students/filters:
+    get:
+      tags:
+        - StudentController
+      summary: Получение списка возможных опций для поиска среди студентов
+      operationId: getSearchOptionsStudents
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/StudentSearchOptionsDto'
+  /api/v1/roles:
+    get:
+      tags:
+        - UserController
+      summary: Получение списка всех возможных ролей
+      operationId: getAllRoles
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleDto'
+  /api/v1/applications/{id}:
+    get:
+      tags:
+        - ApplicationController
+      summary: Получение заявки по его id
+      operationId: findById_2
+      parameters:
+        - name: id
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ApplicationCreationDto'
+    delete:
+      tags:
+        - ApplicationController
+      summary: Удалить заявку по его id
+      operationId: deleteApplication
+      parameters:
+        - name: id
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+components:
+  schemas:
