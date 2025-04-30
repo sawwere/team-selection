@@ -11,13 +11,15 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.application.Application;
 
+import java.util.Optional;
+
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long>, JpaSpecificationExecutor<Application> {
 
     boolean existsByTeamIdAndStudentId(Long teamId, Long studentId);
 
-    Application findByTeamIdAndStudentId(Long teamId, Long studentId);
+    Optional<Application> findByTeamIdAndStudentId(Long teamId, Long studentId);
 
     @Transactional
     @Modifying

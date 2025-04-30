@@ -7,6 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -72,39 +76,41 @@ public class StudentController {
 
     @Operation(
             method = "GET",
-            summary = "Поиск студентов с фильтрацией по полям",
+            summary = "Поиск студентов с фильтрацией, пагинацией и сортировкой",
             parameters = {
-                    @Parameter(name = "input",
-                            description = "строка из поиска, разделенная пробелами",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "course",
-                            description = "Курс обучения студента",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "group_number",
-                            description = "Номер группы студента",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "has_team",
-                            description = "Состоит ли в команде",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "technologies",
-                            description = "Список технологий(умений) студента",
-                            in = ParameterIn.QUERY),
+                    @Parameter(name = "input", description = "строка из поиска", in = ParameterIn.QUERY),
+                    @Parameter(name = "course", description = "Курс обучения", in = ParameterIn.QUERY),
+                    @Parameter(name = "group_number", description = "Номер группы", in = ParameterIn.QUERY),
+                    @Parameter(name = "has_team", description = "Состоит ли в команде", in = ParameterIn.QUERY),
+                    @Parameter(name = "is_captain", description = "Является ли капитаном", in = ParameterIn.QUERY),
+                    @Parameter(name = "technologies", description = "Список ID технологий", in = ParameterIn.QUERY),
+                    @Parameter(name = "page", description = "Номер страницы", example = "0", in = ParameterIn.QUERY),
+                    @Parameter(name = "size", description = "Размер страницы", example = "10", in = ParameterIn.QUERY),
+                    @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_STUDENTS)
-    public List<StudentDto> search(
+    public Page<StudentDto> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "course", required = false) Integer course,
             @RequestParam(value = "group_number", required = false) Integer groupNumber,
             @RequestParam(value = "has_team", required = false) Boolean hasTeam,
             @RequestParam(value = "is_captain", required = false) Boolean isCaptain,
-            @RequestParam(value = "technologies", required = false) List<Long> technologies
-    ) {
-        LOGGER.info("ENTER search() endpoint");
-        return studentService.search(like, course, groupNumber, hasTeam, isCaptain, technologies)
-                .stream()
-                .map(studentDtoMapper::mapToDto)
-                .toList();
+            @RequestParam(value = "track_id", required = false) Long trackId,
+            @RequestParam(value = "technologies", required = false) List<Long> technologies,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name,asc") String sort) {
+
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
+        return studentService.search(like, trackId, course, groupNumber, hasTeam, isCaptain, technologies, pageable)
+                .map(studentDtoMapper::mapToDto);
     }
+
 
     @Operation(
             method = "GET",

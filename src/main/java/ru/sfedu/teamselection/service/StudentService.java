@@ -4,6 +4,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,12 +58,59 @@ public class StudentService {
 
     /**
      * Find all students
-     * @return the list of all the students
+     * @return page of students
      */
     @Transactional(readOnly = true)
     public List<Student> findAll() {
         return studentRepository.findAll();
     }
+
+    public Page<Student> search(String like,
+                                Long trackId,
+                                Integer course,
+                                Integer groupNumber,
+                                Boolean hasTeam,
+                                Boolean isCaptain,
+                                List<Long> technologies,
+                                Pageable pageable) {
+
+        Specification<Student> specification = Specification.allOf();
+
+        if (like != null) {
+            specification = specification.and(StudentSpecification.like(like));
+        }
+
+        if (trackId!=null)
+        {
+            specification = specification.and(StudentSpecification.byTrack(trackId));
+        }
+        if (course != null) {
+            specification = specification.and(StudentSpecification.byCourse(course));
+        }
+        if (groupNumber != null) {
+            specification = specification.and(StudentSpecification.byGroup(groupNumber));
+        }
+        if (hasTeam != null) {
+            specification = specification.and(StudentSpecification.byHasTeam(hasTeam));
+        }
+        if (isCaptain != null) {
+            specification = specification.and(StudentSpecification.byIsCaptain(isCaptain));
+        }
+        specification = specification.and(StudentSpecification.hasTechnologies(technologies));
+
+        Sort sort = pageable.getSort();
+        for (Sort.Order order : sort) {
+            if ("name".equals(order.getProperty())) {
+                Pageable newPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                        Sort.by(order.getDirection(), "user.fio"));
+                Page<Student> st = studentRepository.findAll(specification, newPageable);
+                return studentRepository.findAll(specification, newPageable);
+            }
+        }
+
+        return studentRepository.findAll(specification, pageable);
+    }
+
 
     /**
      * Creates student using given data.
@@ -96,42 +147,7 @@ public class StudentService {
         studentRepository.delete(findByIdOrElseThrow(id));
     }
 
-    /**
-     * Performs search across all students with given filter criteria
-     * @param like like parameter for the student string representation
-     * @param course student's group
-     * @param groupNumber student's course
-     * @param hasTeam student's status of having team
-     * @param technologies student's technologies(skills)
-     * @return the filtered list
-     */
-    @Transactional(readOnly = true)
-    public List<Student> search(String like,
-                                Integer course,
-                                Integer groupNumber,
-                                Boolean hasTeam,
-                                Boolean isCaptain,
-                                List<Long> technologies) {
-        Specification<Student> specification = Specification.allOf();
-        if (like != null) {
-            specification = specification.and(StudentSpecification.like(like));
-        }
-        if (course != null) {
-            specification = specification.and(StudentSpecification.byCourse(course));
-        }
-        if (groupNumber != null) {
-            specification = specification.and(StudentSpecification.byGroup(groupNumber));
-        }
-        if (hasTeam != null) {
-            specification = specification.and(StudentSpecification.byHasTeam(hasTeam));
-        }
-        if (isCaptain != null) {
-            specification = specification.and(StudentSpecification.byIsCaptain(isCaptain));
-        }
-        specification = specification.and(StudentSpecification.hasTechnologies(technologies));
 
-        return studentRepository.findAll(specification);
-    }
 
 
     /**

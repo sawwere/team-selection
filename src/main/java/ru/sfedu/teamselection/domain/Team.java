@@ -90,6 +90,9 @@ public class Team {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
+    @Column
+    private String showcaseRef;
+
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;

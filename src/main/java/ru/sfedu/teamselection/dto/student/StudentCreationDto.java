@@ -35,4 +35,8 @@ public class StudentCreationDto {
     @JsonProperty(value = "user_id")
     @NotNull
     private Long userId;
+
+    @JsonProperty(value = "current_track_id")
+    @NotNull
+    private Long trackId;
 }

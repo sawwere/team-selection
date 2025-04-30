@@ -54,6 +54,9 @@ public class TeamDto {
 
     private List<StudentDto> students;
 
+    @JsonProperty(value = "showcase_ref")
+    private String showcaseRef;
+
     @Builder.Default
     private List<ApplicationCreationDto> applications = new ArrayList<>();
 

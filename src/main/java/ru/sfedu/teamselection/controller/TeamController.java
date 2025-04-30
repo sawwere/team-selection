@@ -7,6 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -83,37 +87,36 @@ public class TeamController {
 
     @Operation(
             method = "GET",
-            summary = "Поиск студентов с фильтрацией по полям",
+            summary = "Поиск команд с фильтрацией, пагинацией и сортировкой",
             parameters = {
-                    @Parameter(name = "input",
-                            description = "строка из поиска, разделенная пробелами",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "track_id",
-                            description = "К какому треку принадлежит команда",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "is_full",
-                            description = "Полностью ли ли укомплектована команда",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "project_type",
-                            description = "Тип проекта, указанный капитаном",
-                            in = ParameterIn.QUERY),
-                    @Parameter(name = "technologies",
-                            description = "Список технологий(умений) команды",
-                            in = ParameterIn.QUERY),
+                    @Parameter(name = "input", description = "строка из поиска", in = ParameterIn.QUERY),
+                    @Parameter(name = "track_id", description = "ID трека", in = ParameterIn.QUERY),
+                    @Parameter(name = "is_full", description = "Полностью ли укомплектована команда", in = ParameterIn.QUERY),
+                    @Parameter(name = "project_type", description = "Тип проекта", in = ParameterIn.QUERY),
+                    @Parameter(name = "technologies", description = "Список ID технологий", in = ParameterIn.QUERY),
+                    @Parameter(name = "page", description = "Номер страницы", example = "0", in = ParameterIn.QUERY),
+                    @Parameter(name = "size", description = "Размер страницы", example = "10", in = ParameterIn.QUERY),
+                    @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_TEAMS)
-    public List<TeamDto> search(
+    public Page<TeamDto> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "track_id", required = false) Long trackId,
             @RequestParam(value = "is_full", required = false) Boolean isFull,
             @RequestParam(value = "project_type", required = false) String projectType,
-            @RequestParam(value = "technologies", required = false) List<Long> technologies
-    ) {
-        LOGGER.info("ENTER search() endpoint");
-        return teamService.search(like, trackId, isFull, projectType, technologies)
-                .stream()
-                .map(teamDtoMapper::mapToDto)
-                .toList();
+            @RequestParam(value = "technologies", required = false) List<Long> technologies,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name,asc") String sort) {
+
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
+        return teamService.search(like, trackId, isFull, projectType, technologies, pageable)
+                .map(teamDtoMapper::mapToDto);
     }
 
     @Operation(

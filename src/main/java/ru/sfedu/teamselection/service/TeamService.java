@@ -3,6 +3,8 @@ package ru.sfedu.teamselection.service;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,10 +53,37 @@ public class TeamService {
 
     /**
      * Find all teams
-     * @return the list of all the teams
+     * @return list of teams
      */
     public List<Team> findAll() {
         return teamRepository.findAll();
+    }
+
+    /**
+     * Performs search across all students with given filter criteria and pagination
+     */
+    public Page<Team> search(String like,
+                             Long trackId,
+                             Boolean isFull,
+                             String projectType,
+                             List<Long> technologies,
+                             Pageable pageable) {
+        Specification<Team> specification = Specification.allOf();
+        if (like != null) {
+            specification = specification.and(TeamSpecification.like(like));
+        }
+        if (trackId != null) {
+            specification = specification.and(TeamSpecification.byTrack(trackId));
+        }
+        if (isFull != null) {
+            specification = specification.and(TeamSpecification.byIsFull(isFull));
+        }
+        if (projectType != null) {
+            specification = specification.and(TeamSpecification.byProjectType(projectType));
+        }
+        specification = specification.and(TeamSpecification.byTechnologies(technologies));
+
+        return teamRepository.findAll(specification, pageable);
     }
 
     /**

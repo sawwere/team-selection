@@ -42,6 +42,9 @@ public class ApplicationController {
     public static final String CREATE_APPLICATION = "/api/v1/applications";
     public static final String UPDATE_APPLICATION = "/api/v1/applications";
 
+    public static final String FIND_BY_TEAM_AND_STUDENT =
+            "/api/v1/applications/team/{teamId}/student/{studentId}";
+
     private final ApplicationService applicationService;
     private final ApplicationMapper applicationMapper;
 
@@ -96,7 +99,7 @@ public class ApplicationController {
                     @Parameter(name = "id", description = "id заявки", in = ParameterIn.PATH),
             }
     )
-    @GetMapping(FIND_BY_ID) // checked
+    @GetMapping(FIND_BY_ID)
     public ApplicationCreationDto findById(@PathVariable(name = "id") Long applicationId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(applicationId));
         return applicationMapper.mapToDto(applicationService.findByIdOrElseThrow(applicationId));
@@ -115,4 +118,25 @@ public class ApplicationController {
         LOGGER.info("ENTER deleteApplication(%d) endpoint".formatted(applicationId));
         applicationService.delete(applicationId);
     }
+
+    @Operation(
+            method = "GET",
+            summary = "Получение заявки по id команды и id студента",
+            parameters = {
+                    @Parameter(name = "teamId", description = "id команды", in = ParameterIn.PATH),
+                    @Parameter(name = "studentId", description = "id студента", in = ParameterIn.PATH)
+            }
+    )
+    @GetMapping(FIND_BY_TEAM_AND_STUDENT)
+    public ApplicationCreationDto findByTeamAndStudent(
+            @PathVariable Long teamId,
+            @PathVariable Long studentId
+    ) {
+        LOGGER.info("ENTER findByTeamAndStudent(%d, %d) endpoint".formatted(teamId, studentId));
+        return applicationMapper.mapToDto(
+                applicationService.findByTeamAndStudentOrElseThrow(teamId, studentId)
+        );
+    }
+
+
 }

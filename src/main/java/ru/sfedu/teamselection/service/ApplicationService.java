@@ -159,6 +159,28 @@ public class ApplicationService {
         return applicationRepository.save(application);
     }
 
+    private Application tryResentApplication(ApplicationCreationDto dto, User sender)
+            throws ConstraintViolationException {
+        Application application = findByIdOrElseThrow(dto.getId());
+        Student student = studentService.findByIdOrElseThrow(application.getStudent().getId());
+
+        validateStudentHasNoCurrentTeam(student);
+        Team team = teamService.findByIdOrElseThrow(application.getTeam().getId());
+
+
+        if (team.getIsFull()) {
+            throw new ConstraintViolationException("Cannot apply for full team");
+        }
+
+        validateIsNotOverLimitOfSecondYears(student, team);
+
+        if (!studentService.typeOfStudentTrack(student).equals(team.getCurrentTrack().getType())) {
+            throw new ConstraintViolationException("Cannot apply, wrong track");
+        }
+        application.setStatus(ApplicationStatus.SENT.toString());
+        return applicationRepository.save(application);
+    }
+
     @Transactional
     private Application tryRejectApplication(ApplicationCreationDto dto, User sender)
             throws ConstraintViolationException {
@@ -194,15 +216,15 @@ public class ApplicationService {
     @Transactional
     public Application update(ApplicationCreationDto dto, User sender) {
         Application application = findByIdOrElseThrow(dto.getId());
-        if (!application.getStatus().equals(ApplicationStatus.SENT.toString())) {
-            throw new ConstraintViolationException("Can update only applications in status SENT");
-        }
+
 
         return switch (dto.getStatus()) {
             case ACCEPTED -> tryAcceptApplication(dto, sender);
             case REJECTED -> tryRejectApplication(dto, sender);
             case CANCELLED -> trCancelApplication(dto, sender);
-            case SENT -> throw new ConstraintViolationException(
+            case SENT -> tryResentApplication(dto, sender);
+            default ->
+                    throw new ConstraintViolationException(
                     "Unexpected application status '%s'".formatted(dto.getStatus())
             );
         };
@@ -218,4 +240,13 @@ public class ApplicationService {
             throw new NotFoundException("There is no such application to be updated");
         }
     }
+
+    /**
+     * Finds application by teamId and studentId or throws NotFoundException.
+     */
+    public Application findByTeamAndStudentOrElseThrow(Long teamId, Long studentId) throws NotFoundException {
+        return applicationRepository.findByTeamIdAndStudentId(teamId, studentId)
+                .orElse(null);
+    }
+
 }
