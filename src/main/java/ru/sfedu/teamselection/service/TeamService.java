@@ -48,7 +48,8 @@ public class TeamService {
      * @throws ru.sfedu.teamselection.exception.NotFoundException in case there is no team with such id
      */
     public Team findByIdOrElseThrow(Long id) throws NotFoundException {
-        return teamRepository.findById(id).orElseThrow();
+        return teamRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Team with id " + id + " not found"));
     }
 
     /**
@@ -83,42 +84,54 @@ public class TeamService {
         }
         specification = specification.and(TeamSpecification.byTechnologies(technologies));
 
-        return teamRepository.findAll(specification, pageable);
+        var t= teamRepository.findAll(specification, pageable);
+        return t;
     }
 
     /**
      * Create new team or update existing team
-     * @param teamDto TeamDto
+     * @param dto TeamDto
      * @return the team
      */
     @Transactional
-    public Team create(TeamCreationDto teamDto) {
-        Team team = teamCreationDtoMapper.mapToEntity(teamDto);
-        String name = teamDto.getName();
-        Long trackId = teamDto.getCurrentTrackId();
-        if (teamRepository.existsByNameIgnoreCaseAndCurrentTrackId(name, trackId)) {
-            team = teamRepository.findByNameIgnoreCaseAndCurrentTrackId(name, trackId).orElseThrow();
-            team.setName(teamDto.getName());
-            team.setProjectDescription(teamDto.getProjectDescription());
-            team.setProjectType(projectTypeDtoMapper.mapToEntity(teamDto.getProjectType()));
-        } else {
-            team.setCurrentTrack(trackService.findByIdOrElseThrow(teamDto.getCurrentTrackId()));
-            Student captain = studentService.findByIdOrElseThrow(teamDto.getCaptainId());
+    public Team create(TeamCreationDto dto) {
+        String name    = dto.getName();
+        Long trackId   = dto.getCurrentTrackId();
 
-            team = addStudentToTeam(team, captain);
+        Team team;
+        if (teamRepository.existsByNameIgnoreCaseAndCurrentTrackId(name, trackId)) {
+            team = teamRepository
+                    .findByNameIgnoreCaseAndCurrentTrackId(name, trackId)
+                    .orElseThrow(() -> new NotFoundException(
+                            "Existing team '" + name + "' on track " + trackId + " not found"
+                    ));
+            // просто обновляем поля
+            team.setName(dto.getName());
+            team.setProjectDescription(dto.getProjectDescription());
+            team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
+        } else {
+            // новая команда
+            team = teamCreationDtoMapper.mapToEntity(dto);
+            team.setCurrentTrack(trackService.findByIdOrElseThrow(trackId));
+
+            Student captain = studentService.findByIdOrElseThrow(dto.getCaptainId());
+            addStudentToTeam(team, captain);
             team.setCaptainId(captain.getId());
             captain.setHasTeam(true);
             captain.setIsCaptain(true);
         }
 
-        team.setTechnologies(technologyRepository.findAllByIdIn(
-                teamDto.getTechnologies()
-                        .stream()
-                        .map(TechnologyDto::getId)
-                        .toList())
+        // технологии
+        team.setTechnologies(
+                technologyRepository.findAllByIdIn(
+                        dto.getTechnologies()
+                                .stream()
+                                .map(t -> t.getId())
+                                .toList()
+                )
         );
-        teamRepository.save(team);
-        return team;
+
+        return teamRepository.save(team);
     }
 
     /**
@@ -127,39 +140,52 @@ public class TeamService {
      */
     @Transactional
     public void delete(Long id) {
-        for (Student teamMember: findByIdOrElseThrow(id).getStudents()) {
-            // there is no need to clean up information about the current team
-            // if the student WAS a member of it earlier, but now belongs to ANOTHER one.
-            if (teamMember.getCurrentTeam().getId().equals(id)) {
-                teamMember.setHasTeam(false);
-                teamMember.setCurrentTeam(null);
-                teamMember.setIsCaptain(false);
+        for (Student teamMember : findByIdOrElseThrow(id).getStudents()) {
+            Team team = findByIdOrElseThrow(id);
+            for (Student member : team.getStudents()) {
+                if (Objects.equals(member.getCurrentTeam().getId(), id)) {
+                    member.setHasTeam(false);
+                    member.setCurrentTeam(null);
+                    member.setIsCaptain(false);
+                }
             }
+            teamRepository.deleteById(id);
         }
-        teamRepository.deleteById(id);
     }
 
     @Transactional
     public Team addStudentToTeam(Team team, Student student) {
         if (student.getHasTeam()) {
-            throw new RuntimeException("Student already has team");
+            throw new ConstraintViolationException("Student already has a team");
         }
         if (team.getIsFull()) {
-            throw new RuntimeException("Cannot add student to full team");
+            throw new ConstraintViolationException("Cannot add student to a full team");
         }
+        // ограничение по второму курсу
         if (student.getCourse() == 2) {
-            long secondYearCount = team.getStudents().stream().filter(x -> x.getCourse() == 2).count();
-            if (secondYearCount == team.getCurrentTrack().getMaxSecondCourseConstraint()) {
-                throw new RuntimeException("Cannot add second year student to the team");
+            long count2 = team.getStudents().stream()
+                    .filter(s -> s.getCourse() == 2)
+                    .count();
+            int max2 = team.getCurrentTrack().getMaxSecondCourseConstraint();
+            if (count2 >= max2) {
+                throw new ConstraintViolationException(
+                        "Team already has maximum of " + max2 + " second-year students");
             }
         }
-        if (team.getStudents().stream().anyMatch(x -> x.getId().equals(student.getId()))) {
-            throw new RuntimeException("Student is already in the team");
+        // не дублируем участника
+        if (team.getStudents().stream()
+                .anyMatch(s -> s.getId().equals(student.getId()))) {
+            throw new ConstraintViolationException("Student is already in the team");
         }
-        //All checks are ok, now we can add student
+
+        // добавляем
         team.getStudents().add(student);
         team.setQuantityOfStudents(team.getQuantityOfStudents() + 1);
-        team.setIsFull(Objects.equals(team.getQuantityOfStudents(), team.getCurrentTrack().getMaxConstraint()));
+        team.setIsFull(
+                team.getQuantityOfStudents().equals(
+                        team.getCurrentTrack().getMaxConstraint()
+                )
+        );
 
         student.setHasTeam(true);
         student.setCurrentTeam(team);
@@ -169,16 +195,14 @@ public class TeamService {
     @Transactional
     public Team removeStudentFromTeam(Team team, Student student) {
         if (team.getCaptainId().equals(student.getId())) {
-            throw new ConstraintViolationException("Can't remove captain from their team.");
+            throw new ConstraintViolationException("Cannot remove captain from their own team");
         }
-        team.getStudents().removeIf(x -> x.getId().equals(student.getId()));
+        team.getStudents().removeIf(s -> s.getId().equals(student.getId()));
         team.setQuantityOfStudents(team.getQuantityOfStudents() - 1);
-        // If the team was full, it isn't now because 1 member has been removed,
-        // otherwise the property is not changed.
         team.setIsFull(false);
 
-        student.setCurrentTeam(null);
         student.setHasTeam(false);
+        student.setCurrentTeam(null);
         return team;
     }
 
@@ -200,19 +224,20 @@ public class TeamService {
      * @apiNote   possibly UNSAFE
      */
     public Team update(Long id, TeamDto dto, User sender) {
-        boolean isUnsafeAllowed = false;
         Team team = findByIdOrElseThrow(id);
-        if (sender.getRole().getName().equals("ADMIN")) {
-            isUnsafeAllowed = true;
-        } else if (!sender.getId().equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId())) {
-            throw new ForbiddenException("Team info can be modified only by its captain");
+
+        boolean isAdmin = sender.getRole().getName().equals("ADMIN");
+        boolean isCaptainOfThis = sender.getId()
+                .equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId());
+
+        if (!isAdmin && !isCaptainOfThis) {
+            throw new ForbiddenException("Only admin or the team’s captain can modify this team");
         }
 
-        if (isUnsafeAllowed) {
+        if (isAdmin) {
             team.setName(dto.getName());
             team.setQuantityOfStudents(dto.getQuantityOfStudents());
             team.setIsFull(dto.getIsFull());
-            // do only if not equals thus saving database calls
             if (!Objects.equals(dto.getCurrentTrackId(), team.getCurrentTrack().getId())) {
                 team.setCurrentTrack(trackService.findByIdOrElseThrow(dto.getCurrentTrackId()));
             }
@@ -221,16 +246,13 @@ public class TeamService {
 
         team.setProjectDescription(dto.getProjectDescription());
         team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
-        team.setTechnologies(technologyRepository.findAllByIdIn(
-                dto.getTechnologies()
-                        .stream()
-                        .map(TechnologyDto::getId)
-                        .toList())
+        team.setTechnologies(
+                technologyRepository.findAllByIdIn(
+                        dto.getTechnologies().stream().map(t -> t.getId()).toList()
+                )
         );
 
-
-        teamRepository.save(team);
-        return team;
+        return teamRepository.save(team);
     }
 
     /**

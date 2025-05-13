@@ -55,7 +55,7 @@ public class Team {
 
     @Column(name = "captain_id", nullable = false)
     @Builder.Default
-    private Long captainId = -1L; //TODO check
+    private Long captainId = -1L;
 
     @Column(name = "is_full")
     @Builder.Default

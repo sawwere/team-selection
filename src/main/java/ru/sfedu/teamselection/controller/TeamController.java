@@ -155,7 +155,7 @@ public class TeamController {
     @GetMapping(FIND_APPLICANTS_BY_ID)
     public List<StudentDto> findApplicantsById(@PathVariable(value = "id") Long teamId) {
         LOGGER.info("ENTER findApplicantsById(%d) endpoint".formatted(teamId));
-        return applicationService.findTeamApplications(teamId)
+        return applicationService.findTeamApplicationsStudents(teamId)
                 .stream()
                 .map(studentDtoMapper::mapToDto)
                 .toList();

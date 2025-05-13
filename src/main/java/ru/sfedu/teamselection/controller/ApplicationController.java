@@ -67,12 +67,14 @@ public class ApplicationController {
             summary = "Создание заявки",
             parameters = { @Parameter(name = "application", description = "сущность заявки")}
     )
-    @PostMapping(CREATE_APPLICATION) // checked
+    @PostMapping(CREATE_APPLICATION)
     public ApplicationCreationDto createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = userService.getCurrentUser();
-        return applicationMapper.mapToDto(applicationService.create(application, user));
+        return applicationMapper.mapToCreationDto(applicationService.create(application, user));
     }
+
+
 
     @Operation(
             method = "PUT",
@@ -80,16 +82,13 @@ public class ApplicationController {
             parameters = {@Parameter(name = "application", description = "DTO с обновлённой информацией о заявке")}
     )
     @PutMapping(UPDATE_APPLICATION)
-    public ApplicationCreationDto updateApplication(@RequestBody ApplicationCreationDto applicationDto) {
-        LOGGER.info("ENTER updateApplication() endpoint");
-        User user = userService.getCurrentUser();
-        try {
-            return applicationMapper.mapToDto(applicationService.update(applicationDto, user));
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found", e);
-        } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        }
+    public ApplicationCreationDto update(
+            @RequestBody ApplicationCreationDto dto
+    ) {
+        User current = userService.getCurrentUser();
+        return applicationMapper.mapToCreationDto(
+                applicationService.update(dto, current)
+        );
     }
 
     @Operation(
@@ -102,7 +101,7 @@ public class ApplicationController {
     @GetMapping(FIND_BY_ID)
     public ApplicationCreationDto findById(@PathVariable(name = "id") Long applicationId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(applicationId));
-        return applicationMapper.mapToDto(applicationService.findByIdOrElseThrow(applicationId));
+        return applicationMapper.mapToCreationDto(applicationService.findByIdOrElseThrow(applicationId));
     }
 
     @Operation(
@@ -114,9 +113,8 @@ public class ApplicationController {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_APPLICATION) // checked
-    public void deleteApplication(@PathVariable(value = "id") Long applicationId) {
-        LOGGER.info("ENTER deleteApplication(%d) endpoint".formatted(applicationId));
-        applicationService.delete(applicationId);
+    public void delete(@PathVariable Long id) {
+        applicationService.delete(id);
     }
 
     @Operation(
@@ -133,7 +131,7 @@ public class ApplicationController {
             @PathVariable Long studentId
     ) {
         LOGGER.info("ENTER findByTeamAndStudent(%d, %d) endpoint".formatted(teamId, studentId));
-        return applicationMapper.mapToDto(
+        return applicationMapper.mapToCreationDto(
                 applicationService.findByTeamAndStudentOrElseThrow(teamId, studentId)
         );
     }

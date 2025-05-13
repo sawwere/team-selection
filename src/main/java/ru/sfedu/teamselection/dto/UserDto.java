@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.dto.student.StudentDto;
+import ru.sfedu.teamselection.dto.student.StudentSummaryDto;
 
 /**
  * DTO for {@link ru.sfedu.teamselection.domain.User}
@@ -30,6 +33,8 @@ public class UserDto {
 
     @NotBlank
     private String role;
+
+    private StudentSummaryDto student;
 
     @JsonProperty(value = "is_remind_enabled")
     @NotNull

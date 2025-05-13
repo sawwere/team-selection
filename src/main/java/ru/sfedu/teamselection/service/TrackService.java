@@ -10,6 +10,8 @@ import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.track.TrackCreationDto;
 import ru.sfedu.teamselection.dto.track.TrackDto;
 import ru.sfedu.teamselection.enums.TrackType;
+import ru.sfedu.teamselection.exception.ConstraintViolationException;
+import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.track.TrackCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.track.TrackDtoMapper;
 import ru.sfedu.teamselection.repository.TrackRepository;
@@ -30,8 +32,9 @@ public class TrackService {
      * @return entity with given id
      * @throws NoSuchElementException in case there is no track with such id
      */
-    public Track findByIdOrElseThrow(Long id) throws NoSuchElementException {
-        return trackRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Track with id " + id + " does not exist"));
+    public Track findByIdOrElseThrow(Long id) {
+        return trackRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id.toString()));
     }
 
     public List<TrackDto> findAll()
@@ -41,20 +44,23 @@ public class TrackService {
 
     /**
      * Create a new track
-     * @param trackDto DTO containing track data
+     * @param dto DTO containing track data
      * @return created Track entity
      */
     @Transactional
-    public Track create(TrackCreationDto trackDto) {
-        Track track = trackCreationDtoMapper.mapToEntity(trackDto);
-
-        if (track == null) {
-            throw new IllegalArgumentException("Track cannot be null");
+    public Track create(TrackCreationDto dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("TrackCreationDto must not be null");
         }
+        Track track = trackCreationDtoMapper.mapToEntity(dto);
 
-        if (trackRepository.findByNameIgnoreCaseAndType(track.getName(), track.getType()).isPresent()) {
-            throw new RuntimeException("A track with this name and type already exists");
-        }
+        // проверяем дубликат
+        trackRepository.findByNameIgnoreCaseAndType(track.getName(),track.getType())
+                .ifPresent(t -> {
+                    throw new ConstraintViolationException(
+                            String.format("Track with name '%s' and type '%s' already exists", dto.getName(), dto.getType())
+                    );
+                });
 
         return trackRepository.save(track);
     }
@@ -87,9 +93,7 @@ public class TrackService {
      */
     @Transactional
     public void deleteById(Long id) {
-        if (!trackRepository.existsById(id)) {
-            throw new NoSuchElementException("Track with id " + id + " does not exist");
-        }
-        trackRepository.deleteById(id);
+        Track track = findByIdOrElseThrow(id);
+        trackRepository.delete(track);
     }
 }

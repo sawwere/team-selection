@@ -88,4 +88,4 @@ frontend:
 # /oauth2/authorization/github
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: TRACE

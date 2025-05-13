@@ -98,6 +98,7 @@ public class Student {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
-    @OneToOne(cascade = {CascadeType.MERGE})
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

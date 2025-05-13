@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.OidcUserImpl;
 
 @Component
@@ -26,13 +27,22 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontendUrl}")
     private String frontendUrl;
 
+    private final UserService userService;
+
     @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException {
-        var oAuth2User = (OAuth2User) authentication.getPrincipal();
+        //var oAuth2User = (OAuth2User) authentication.getPrincipal();
+        OAuth2User oidcUser = (OAuth2User) authentication.getPrincipal();
+        String email = oidcUser.getAttribute("email");  // или preferred_username
+
+        // подгружаем из БД
+        User user = userService.findByEmail(email);
+
+
 
         String sessionId = ((WebAuthenticationDetails) authentication.getDetails()).getSessionId();
 
@@ -53,12 +63,12 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             response.addCookie(jSessionIdCookie);
         }
 
-        User user;
-        if (oAuth2User instanceof OidcUserImpl oidcUser) {
-            user = oidcUser.getUser();
-        } else {
-            user = (User) oAuth2User;
-        }
+        //User user;
+        //if (oAuth2User instanceof OidcUserImpl oidcUser) {
+            //user = oidcUser.getUser();
+        //} else {
+            //user = (User) oAuth2User;
+        //}
 
         if (user.getRole().getName().contains("USER")) {
             redirectStrategy.sendRedirect(request, response, frontendUrl + "/registration");

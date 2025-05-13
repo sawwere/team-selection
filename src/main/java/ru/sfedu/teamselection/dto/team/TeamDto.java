@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 
 
@@ -58,7 +59,7 @@ public class TeamDto {
     private String showcaseRef;
 
     @Builder.Default
-    private List<ApplicationCreationDto> applications = new ArrayList<>();
+    private List<ApplicationDto> applications = new ArrayList<>();
 
     @Builder.Default
     private List<TechnologyDto> technologies = new ArrayList<>();

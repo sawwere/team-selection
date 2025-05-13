@@ -935,10 +935,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     }
 
     @Test
-    void findTeamApplications() {
+    void findTeamApplicationsStudents() {
         Long teamId = 4L;
 
-        var actual = underTest.findTeamApplications(teamId);
+        var actual = underTest.findTeamApplicationsStudents(teamId);
 
         Assertions.assertEquals(2, actual.size());
         var resultedStudentIds = actual.stream().map(Student::getId).sorted().toList();
@@ -947,10 +947,10 @@ class ApplicationServiceTest extends BasicTestContainerTest {
 
     @Test
     @Sql(value = "/sql-scripts/create_team_for_history.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void findTeamApplicationsForTeamWithoutApplications() {
+    void findTeamApplicationsForTeamWithoutApplicationsStudents() {
         Long teamId = 1003L;
 
-        var actual = underTest.findTeamApplications(teamId);
+        var actual = underTest.findTeamApplicationsStudents(teamId);
 
         Assertions.assertEquals(0, actual.size());
     }

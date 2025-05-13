@@ -11,6 +11,7 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.application.Application;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -18,6 +19,8 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Long>, JpaSpecificationExecutor<Application> {
 
     boolean existsByTeamIdAndStudentId(Long teamId, Long studentId);
+
+    List<Application> findByTeamId(Long teamId);
 
     Optional<Application> findByTeamIdAndStudentId(Long teamId, Long studentId);
 
@@ -30,4 +33,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     @Modifying
     @Query("update Application a set a.status = ?1 where a.student = ?2 and a.status = 'sent'")
     void updateStatusByStudent(String status, Student student);
+
+
 }

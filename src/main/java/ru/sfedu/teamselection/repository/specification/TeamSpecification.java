@@ -2,8 +2,12 @@ package ru.sfedu.teamselection.repository.specification;
 
 import java.util.List;
 import java.util.Locale;
+
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Technology;
 
 @SuppressWarnings("checkstyle:MultipleStringLiterals")
 public final class TeamSpecification {
@@ -39,15 +43,14 @@ public final class TeamSpecification {
                 );
     }
 
-    public static Specification<Team> byTechnologies(List<Long> technologyIds) {
-        return (root, query, criteriaBuilder) -> {
-            if (technologyIds == null || technologyIds.isEmpty()) {
-                return criteriaBuilder.conjunction(); // do not filter if there is no items in the list
+    public static Specification<Team> byTechnologies(List<Long> technologies) {
+        return (root, cq, cb) -> {
+            if (technologies == null || technologies.isEmpty()) {
+                return cb.conjunction();
             }
-
-            return root.join("technologies")
-                    .get("id")
-                    .in(technologyIds);
+            Join<Team, Technology> join = root.join("technologies", JoinType.LEFT);
+            return join.get("id").in(technologies);
         };
     }
+
 }

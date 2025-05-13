@@ -53,7 +53,8 @@ public class StudentService {
      */
     @Transactional(readOnly = true)
     public Student findByIdOrElseThrow(Long id) throws NotFoundException {
-        return studentRepository.findById(id).orElseThrow();
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Студент не найден, id=" + id));
     }
 
     /**
@@ -119,14 +120,14 @@ public class StudentService {
      */
     @Transactional
     public Student create(StudentCreationDto dto) {
-        User studentUser = userService.findByIdOrElseThrow(dto.getUserId());
-        Role role = roleRepository.findByName("STUDENT").orElseThrow();
-        Student student = studentCreationDtoMapper.mapToEntity(dto);
+        User u = userService.findByIdOrElseThrow(dto.getUserId());
+        var role = roleRepository.findByName("STUDENT")
+                .orElseThrow(() -> new NotFoundException("Роль STUDENT не найдена"));
+        u.setRole(role);
 
-        studentUser.setRole(role);
-        student.setUser(studentUser);
-        studentRepository.save(student);
-        return student;
+        Student st = studentCreationDtoMapper.mapToEntity(dto);
+        st.setUser(u);
+        return studentRepository.save(st);
     }
 
     /**
@@ -136,15 +137,11 @@ public class StudentService {
      */
     @Transactional
     public void delete(Long id) {
-        Student student = findByIdOrElseThrow(id);
-        if (student.getHasTeam()) {
-            try {
-                teamService.removeStudentFromTeam(student.getCurrentTeam(), student);
-            } catch (ConstraintViolationException ex) {
-                throw new ConstraintViolationException("Can't delete student who is a captain");
-            }
+        Student st = findByIdOrElseThrow(id);
+        if (Boolean.TRUE.equals(st.getHasTeam())) {
+            teamService.removeStudentFromTeam(st.getCurrentTeam(), st);
         }
-        studentRepository.delete(findByIdOrElseThrow(id));
+        studentRepository.delete(st);
     }
 
 
@@ -159,22 +156,19 @@ public class StudentService {
      */
     @Transactional
     public Student update(Long id, StudentDto dto, Boolean isUnsafeAllowed) {
-        Student student = findByIdOrElseThrow(id);
+        Student st = findByIdOrElseThrow(id);
 
-        if (isUnsafeAllowed) {
-            student.setHasTeam(dto.getHasTeam());
-            student.setIsCaptain(dto.getIsCaptain());
+        if (Boolean.TRUE.equals(isUnsafeAllowed)) {
+            st.setHasTeam(dto.getHasTeam());
+            st.setIsCaptain(dto.getIsCaptain());
         }
-        // TODO should user be able to change course?
-        // может привести к ошибкам: изменить курс уже после вступления в команду - поломается логика
-        student.setCourse(dto.getCourse());
-        student.setGroupNumber(dto.getGroupNumber());
-        student.setAboutSelf(dto.getAboutSelf());
-        student.setContacts(dto.getContacts());
-        student.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
+        st.setCourse(dto.getCourse());
+        st.setGroupNumber(dto.getGroupNumber());
+        st.setAboutSelf(dto.getAboutSelf());
+        st.setContacts(dto.getContacts());
+        st.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
 
-        studentRepository.save(student);
-        return student;
+        return studentRepository.save(st);
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")
