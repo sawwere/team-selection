@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,9 +38,10 @@ public class TechnologyController {
             summary = "Получение списка всех технологий"
     )
     @GetMapping(FIND_ALL) // checked
-    public List<TechnologyDto> findAll() {
+    public ResponseEntity<List<TechnologyDto>> findAll() {
         log.info("ENTER findAll() endpoint");
-        return technologyDtoMapper.mapListToDto(technologyRepository.findAll());
+        List<TechnologyDto> result = technologyDtoMapper.mapListToDto(technologyRepository.findAll());
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -47,13 +49,15 @@ public class TechnologyController {
             summary = "Создание новой технологии",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность технологии"
-            ),
-            tags = {"ADMIN"}
+            )
     )
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(CREATE_TECHNOLOGY)
-    public TechnologyDto createTechnology(@RequestBody TechnologyDto technology) {
+    public ResponseEntity<TechnologyDto> createTechnology(@RequestBody TechnologyDto technology) {
         log.info("ENTER createTechnology() endpoint");
-        return technologyDtoMapper.mapToDto(technologyRepository.save(technologyDtoMapper.mapToEntity(technology)));
+        TechnologyDto result = technologyDtoMapper.mapToDto(
+                technologyRepository.save(technologyDtoMapper.mapToEntity(technology))
+        );
+        return ResponseEntity.ok(result);
     }
 }

@@ -84,8 +84,7 @@ public class TeamService {
         }
         specification = specification.and(TeamSpecification.byTechnologies(technologies));
 
-        var t= teamRepository.findAll(specification, pageable);
-        return t;
+        return teamRepository.findAll(specification, pageable);
     }
 
     /**
@@ -126,7 +125,7 @@ public class TeamService {
                 technologyRepository.findAllByIdIn(
                         dto.getTechnologies()
                                 .stream()
-                                .map(t -> t.getId())
+                                .map(TechnologyDto::getId)
                                 .toList()
                 )
         );
@@ -140,14 +139,12 @@ public class TeamService {
      */
     @Transactional
     public void delete(Long id) {
-        for (Student teamMember : findByIdOrElseThrow(id).getStudents()) {
-            Team team = findByIdOrElseThrow(id);
-            for (Student member : team.getStudents()) {
-                if (Objects.equals(member.getCurrentTeam().getId(), id)) {
-                    member.setHasTeam(false);
-                    member.setCurrentTeam(null);
-                    member.setIsCaptain(false);
-                }
+        Team team = findByIdOrElseThrow(id);
+        for (Student teamMember : team.getStudents()) {
+            if (Objects.equals(teamMember.getCurrentTeam().getId(), id)) {
+                teamMember.setHasTeam(false);
+                teamMember.setCurrentTeam(null);
+                teamMember.setIsCaptain(false);
             }
             teamRepository.deleteById(id);
         }
@@ -248,7 +245,7 @@ public class TeamService {
         team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
         team.setTechnologies(
                 technologyRepository.findAllByIdIn(
-                        dto.getTechnologies().stream().map(t -> t.getId()).toList()
+                        dto.getTechnologies().stream().map(TechnologyDto::getId).toList()
                 )
         );
 

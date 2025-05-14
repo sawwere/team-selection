@@ -45,7 +45,7 @@ public class UserControllerTest {
     private AzureOidcUserService azureOidcUserService;
 
     @MockitoBean
-    private final UserMapper userMapper = UserMapper.INSTANCE;
+    private UserMapper userMapper;
     @MockitoBean
     private RoleMapper roleDtoMapper;
 

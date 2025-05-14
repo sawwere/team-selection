@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -70,10 +71,12 @@ public class StudentController {
     )
     @GetMapping(GET_SEARCH_OPTIONS)
 
-    public StudentSearchOptionsDto getSearchOptionsStudents() {
-        return studentService.getSearchOptionsStudents();
+    public ResponseEntity<StudentSearchOptionsDto> getSearchOptionsStudents() {
+        StudentSearchOptionsDto result = studentService.getSearchOptionsStudents();
+        return ResponseEntity.ok(result);
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @Operation(
             method = "GET",
             summary = "Поиск студентов с фильтрацией, пагинацией и сортировкой",
@@ -89,7 +92,7 @@ public class StudentController {
                     @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_STUDENTS)
-    public Page<StudentDto> search(
+    public ResponseEntity<Page<StudentDto>> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "course", required = false) Integer course,
             @RequestParam(value = "group_number", required = false) Integer groupNumber,
@@ -107,8 +110,18 @@ public class StudentController {
                 : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
 
-        return studentService.search(like, trackId, course, groupNumber, hasTeam, isCaptain, technologies, pageable)
+        Page<StudentDto> result = studentService.search(
+                        like,
+                        trackId,
+                        course,
+                        groupNumber,
+                        hasTeam,
+                        isCaptain,
+                        technologies,
+                        pageable
+                )
                 .map(studentDtoMapper::mapToDto);
+        return ResponseEntity.ok(result);
     }
 
 
@@ -117,9 +130,10 @@ public class StudentController {
             summary = "Получение списка всех студентов за все время"
     )
     @GetMapping(FIND_ALL) // checked
-    public List<StudentDto> findAll() {
+    public ResponseEntity<List<StudentDto>> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
-        return studentService.findAll().stream().map(studentDtoMapper::mapToDto).toList();
+        List<StudentDto> result = studentService.findAll().stream().map(studentDtoMapper::mapToDto).toList();
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -129,9 +143,10 @@ public class StudentController {
                     description = "Сущность студента"
             ))
     @PostMapping(CREATE_STUDENT) // checked
-    public StudentDto createStudent(@RequestBody StudentCreationDto student) {
+    public ResponseEntity<StudentDto> createStudent(@RequestBody StudentCreationDto student) {
         LOGGER.info("ENTER createUser() endpoint");
-        return studentDtoMapper.mapToDto(studentService.create(student));
+        StudentDto result = studentDtoMapper.mapToDto(studentService.create(student));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -160,12 +175,13 @@ public class StudentController {
     @PutMapping(value = UPDATE_STUDENT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public StudentDto updateStudent(@PathVariable(value = "id") Long studentId,
+    public ResponseEntity<StudentDto> updateStudent(@PathVariable(value = "id") Long studentId,
                                   @RequestBody StudentDto student) {
         LOGGER.info("ENTER updateStudent(%d) endpoint".formatted(studentId));
         User user = userService.getCurrentUser();
         boolean isUnsafeAllowed = user.getRole().getName().equals("ADMIN");
-        return studentDtoMapper.mapToDto(studentService.update(studentId, student, isUnsafeAllowed));
+        StudentDto result = studentDtoMapper.mapToDto(studentService.update(studentId, student, isUnsafeAllowed));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -176,9 +192,10 @@ public class StudentController {
             }
     )
     @GetMapping(FIND_BY_ID) // checked
-    public StudentDto findById(@PathVariable(name = "id") Long studentId) {
+    public ResponseEntity<StudentDto> findById(@PathVariable(name = "id") Long studentId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(studentId));
-        return studentDtoMapper.mapToDto(studentService.findByIdOrElseThrow(studentId));
+        StudentDto result = studentDtoMapper.mapToDto(studentService.findByIdOrElseThrow(studentId));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -196,9 +213,10 @@ public class StudentController {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_STUDENT) // checked
-    public void deleteStudent(@PathVariable(value = "id") Long studentId) {
+    public ResponseEntity<Void> deleteStudent(@PathVariable(value = "id") Long studentId) {
         LOGGER.info("ENTER deleteStudent(%d) endpoint".formatted(studentId));
         studentService.delete(studentId);
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -213,13 +231,19 @@ public class StudentController {
             }
     )
     @GetMapping(FIND_TEAM_HISTORY) // checked
-    public List<TeamDto> getTeamHistory(@PathVariable(value = "id") Long studentId) {
+    public ResponseEntity<List<TeamDto>> getTeamHistory(@PathVariable(value = "id") Long studentId) {
         LOGGER.info("ENTER getTeamHistory(%d) endpoint".formatted(studentId));
-        return teamService.getTeamHistoryForStudent(studentId).stream().map(teamDtoMapper::mapToDto).toList();
+        List<TeamDto> result = teamService
+                .getTeamHistoryForStudent(studentId)
+                .stream()
+                .map(teamDtoMapper::mapToDto)
+                .toList();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(GET_STUDENT_ID_BY_CURRENT_USER)
-    public Long getCurrentStudentId() {
-        return studentService.getCurrentStudent();
+    public ResponseEntity<Long> getCurrentStudentId() {
+        Long result = studentService.getCurrentStudent();
+        return ResponseEntity.ok(result);
     }
 }

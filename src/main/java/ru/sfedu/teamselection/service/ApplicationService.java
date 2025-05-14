@@ -118,7 +118,7 @@ public class ApplicationService {
             return update(dto, sender);
         }
         applicationValidator.validateCreate(dto, sender);
-        var app = applicationMapper.mapToCreationEntity(dto);
+        var app = applicationMapper.mapCreationToEntity(dto);
         app.setStatus(SENT.name());
         app.setStudent(studentService.findByIdOrElseThrow(dto.getStudentId()));
         app.setTeam(teamService.findByIdOrElseThrow(dto.getTeamId()));

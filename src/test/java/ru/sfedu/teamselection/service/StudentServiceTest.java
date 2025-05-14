@@ -12,6 +12,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -59,6 +63,16 @@ class StudentServiceTest extends BasicTestContainerTest {
 
     @Autowired
     private TechnologyMapper technologyDtoMapper;
+
+    private final int defaultPage = 0;
+    private final int defaultPageSize = 10;
+    private final Sort.Direction defaultDirection = Sort.Direction.ASC;
+    private final String defaultSort = "name";
+    private final Pageable pageable = PageRequest.of(
+            defaultPage,
+            defaultPageSize,
+            Sort.by(defaultDirection, defaultSort)
+    );
 
 
     @BeforeEach
@@ -151,20 +165,22 @@ class StudentServiceTest extends BasicTestContainerTest {
     void searchByLike() {
         String like = "Серг";
 
-        List<Student> actual = underTest.search(
+        Page<Student> actual = underTest.search(
                 like,
                 null,
                 null,
                 null,
                 null,
-                null
+                null,
+                List.of(),
+                pageable
         );
 
         for (Student student : actual) {
             Assertions.assertTrue(student.getUser().getFio().contains(like));
         }
 
-        Assertions.assertEquals(5, actual.size());
+        Assertions.assertEquals(5, actual.getTotalElements());
     }
 
     @Test
@@ -172,20 +188,22 @@ class StudentServiceTest extends BasicTestContainerTest {
     void searchByCourse() {
         Integer courseParam = 1;
 
-        List<Student> actual = underTest.search(
+        Page<Student> actual = underTest.search(
+                null,
                 null,
                 courseParam,
                 null,
                 null,
                 null,
-                null
+                List.of(),
+                pageable
         );
 
         for (Student student : actual) {
             Assertions.assertEquals(courseParam, student.getCourse());
         }
 
-        Assertions.assertEquals(8, actual.size());
+        Assertions.assertEquals(8, actual.getTotalElements());
     }
 
     @Test
@@ -193,20 +211,22 @@ class StudentServiceTest extends BasicTestContainerTest {
     void searchByGroup() {
         Integer groupParam = 1;
 
-        List<Student> actual = underTest.search(
+        Page<Student> actual = underTest.search(
+                null,
                 null,
                 null,
                 groupParam,
                 null,
                 null,
-                null
+                null,
+                pageable
         );
 
         for (Student student : actual) {
             Assertions.assertEquals(groupParam, student.getGroupNumber());
         }
 
-        Assertions.assertEquals(19, actual.size());
+        Assertions.assertEquals(19, actual.getTotalElements());
     }
 
     @Test
@@ -214,20 +234,22 @@ class StudentServiceTest extends BasicTestContainerTest {
     void searchByHasTeam() {
         Boolean hasTeamParam = true;
 
-        List<Student> actual = underTest.search(
+        Page<Student> actual = underTest.search(
+                null,
                 null,
                 null,
                 null,
                 hasTeamParam,
                 null,
-                null
+                null,
+                pageable
         );
 
         for (Student student : actual) {
             Assertions.assertEquals(hasTeamParam, student.getHasTeam());
         }
 
-        Assertions.assertEquals(11, actual.size());
+        Assertions.assertEquals(11, actual.getTotalElements());
     }
 
     @Test
@@ -235,20 +257,22 @@ class StudentServiceTest extends BasicTestContainerTest {
     void searchByIsCaptain() {
         Boolean isCaptainParam = true;
 
-        List<Student> actual = underTest.search(
+        Page<Student> actual = underTest.search(
+                null,
                 null,
                 null,
                 null,
                 null,
                 isCaptainParam,
-                null
+                null,
+                pageable
         );
 
         for (Student student : actual) {
             Assertions.assertEquals(isCaptainParam, student.getIsCaptain());
         }
 
-        Assertions.assertEquals(4, actual.size());
+        Assertions.assertEquals(4, actual.getTotalElements());
     }
 
     @Test
@@ -256,13 +280,15 @@ class StudentServiceTest extends BasicTestContainerTest {
     void searchByTechnologies() {
         List<Long> technologiesParam = List.of(1L, 2L, 5L);
 
-        List<Student> actual = underTest.search(
+        Page<Student> actual = underTest.search(
                 null,
                 null,
                 null,
                 null,
                 null,
-                List.of(1L, 2L, 5L)
+                null,
+                List.of(1L, 2L, 5L),
+                pageable
         );
 
         for (Student student : actual) {
@@ -273,7 +299,7 @@ class StudentServiceTest extends BasicTestContainerTest {
             );
         }
 
-        Assertions.assertEquals(7, actual.size());
+        Assertions.assertEquals(7, actual.getTotalElements());
     }
 
     @Test

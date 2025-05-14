@@ -1,13 +1,13 @@
 package ru.sfedu.teamselection.mapper.application;
 
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.ObjectFactory;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
+import org.mapstruct.ObjectFactory;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingConstants;
 import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.domain.application.TeamInvite;
 import ru.sfedu.teamselection.domain.application.TeamRequest;
@@ -26,9 +26,9 @@ public interface ApplicationMapper {
     @Mapping(source = "teamId",    target = "team.id")
     @Mapping(source = "studentId", target = "student.id")
     @Mapping(target = "status",    qualifiedByName = "mapStatus")
-    Application mapToCreationEntity(ApplicationCreationDto dto);
+    Application mapCreationToEntity(ApplicationCreationDto dto);
 
-    @InheritInverseConfiguration(name = "mapToCreationEntity")
+    @InheritInverseConfiguration(name = "mapCreationToEntity")
     @Mapping(target = "status", qualifiedByName = "mapStatus")
     ApplicationCreationDto mapToCreationDto(Application entity);
 

@@ -1,6 +1,5 @@
 package ru.sfedu.teamselection.controller;
 
-import com.azure.core.annotation.Get;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -13,11 +12,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
 import ru.sfedu.teamselection.dto.UserDto;
@@ -33,6 +40,7 @@ import ru.sfedu.teamselection.service.UserService;
 @CrossOrigin
 public class UserController {
     public static final String CURRENT_USER = "/api/v1/users/me";
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String PUT_USER = "/api/v1/users";
     public static final String FIND_USERS = "/api/v1/users";
     public static final String DELETE_USER = "/api/v1/users/{id}";
@@ -68,8 +76,9 @@ public class UserController {
     @PutMapping(value = PUT_USER,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserDto putUser(@RequestBody @Valid UserDto userDto) {
-        return userMapper.mapToDto(userService.createOrUpdate(userDto));
+    public ResponseEntity<UserDto> putUser(@RequestBody @Valid UserDto userDto) {
+        UserDto result = userMapper.mapToDto(userService.createOrUpdate(userDto));
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -81,9 +90,10 @@ public class UserController {
             summary = "Получение текущего пользователя"
     )
     @GetMapping(CURRENT_USER)
-    public UserDto getCurrentUser() {
+    public ResponseEntity<UserDto> getCurrentUser() {
         User currentUser = userService.getCurrentUser();
-        return userMapper.mapToDto(currentUser);
+        UserDto result = userMapper.mapToDto(currentUser);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -131,8 +141,9 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @GetMapping(FIND_USERS)
-    public Page<UserDto> searchUsers(
+    public ResponseEntity<Page<UserDto>> searchUsers(
             @RequestParam(value = "fio",         required = false) String  fio,
             @RequestParam(value = "email",       required = false) String  email,
             @RequestParam(value = "role",        required = false) String  role,
@@ -160,7 +171,8 @@ public class UserController {
                 : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, parts[0]));
 
-        return userService.search(criteria, pageable);
+        Page<UserDto> result = userService.search(criteria, pageable);
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Удалить пользователя", tags = {"ADMIN"})
@@ -168,7 +180,7 @@ public class UserController {
     @DeleteMapping(DELETE_USER)
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deactivateUser(id);
-        return ResponseEntity.ok("User with id: "+id+"was deleted");
+        return ResponseEntity.ok("User with id: " + id + "was deleted");
     }
 
 }

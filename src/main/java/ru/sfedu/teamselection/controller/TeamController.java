@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -71,8 +72,9 @@ public class TeamController {
             summary = "Получение списка возможных опций для поиска среди команд заданного трека"
     )
     @GetMapping(GET_SEARCH_OPTIONS)
-    public TeamSearchOptionsDto getSearchOptionsTeams(@RequestParam(value = "track_id") Long trackId) {
-        return teamService.getSearchOptionsTeams(trackId);
+    public ResponseEntity<TeamSearchOptionsDto> getSearchOptionsTeams(@RequestParam(value = "track_id") Long trackId) {
+        TeamSearchOptionsDto result = teamService.getSearchOptionsTeams(trackId);
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -80,11 +82,13 @@ public class TeamController {
             summary = "Получение списка всех команд за все время"
     )
     @GetMapping(FIND_ALL) // checked
-    public List<TeamDto> findAll() {
+    public ResponseEntity<List<TeamDto>> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
-        return teamService.findAll().stream().map(teamDtoMapper::mapToDto).toList();
+        List<TeamDto> result = teamService.findAll().stream().map(teamDtoMapper::mapToDto).toList();
+        return ResponseEntity.ok(result);
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @Operation(
             method = "GET",
             summary = "Поиск команд с фильтрацией, пагинацией и сортировкой",
@@ -99,7 +103,7 @@ public class TeamController {
                     @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_TEAMS)
-    public Page<TeamDto> search(
+    public ResponseEntity<Page<TeamDto>> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "track_id", required = false) Long trackId,
             @RequestParam(value = "is_full", required = false) Boolean isFull,
@@ -115,8 +119,9 @@ public class TeamController {
                 : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
 
-        return teamService.search(like, trackId, isFull, projectType, technologies, pageable)
+        Page<TeamDto> result = teamService.search(like, trackId, isFull, projectType, technologies, pageable)
                 .map(teamDtoMapper::mapToDto);
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -128,9 +133,10 @@ public class TeamController {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_TEAM) // checked
-    public void deleteTeam(@PathVariable(value = "id") Long teamId) {
+    public ResponseEntity<Void> deleteTeam(@PathVariable(value = "id") Long teamId) {
         LOGGER.info("ENTER deleteTeam(%d) endpoint".formatted(teamId));
         teamService.delete(teamId);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
@@ -141,9 +147,10 @@ public class TeamController {
             }
     )
     @GetMapping(FIND_BY_ID) // checked
-    public TeamDto findById(@PathVariable(name = "id") Long teamId) {
+    public ResponseEntity<TeamDto> findById(@PathVariable(name = "id") Long teamId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(teamId));
-        return teamDtoMapper.mapToDto(teamService.findByIdOrElseThrow(teamId));
+        TeamDto result = teamDtoMapper.mapToDto(teamService.findByIdOrElseThrow(teamId));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -153,12 +160,13 @@ public class TeamController {
                     @Parameter(name = "id", description = "id команды", in = ParameterIn.PATH),
             })
     @GetMapping(FIND_APPLICANTS_BY_ID)
-    public List<StudentDto> findApplicantsById(@PathVariable(value = "id") Long teamId) {
+    public ResponseEntity<List<StudentDto>> findApplicantsById(@PathVariable(value = "id") Long teamId) {
         LOGGER.info("ENTER findApplicantsById(%d) endpoint".formatted(teamId));
-        return applicationService.findTeamApplicationsStudents(teamId)
+        List<StudentDto> result = applicationService.findTeamApplicationsStudents(teamId)
                 .stream()
                 .map(studentDtoMapper::mapToDto)
                 .toList();
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -169,9 +177,10 @@ public class TeamController {
             )
     )
     @PostMapping(CREATE_TEAM)
-    public TeamDto createTeam(@RequestBody TeamCreationDto team) {
+    public ResponseEntity<TeamDto> createTeam(@RequestBody TeamCreationDto team) {
         LOGGER.info("ENTER createTeam() endpoint");
-        return teamDtoMapper.mapToDto(teamService.create(team));
+        TeamDto result = teamDtoMapper.mapToDto(teamService.create(team));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -193,9 +202,10 @@ public class TeamController {
     )
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping(ADD_STUDENT_TO_TEAM)
-    public TeamDto addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
+    public ResponseEntity<TeamDto> addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
-        return teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId));
+        TeamDto result = teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -221,10 +231,11 @@ public class TeamController {
                     description = "Сущность команды"
             ))
     @PutMapping(UPDATE_TEAM)
-    public TeamDto updateTeam(@PathVariable(value = "id") Long teamId,
+    public ResponseEntity<TeamDto> updateTeam(@PathVariable(value = "id") Long teamId,
                                     @RequestBody TeamDto team) {
         LOGGER.info("ENTER updateTeam(%d) endpoint".formatted(teamId));
         User user = userService.getCurrentUser();
-        return teamDtoMapper.mapToDto(teamService.update(teamId, team, user));
+        TeamDto result = teamDtoMapper.mapToDto(teamService.update(teamId, team, user));
+        return ResponseEntity.ok(result);
     }
 }

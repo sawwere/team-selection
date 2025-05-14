@@ -1,7 +1,6 @@
 package ru.sfedu.teamselection.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import ru.sfedu.teamselection.domain.application.TeamInvite;
 import ru.sfedu.teamselection.domain.application.TeamRequest;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
+import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
@@ -75,7 +75,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(17L).orElseThrow())
         );
     }
@@ -93,7 +93,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(19L).orElseThrow())
         );
     }
@@ -135,7 +135,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(5L).orElseThrow())
         );
     }
@@ -149,7 +149,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(19L).orElseThrow())
         );
     }
@@ -164,7 +164,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(8L).orElseThrow())
         );
     }
@@ -179,7 +179,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(12L).orElseThrow())
         );
     }
@@ -194,7 +194,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamRequest.builder()
-                .status("sent")
+                .status("SENT")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -216,7 +216,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamInvite.builder()
-                .status("sent")
+                .status("SENT")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -242,7 +242,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamRequest.builder()
-                .status("sent")
+                .status("SENT")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -267,7 +267,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamInvite.builder()
-                .status("sent")
+                .status("SENT")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -289,7 +289,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(NoSuchElementException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(5L).orElseThrow())
         );
     }
@@ -304,7 +304,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(NoSuchElementException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(3L).orElseThrow())
         );
     }
@@ -320,7 +320,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamRequest.builder()
-                .status("rejected")
+                .status("REJECTED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -341,7 +341,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(9L).orElseThrow())
         );
     }
@@ -363,7 +363,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.create(dto, userRepository.findById(9L).orElseThrow())
         );
     }
@@ -416,7 +416,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamRequest.builder()
-                .status("rejected")
+                .status("REJECTED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -450,7 +450,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamInvite.builder()
-                .status("rejected")
+                .status("REJECTED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -557,7 +557,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamRequest.builder()
-                .status("accepted")
+                .status("ACCEPTED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -592,7 +592,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamInvite.builder()
-                .status("accepted")
+                .status("ACCEPTED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -626,7 +626,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamRequest.builder()
-                .status("accepted")
+                .status("ACCEPTED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -664,7 +664,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamInvite.builder()
-                .status("accepted")
+                .status("ACCEPTED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -694,7 +694,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(3L).orElseThrow())
         );
     }
@@ -718,7 +718,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(8L).orElseThrow())
         );
     }
@@ -737,7 +737,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(22L).orElseThrow())
         );
     }
@@ -812,7 +812,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(15L).orElseThrow())
         );
     }
@@ -834,7 +834,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(19L).orElseThrow())
         );
     }
@@ -849,7 +849,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(15L).orElseThrow())
         );
     }
@@ -871,7 +871,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(ConstraintViolationException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(2L).orElseThrow())
         );
     }
@@ -887,7 +887,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamRequest.builder()
-                .status("cancelled")
+                .status("CANCELLED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
@@ -919,7 +919,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .build();
 
         Application expected = TeamInvite.builder()
-                .status("cancelled")
+                .status("CANCELLED")
                 .student(Student.builder().id(dto.getStudentId()).build())
                 .team(Team.builder().id(dto.getTeamId()).build())
                 .build();
