@@ -55,7 +55,7 @@ public class ApplicationValidator {
         if (app == null) {
             throw new ResourceNotFoundException("Application", dto.getId());
         }
-        if (app.getStatus().equals(ApplicationStatus.ACCEPTED.toString())) {
+        if (app.getStatus().toLowerCase().equals(ApplicationStatus.ACCEPTED.toString())) {
             throw new BusinessException("Невозможно изменить статус принятой заявки");
         }
         var sender = studentService.findByIdOrElseThrow(app.getSenderId());
@@ -72,7 +72,7 @@ public class ApplicationValidator {
                 validateSenderIsTarget(app, requestSender);
             }
             case CANCELLED -> {
-                if (!app.getStatus().equals(ApplicationStatus.SENT.toString())) {
+                if (!app.getStatus().toLowerCase().equals(ApplicationStatus.SENT.toString())) {
                     throw new BusinessException(
                             "Заявку можно отменить только если она находится в статусе Отправлено"
                     );
