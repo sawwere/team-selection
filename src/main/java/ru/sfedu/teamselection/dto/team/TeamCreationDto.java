@@ -12,13 +12,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 
-
 @Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamCreationDto {
+
+    private Long id;
 
     private String name;
 

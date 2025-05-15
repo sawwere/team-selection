@@ -1,7 +1,11 @@
 package ru.sfedu.teamselection.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +16,7 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
+import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
@@ -25,7 +30,6 @@ import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.TeamSpecification;
-
 
 @RequiredArgsConstructor
 @Service
@@ -220,6 +224,7 @@ public class TeamService {
      * @return updated entity
      * @apiNote   possibly UNSAFE
      */
+    @Transactional
     public Team update(Long id, TeamDto dto, User sender) {
         Team team = findByIdOrElseThrow(id);
 
@@ -230,6 +235,7 @@ public class TeamService {
         if (!isAdmin && !isCaptainOfThis) {
             throw new ForbiddenException("Only admin or the team’s captain can modify this team");
         }
+
 
         if (isAdmin) {
             team.setName(dto.getName());
@@ -249,8 +255,31 @@ public class TeamService {
                 )
         );
 
+
+        List<Long> newStudentIds = dto.getStudents().stream()
+                .map(StudentDto::getId)
+                .toList();
+        Set<Long> currentIds = team.getStudents().stream()
+                .map(Student::getId)
+                .collect(Collectors.toSet());
+
+        for (Student s : new ArrayList<>(team.getStudents())) {
+            if (!newStudentIds.contains(s.getId())) {
+
+                removeStudentFromTeam(team, s);
+            }
+        }
+
+        for (Long sid : newStudentIds) {
+            if (!currentIds.contains(sid)) {
+                Student student = studentService.findByIdOrElseThrow(sid);
+                addStudentToTeam(team, student);
+            }
+        }
+
         return teamRepository.save(team);
     }
+
 
     /**
      * Performs search across all students with given filter criteria

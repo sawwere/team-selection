@@ -33,6 +33,7 @@ public class TeamCreationDtoMapper implements DtoMapper<TeamCreationDto, Team> {
     @Override
     public TeamCreationDto mapToDto(Team entity) {
         return TeamCreationDto.builder()
+                .id(entity.getId())
                 .name(entity.getName())
                 .projectDescription(entity.getProjectDescription())
                 .projectType(projectTypeDtoMapper.mapToDto(entity.getProjectType()))

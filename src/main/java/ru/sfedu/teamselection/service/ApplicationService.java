@@ -29,7 +29,6 @@ import static ru.sfedu.teamselection.enums.ApplicationStatus.*;
 public class ApplicationService {
     private static final Logger LOGGER = Logger.getLogger(ApplicationService.class.getName());
 
-    private final EntityManager entityManager;
     private final ApplicationRepository applicationRepository;
 
     private final StudentService studentService;
@@ -76,8 +75,8 @@ public class ApplicationService {
 
     //public List<ApplicationDto> findTeamApplications(Long teamId)
     //{
-     //   return applicationRepository.findByTeamId(teamId).stream().map(x->applicationMapper.mapToDto(x)).toList();
-  //  }
+    //   return applicationRepository.findByTeamId(teamId).stream().map(x->applicationMapper.mapToDto(x)).toList();
+    //  }
 
 
 
