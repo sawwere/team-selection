@@ -1,6 +1,5 @@
 package ru.sfedu.teamselection.service;
 
-import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -29,7 +28,6 @@ import static ru.sfedu.teamselection.enums.ApplicationStatus.*;
 public class ApplicationService {
     private static final Logger LOGGER = Logger.getLogger(ApplicationService.class.getName());
 
-    private final EntityManager entityManager;
     private final ApplicationRepository applicationRepository;
 
     private final StudentService studentService;

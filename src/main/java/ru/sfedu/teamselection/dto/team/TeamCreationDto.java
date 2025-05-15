@@ -20,6 +20,8 @@ import ru.sfedu.teamselection.dto.TechnologyDto;
 @AllArgsConstructor
 public class TeamCreationDto {
 
+    private Long id;
+
     private String name;
 
     @JsonProperty(value = "project_description")
