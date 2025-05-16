@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.logging.Logger;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,13 +30,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamUpdateDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.TeamExportService;
 import ru.sfedu.teamselection.service.TeamService;
@@ -70,6 +76,8 @@ public class TeamController {
     public static final String GET_SEARCH_OPTIONS = "/api/v1/teams/filters";
 
     private final TeamExportService teamExportService;
+
+    private final TeamUpdateDtoMapper teamUpdateDtoMapper;
 
 
     @Operation(
@@ -262,11 +270,18 @@ public class TeamController {
                     description = "Сущность команды"
             ))
     @PutMapping(UPDATE_TEAM)
-    public ResponseEntity<TeamDto> updateTeam(@PathVariable(value = "id") Long teamId,
-                                    @RequestBody TeamDto team) {
-        LOGGER.info("ENTER updateTeam(%d) endpoint".formatted(teamId));
+    public ResponseEntity<TeamDto> updateTeam(
+            @PathVariable Long id,
+            @RequestBody @Valid TeamUpdateDto dto
+    ) {
+        if (!id.equals(dto.getId())) {
+            return ResponseEntity.badRequest().build();
+        }
+
         User user = userService.getCurrentUser();
-        TeamDto result = teamDtoMapper.mapToDto(teamService.update(teamId, team, user));
+        Team partial = teamUpdateDtoMapper.toEntity(dto);
+        Team updated = teamService.update(id, partial, dto.getStudentIds(), user);
+        TeamDto result = teamDtoMapper.mapToDto(updated);
         return ResponseEntity.ok(result);
     }
 }

@@ -1,9 +1,6 @@
 package ru.sfedu.teamselection.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
@@ -224,66 +222,64 @@ public class TeamService {
      * Updates entity using data given in dto
      * # WARNING: unsafe method. No business-logic validation is performed here depending on sender authorities.
      * @param id id of entity
-     * @param dto dto containing updated values
      * @return updated entity
      * @apiNote   possibly UNSAFE
      */
     @Transactional
-    public Team update(Long id, TeamDto dto, User sender) {
-        Team team = findByIdOrElseThrow(id);
+    public Team update(Long id,
+                       Team partial,
+                       List<Long> studentIds,
+                       User sender) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Team not found " + id));
 
-        boolean isAdmin = sender.getRole().getName().equals("ADMIN");
-        boolean isCaptainOfThis = sender.getId()
+        boolean isAdmin   = sender.getRole().getName().equals("ADMIN");
+        boolean isCaptain = sender.getId()
                 .equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId());
 
-        if (!isAdmin && !isCaptainOfThis) {
-            throw new ForbiddenException("Only admin or the team’s captain can modify this team");
+        if (!isAdmin && !isCaptain) {
+            throw new ForbiddenException("Only admin or captain");
         }
 
-
+        // Только admin может менять эти поля:
         if (isAdmin) {
-            team.setName(dto.getName());
-            team.setQuantityOfStudents(dto.getQuantityOfStudents());
-            team.setIsFull(dto.getIsFull());
-            if (!Objects.equals(dto.getCurrentTrackId(), team.getCurrentTrack().getId())) {
-                team.setCurrentTrack(trackService.findByIdOrElseThrow(dto.getCurrentTrackId()));
+            team.setName(partial.getName());
+            team.setIsFull(partial.getIsFull());
+            if (!Objects.equals(partial.getCurrentTrack().getId(),
+                    team.getCurrentTrack().getId())) {
+                team.setCurrentTrack(
+                        trackService.findByIdOrElseThrow(partial.getCurrentTrack().getId())
+                );
             }
-            team.setCaptainId(dto.getCaptain().getId());
+            team.setCaptainId(partial.getCaptainId());
         }
 
-        team.setProjectDescription(dto.getProjectDescription());
-        team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
+        // Всегда можно менять:
+        team.setProjectDescription(partial.getProjectDescription());
+        team.setProjectType(partial.getProjectType());
         team.setTechnologies(
                 technologyRepository.findAllByIdIn(
-                        dto.getTechnologies().stream().map(TechnologyDto::getId).toList()
+                        partial.getTechnologies()
+                                .stream()
+                                .map(Technology::getId)
+                                .collect(Collectors.toList())
                 )
         );
 
-
-        List<Long> newStudentIds = dto.getStudents().stream()
-                .map(StudentDto::getId)
-                .toList();
-        Set<Long> currentIds = team.getStudents().stream()
-                .map(Student::getId)
-                .collect(Collectors.toSet());
-
-        for (Student s : new ArrayList<>(team.getStudents())) {
-            if (!newStudentIds.contains(s.getId())) {
-
-                removeStudentFromTeam(team, s);
-            }
-        }
-
-        for (Long sid : newStudentIds) {
-            if (!currentIds.contains(sid)) {
-                Student student = studentService.findByIdOrElseThrow(sid);
-                addStudentToTeam(team, student);
+        // Обновление списка студентов по incoming studentIds:
+        Set<Long> toKeep = new HashSet<>(studentIds);
+        // Удаляем «старых»:
+        team.getStudents().removeIf(s -> !toKeep.contains(s.getId()));
+        // Добавляем «новых»:
+        for (Long sid : studentIds) {
+            if (team.getStudents().stream().noneMatch(s -> s.getId().equals(sid))) {
+                Student newS = studentService.findByIdOrElseThrow(sid);
+                team.getStudents().add(newS);
             }
         }
 
         return teamRepository.save(team);
     }
-
 
     /**
      * Performs search across all students with given filter criteria
