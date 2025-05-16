@@ -55,6 +55,12 @@ public class StudentService {
                 .orElseThrow(() -> new NotFoundException("Студент не найден, id=" + id));
     }
 
+    @Transactional(readOnly = true)
+    public List<Student> findAllByTrack(Long trackId, Sort sort) {
+        Specification<Student> spec = StudentSpecification.byTrack(trackId);
+        return studentRepository.findAll(spec, sort);
+    }
+
     /**
      * Find all students
      * @return page of students
@@ -64,6 +70,7 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Page<Student> search(String like,
                                 Long trackId,
                                 Integer course,
@@ -73,40 +80,43 @@ public class StudentService {
                                 List<Long> technologies,
                                 Pageable pageable) {
 
-        Specification<Student> specification = Specification.allOf();
+        Specification<Student> spec = (root, query, cb) -> cb.conjunction();
 
         if (like != null) {
-            specification = specification.and(StudentSpecification.like(like));
+            spec = spec.and(StudentSpecification.like(like));
         }
-
         if (trackId != null) {
-            specification = specification.and(StudentSpecification.byTrack(trackId));
+            spec = spec.and(StudentSpecification.byTrack(trackId));
         }
         if (course != null) {
-            specification = specification.and(StudentSpecification.byCourse(course));
+            spec = spec.and(StudentSpecification.byCourse(course));
         }
         if (groupNumber != null) {
-            specification = specification.and(StudentSpecification.byGroup(groupNumber));
+            spec = spec.and(StudentSpecification.byGroup(groupNumber));
         }
         if (hasTeam != null) {
-            specification = specification.and(StudentSpecification.byHasTeam(hasTeam));
+            spec = spec.and(StudentSpecification.byHasTeam(hasTeam));
         }
         if (isCaptain != null) {
-            specification = specification.and(StudentSpecification.byIsCaptain(isCaptain));
+            spec = spec.and(StudentSpecification.byIsCaptain(isCaptain));
         }
-        specification = specification.and(StudentSpecification.hasTechnologies(technologies));
+        if (technologies != null && !technologies.isEmpty()) {
+            spec = spec.and(StudentSpecification.hasTechnologies(technologies));
+        }
 
         Sort sort = pageable.getSort();
         for (Sort.Order order : sort) {
             if ("name".equals(order.getProperty())) {
-                Pageable newPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                        Sort.by(order.getDirection(), "user.fio"));
-                Page<Student> st = studentRepository.findAll(specification, newPageable);
-                return studentRepository.findAll(specification, newPageable);
+                pageable = PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        Sort.by(order.getDirection(), "user.fio")
+                );
+                break;
             }
         }
 
-        return studentRepository.findAll(specification, pageable);
+        return studentRepository.findAll(spec, pageable);
     }
 
 

@@ -31,7 +31,6 @@ import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.TeamSpecification;
 
-
 @RequiredArgsConstructor
 @Service
 public class TeamService {

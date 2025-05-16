@@ -74,8 +74,8 @@ public class ApplicationService {
 
     //public List<ApplicationDto> findTeamApplications(Long teamId)
     //{
-     //   return applicationRepository.findByTeamId(teamId).stream().map(x->applicationMapper.mapToDto(x)).toList();
-  //  }
+    //   return applicationRepository.findByTeamId(teamId).stream().map(x->applicationMapper.mapToDto(x)).toList();
+    //  }
 
 
 

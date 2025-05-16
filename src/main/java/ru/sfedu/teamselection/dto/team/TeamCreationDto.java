@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 
-
 @Builder
 @Getter
 @Setter

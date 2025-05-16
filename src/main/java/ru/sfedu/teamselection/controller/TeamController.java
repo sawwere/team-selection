@@ -11,7 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,6 +35,7 @@ import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
+import ru.sfedu.teamselection.service.TeamExportService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 
@@ -65,6 +68,8 @@ public class TeamController {
     public static final String ADD_STUDENT_TO_TEAM = "/api/v1/teams/{teamId}/students/{studentId}";
 
     public static final String GET_SEARCH_OPTIONS = "/api/v1/teams/filters";
+
+    private final TeamExportService teamExportService;
 
 
     @Operation(
@@ -167,6 +172,32 @@ public class TeamController {
                 .map(studentDtoMapper::mapToDto)
                 .toList();
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = "/api/v1/teams/export/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> exportTeamsCsv(
+            @RequestParam("trackId") Long trackId) {
+        byte[] data = teamExportService.exportTeamsToCsvByTrack(trackId);
+        String filename = "teams_track_" + trackId + ".csv";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(data);
+    }
+
+    @GetMapping(value = "/api/v1/teams/export/excel", produces =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    public ResponseEntity<byte[]> exportTeamsExcel(
+            @RequestParam("trackId") Long trackId) {
+        byte[] data = teamExportService.exportTeamsToExcelByTrack(trackId);
+        String filename = "teams_track_" + trackId + ".xlsx";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(data);
     }
 
     @Operation(

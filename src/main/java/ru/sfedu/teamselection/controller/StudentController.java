@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.service.StudentExportService;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
@@ -65,6 +67,8 @@ public class StudentController {
     private final StudentDtoMapper studentDtoMapper;
     private final TeamDtoMapper teamDtoMapper;
 
+    private final StudentExportService studentExportService;
+
     @Operation(
             method = "GET",
             summary = "Получение списка возможных опций для поиска среди студентов"
@@ -75,6 +79,38 @@ public class StudentController {
         StudentSearchOptionsDto result = studentService.getSearchOptionsStudents();
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * Экспорт студентов в CSV по заданному треку.
+     */
+    @Operation(method = "GET", summary = "Экспорт студентов в CSV по trackId")
+    @GetMapping(value = "/api/v1/students/export/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> exportCsvByTrack(
+            @RequestParam("trackId") Long trackId) {
+        byte[] csvData = studentExportService.exportStudentsToCsvByTrack(trackId);
+        String filename = "students_track_" + trackId + ".csv";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvData);
+    }
+
+    /**
+     * Экспорт студентов в Excel по заданному треку.
+     */
+    @Operation(method = "GET", summary = "Экспорт студентов в Excel по trackId")
+    @GetMapping(value = "/api/v1/students/export/excel", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    public ResponseEntity<byte[]> exportExcelByTrack(
+            @RequestParam("trackId") Long trackId) {
+        byte[] xlsxData = studentExportService.exportStudentsToExcelByTrack(trackId);
+        String filename = "students_track_" + trackId + ".xlsx";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(xlsxData);
+    }
+
 
     @SuppressWarnings("checkstyle:ParameterNumber")
     @Operation(
@@ -121,6 +157,7 @@ public class StudentController {
                         pageable
                 )
                 .map(studentDtoMapper::mapToDto);
+        var r = result;
         return ResponseEntity.ok(result);
     }
 
