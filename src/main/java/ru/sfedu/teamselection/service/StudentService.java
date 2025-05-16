@@ -32,7 +32,9 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final TechnologyRepository technologyRepository;
 
-    private final UserService userService;
+    @Lazy
+    @Autowired
+    private UserService userService;
 
     private final StudentCreationDtoMapper studentCreationDtoMapper;
     private final TechnologyMapper technologyDtoMapper;
