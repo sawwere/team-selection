@@ -118,7 +118,7 @@ public class TeamService {
             team.setCurrentTrack(trackService.findByIdOrElseThrow(trackId));
 
             Student captain = studentService.findByIdOrElseThrow(dto.getCaptainId());
-            addStudentToTeam(team, captain);
+            addStudentToTeam(team, captain, false);
             team.setCaptainId(captain.getId());
             captain.setHasTeam(true);
             captain.setIsCaptain(true);
@@ -155,11 +155,11 @@ public class TeamService {
     }
 
     @Transactional
-    public Team addStudentToTeam(Team team, Student student) {
+    public Team addStudentToTeam(Team team, Student student, Boolean skipRestrictions) {
         if (student.getHasTeam()) {
             throw new ConstraintViolationException("Student already has a team");
         }
-        if (team.getIsFull()) {
+        if (!skipRestrictions && team.getIsFull()) {
             throw new ConstraintViolationException("Cannot add student to a full team");
         }
         // ограничение по второму курсу
@@ -207,11 +207,18 @@ public class TeamService {
         return team;
     }
 
+    /**
+     *
+     * @param teamId
+     * @param studentId
+     * @param sender
+     * @return
+     */
     @Transactional
-    public Team addStudentToTeam(Long teamId, Long studentId) {
+    public Team addStudentToTeam(Long teamId, Long studentId, User sender) {
         Team team = findByIdOrElseThrow(teamId);
         Student student = studentService.findByIdOrElseThrow(studentId);
-        addStudentToTeam(team, student);
+        addStudentToTeam(team, student, isAdmin(sender));
 
         return team;
     }
@@ -228,7 +235,7 @@ public class TeamService {
     public Team update(Long id, TeamDto dto, User sender) {
         Team team = findByIdOrElseThrow(id);
 
-        boolean isAdmin = sender.getRole().getName().equals("ADMIN");
+        boolean isAdmin = isAdmin(sender);
         boolean isCaptainOfThis = sender.getId()
                 .equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId());
 
@@ -273,7 +280,7 @@ public class TeamService {
         for (Long sid : newStudentIds) {
             if (!currentIds.contains(sid)) {
                 Student student = studentService.findByIdOrElseThrow(sid);
-                addStudentToTeam(team, student);
+                addStudentToTeam(team, student, isAdmin);
             }
         }
 
@@ -343,5 +350,9 @@ public class TeamService {
 
     public List<Team> getTeamHistoryForStudent(Long studentId) {
         return teamRepository.findAllByStudent(studentId);
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole().getName().equals("ADMIN");
     }
 }

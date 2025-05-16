@@ -227,7 +227,8 @@ public class TeamControllerTest {
     public void addStudentToTeam() throws Exception {
         Mockito.doReturn(genericTeam).when(teamService).addStudentToTeam(
                 Mockito.anyLong(),
-                Mockito.anyLong()
+                Mockito.anyLong(),
+                Mockito.any()
         );
 
         mockMvc.perform(put(TeamController.ADD_STUDENT_TO_TEAM, "1", "1")
@@ -241,7 +242,8 @@ public class TeamControllerTest {
     public void addStudentToTeamNotFromAdminShouldFail() throws Exception {
         Mockito.doReturn(genericTeam).when(teamService).addStudentToTeam(
                 Mockito.anyLong(),
-                Mockito.anyLong()
+                Mockito.anyLong(),
+                Mockito.any()
         );
 
         mockMvc.perform(put(TeamController.ADD_STUDENT_TO_TEAM, "1", "1")

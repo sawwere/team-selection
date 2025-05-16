@@ -326,22 +326,46 @@ class TeamServiceTest extends BasicTestContainerTest {
 
     @Test
     void addStudentToTeamWhoHasTeamShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(2L, 2L));
+        Assertions.assertThrows(
+                RuntimeException.class,
+                () -> underTest.addStudentToTeam(
+                        2L,
+                        2L,
+                        studentRepository.findById(2L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
     void addStudentToFullTeamShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(1004L, 11L));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.addStudentToTeam(
+                        1004L,
+                        11L,
+                        studentRepository.findById(11L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
     void addSecondYearStudentToTeamOverLimitShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(1003L, 13L));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.addStudentToTeam(1003L,
+                        13L,
+                        studentRepository.findById(13L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
     void addStudentToTeamInWhichWasMemberBeforeShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(1003L, 1L));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.addStudentToTeam(
+                        1003L,
+                        1L,
+                        studentRepository.findById(1L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
@@ -349,7 +373,7 @@ class TeamServiceTest extends BasicTestContainerTest {
         Long teamId = 2L;
         Long studentId = 7L;
 
-        underTest.addStudentToTeam(teamId, studentId);
+        underTest.addStudentToTeam(teamId, studentId, studentRepository.findById(studentId).orElseThrow().getUser());
 
         Student student = studentRepository.findById(studentId).orElseThrow();
         Team team = teamRepository.findById(teamId).orElseThrow();

@@ -132,7 +132,7 @@ public class ApplicationService {
     }
 
     private Application accept(Application app, User sender) {
-        teamService.addStudentToTeam(app.getTeam(), app.getStudent());
+        teamService.addStudentToTeam(app.getTeam(), app.getStudent(), false);
         app.setStatus(ACCEPTED.name());
         applicationRepository.updateStatusByTeam(ApplicationStatus.CANCELLED.name(), app.getTeam());
         applicationRepository.updateStatusByStudent(ApplicationStatus.CANCELLED.name(), app.getStudent());

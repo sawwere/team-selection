@@ -235,7 +235,8 @@ public class TeamController {
     @PutMapping(ADD_STUDENT_TO_TEAM)
     public ResponseEntity<TeamDto> addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
-        TeamDto result = teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId));
+        User user = userService.getCurrentUser();
+        TeamDto result = teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId, user));
         return ResponseEntity.ok(result);
     }
 
