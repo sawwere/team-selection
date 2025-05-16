@@ -2,9 +2,12 @@ package ru.sfedu.teamselection.service;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
@@ -22,6 +26,7 @@ import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
+import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 import ru.sfedu.teamselection.repository.specification.UserSpecification;
 import ru.sfedu.teamselection.service.security.OidcUserImpl;
@@ -37,6 +42,11 @@ public class UserService {
     private final RoleRepository roleRepository;
 
     private final StudentRepository studentRepository;
+
+    @Lazy
+    @Autowired
+    private TeamService teamService;
+
 
     @Transactional(readOnly = true)
     public Page<UserDto> search(UserSearchCriteria criteria, Pageable pageable) {
@@ -96,29 +106,63 @@ public class UserService {
     @Transactional
     public User createOrUpdate(UserDto dto) {
         if (dto.getId() != null) {
+            // --- обновление ---
             User existing = findByIdOrElseThrow(dto.getId());
 
-            Optional<Role> roleOpt = roleRepository.findByName(dto.getRole());
-            if (roleOpt.isPresent()) {
-                existing.setRole(roleOpt.get());
-            } else {
-                throw new NotFoundException("Роль '" + dto.getRole() + "' не найдена");
+            // обновляем роль
+            Role role = roleRepository.findByName(dto.getRole())
+                    .orElseThrow(() -> new NotFoundException("Роль '" + dto.getRole() + "' не найдена"));
+            existing.setRole(role);
+
+            // сохраняем старый и новый ID команды
+            Long oldTeamId = existing.getStudent() != null && existing.getStudent().getCurrentTeam() != null
+                    ? existing.getStudent().getCurrentTeam().getId()
+                    : null;
+            Long newTeamId = dto.getStudent() != null
+                    ? dto.getStudent().getCurrentTeamId()
+                    : null;
+
+            // если команда изменилась — сначала удалить из старой, потом добавить в новую
+            if (!Objects.equals(oldTeamId, newTeamId)) {
+                // удаляем из старой
+                if (oldTeamId != null) {
+                    Team oldTeam = teamService.findByIdOrElseThrow(oldTeamId);
+                    Student student = existing.getStudent();
+                    teamService.removeStudentFromTeam(oldTeam, student);
+                }
+                // добавляем в новую
+                if (newTeamId != null) {
+                    Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
+                    Student student = existing.getStudent();
+                    teamService.addStudentToTeam(newTeam, student);
+                }
             }
 
+            // обновляем остальные поля
             existing.setFio(dto.getFio());
             existing.setEmail(dto.getEmail());
             existing.setIsEnabled(dto.getIsEnabled());
             existing.setIsRemindEnabled(dto.getIsRemindEnabled());
 
             return userRepository.save(existing);
+
         } else {
             User user = userMapper.mapToEntity(dto);
 
-            Optional<Role> roleOpt = roleRepository.findByName(dto.getRole());
-            if (roleOpt.isPresent()) {
-                user.setRole(roleOpt.get());
-            } else {
-                throw new NotFoundException("Роль '" + dto.getRole() + "' не найдена");
+            Role role = roleRepository.findByName(dto.getRole())
+                    .orElseThrow(() -> new NotFoundException("Роль '" + dto.getRole() + "' не найдена"));
+            user.setRole(role);
+            if (dto.getStudent() != null) {
+                Student student = Student.builder()
+                        .user(user)
+                        .build();
+                studentRepository.save(student);
+
+                Long teamId = dto.getStudent().getCurrentTeamId();
+                if (teamId != null) {
+                    Team team = teamService.findByIdOrElseThrow(teamId);
+                    teamService.addStudentToTeam(team, student);
+                }
             }
 
             return userRepository.save(user);
