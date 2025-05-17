@@ -4,10 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.logging.Logger;
-
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +37,6 @@ import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
-import ru.sfedu.teamselection.mapper.team.TeamUpdateDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.TeamExportService;
 import ru.sfedu.teamselection.service.TeamService;
@@ -76,8 +73,6 @@ public class TeamController {
     public static final String GET_SEARCH_OPTIONS = "/api/v1/teams/filters";
 
     private final TeamExportService teamExportService;
-
-    private final TeamUpdateDtoMapper teamUpdateDtoMapper;
 
 
     @Operation(
@@ -279,8 +274,7 @@ public class TeamController {
         }
 
         User user = userService.getCurrentUser();
-        Team partial = teamUpdateDtoMapper.toEntity(dto);
-        Team updated = teamService.update(id, partial, dto.getStudentIds(), user);
+        Team updated = teamService.update(id, dto, user);
         TeamDto result = teamDtoMapper.mapToDto(updated);
         return ResponseEntity.ok(result);
     }

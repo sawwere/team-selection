@@ -51,7 +51,7 @@ public class TechnologyController {
                     description = "Сущность технологии"
             )
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(CREATE_TECHNOLOGY)
     public ResponseEntity<TechnologyDto> createTechnology(@RequestBody TechnologyDto technology) {
         log.info("ENTER createTechnology() endpoint");

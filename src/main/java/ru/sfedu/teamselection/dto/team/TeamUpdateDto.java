@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-import ru.sfedu.teamselection.dto.TechnologyDto;
-
+import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ru.sfedu.teamselection.dto.TechnologyDto;
 
 @Builder
 @Getter
@@ -31,17 +35,19 @@ public class TeamUpdateDto {
 
     @JsonProperty("technologies")
     @NotNull
-    private List<TechnologyDto> technologies;
+    @Builder.Default
+    private List<TechnologyDto> technologies = new ArrayList<>();
 
     @NotNull
     private Long captainId;
 
     /**
      * Здесь список только ID студентов.
-     * Jackson легко десериализует List<Long>.
+     * Jackson легко десериализует <code>List<Long></code>
      */
     @NotNull
-    private List<Long> studentIds;
+    @Builder.Default
+    private List<Long> studentIds = new ArrayList<>();
 
     /** ID текущего трека **/
     @JsonProperty("current_track_id")

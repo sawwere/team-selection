@@ -20,12 +20,14 @@ import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamUpdateDtoMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
@@ -46,6 +48,7 @@ public class TeamService {
     private final TechnologyMapper technologyDtoMapper;
     private final ProjectTypeMapper projectTypeDtoMapper;
     private final TeamCreationDtoMapper teamCreationDtoMapper;
+    private final TeamUpdateDtoMapper teamUpdateDtoMapper;
 
     /**
      * Find Team entity by id
@@ -227,9 +230,10 @@ public class TeamService {
      */
     @Transactional
     public Team update(Long id,
-                       Team partial,
-                       List<Long> studentIds,
+                       TeamUpdateDto dto,
                        User sender) {
+        Team partial = teamUpdateDtoMapper.toEntity(dto);
+
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Team not found " + id));
 
@@ -266,15 +270,21 @@ public class TeamService {
                 )
         );
 
-        // Обновление списка студентов по incoming studentIds:
-        Set<Long> toKeep = new HashSet<>(studentIds);
-        // Удаляем «старых»:
-        team.getStudents().removeIf(s -> !toKeep.contains(s.getId()));
-        // Добавляем «новых»:
-        for (Long sid : studentIds) {
-            if (team.getStudents().stream().noneMatch(s -> s.getId().equals(sid))) {
-                Student newS = studentService.findByIdOrElseThrow(sid);
-                team.getStudents().add(newS);
+        List<Long> newStudentIds = dto.getStudentIds();
+        Set<Long> currentIds = team.getStudents().stream()
+                .map(Student::getId)
+                .collect(Collectors.toSet());
+
+        for (Student s : new ArrayList<>(team.getStudents())) {
+            if (!newStudentIds.contains(s.getId())) {
+                removeStudentFromTeam(team, s);
+            }
+        }
+
+        for (Long sid : newStudentIds) {
+            if (!currentIds.contains(sid)) {
+                Student student = studentService.findByIdOrElseThrow(sid);
+                addStudentToTeam(team, student);
             }
         }
 

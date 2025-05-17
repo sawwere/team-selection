@@ -26,6 +26,7 @@ import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
@@ -149,14 +150,15 @@ class TeamServiceTest extends BasicTestContainerTest {
     void updateFromTeamCaptain() {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
-        TeamDto teamDto = TeamDto.builder()
+        TeamUpdateDto teamDto = TeamUpdateDto.builder()
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
-                .quantityOfStudents(22) // should not be updated
+                .studentIds(beforeUpdateTeam.getStudents().stream().map(Student::getId).toList())
                 .build();
 
-        Team actual = underTest.update(beforeUpdateTeam.getId(),
+        Team actual = underTest.update(
+                beforeUpdateTeam.getId(),
                 teamDto,
                 userService.findByIdOrElseThrow(
                         studentRepository.findById(beforeUpdateTeam.getCaptainId()).orElseThrow().getUser().getId()
@@ -174,15 +176,15 @@ class TeamServiceTest extends BasicTestContainerTest {
     void updateFromAdmin() {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
-        TeamDto teamDto = TeamDto.builder()
+        TeamUpdateDto teamDto = TeamUpdateDto.builder()
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(3L).build())
-                .quantityOfStudents(beforeUpdateTeam.getQuantityOfStudents()-1) // should be updated
                 .currentTrackId(3L) // the same as was
-                .captain(StudentDto.builder().id(1L).build()) // should be updated
+                .captainId(1L) // should be updated
                 .build();
 
-        Team actual = underTest.update(beforeUpdateTeam.getId(),
+        Team actual = underTest.update(
+                beforeUpdateTeam.getId(),
                 teamDto,
                 userService.findByIdOrElseThrow(1L)
         );
@@ -201,17 +203,20 @@ class TeamServiceTest extends BasicTestContainerTest {
     void updateFromForeignUser() {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
-        TeamDto teamDto = TeamDto.builder()
+        TeamUpdateDto teamDto = TeamUpdateDto.builder()
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
-                .quantityOfStudents(22) // should not be updated
                 .build();
 
-        Assertions.assertThrows(ForbiddenException.class, () -> underTest.update(beforeUpdateTeam.getId(),
+        Assertions.assertThrows(
+            ForbiddenException.class,
+            () -> underTest.update(
+                beforeUpdateTeam.getId(),
                 teamDto,
                 userService.findByIdOrElseThrow(2L)
-        ));
+            )
+        );
     }
 
     @Test

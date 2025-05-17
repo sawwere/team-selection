@@ -28,6 +28,7 @@ import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.service.StudentExportService;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
@@ -43,6 +44,8 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 public class StudentControllerTest {
     @MockitoBean
     private TeamService teamService;
+    @MockitoBean
+    private StudentExportService studentExportService;
     @MockitoBean(name = "studentService")
     private StudentService studentService;
     @MockitoBean

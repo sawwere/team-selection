@@ -29,6 +29,7 @@ import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
+import ru.sfedu.teamselection.service.TeamExportService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
@@ -41,6 +42,8 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 @Import(SecurityConfig.class)
 @WebMvcTest({TeamController.class})
 public class TeamControllerTest {
+    @MockitoBean
+    private TeamExportService teamExportService;
     @MockitoBean
     private TeamService teamService;
     @MockitoBean

@@ -737,7 +737,8 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(BusinessException.class,
+        Assertions.assertThrows(
+                ConstraintViolationException.class,
                 () -> underTest.update(dto, userRepository.findById(22L).orElseThrow())
         );
     }
