@@ -153,10 +153,12 @@ class TeamServiceTest extends BasicTestContainerTest {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
         TeamUpdateDto teamDto = TeamUpdateDto.builder()
+                .id(beforeUpdateTeam.getId())
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
                 .studentIds(beforeUpdateTeam.getStudents().stream().map(Student::getId).toList())
+                .currentTrackId(1L)
                 .build();
 
         Team actual = underTest.update(
@@ -179,10 +181,12 @@ class TeamServiceTest extends BasicTestContainerTest {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
         TeamUpdateDto teamDto = TeamUpdateDto.builder()
+                .id(beforeUpdateTeam.getId())
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(3L).build())
                 .currentTrackId(3L) // the same as was
                 .captainId(1L) // should be updated
+                .currentTrackId(1L)
                 .build();
 
         Team actual = underTest.update(
@@ -206,9 +210,11 @@ class TeamServiceTest extends BasicTestContainerTest {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
         TeamUpdateDto teamDto = TeamUpdateDto.builder()
+                .id(beforeUpdateTeam.getId())
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
+                .currentTrackId(beforeUpdateTeam.getCurrentTrack().getId())
                 .build();
 
         Assertions.assertThrows(

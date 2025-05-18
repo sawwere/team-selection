@@ -252,7 +252,8 @@ public class TeamService {
 
 
         boolean isAdmin = isAdmin(sender);
-        boolean isCaptainOfThis = sender.getId();
+        boolean isCaptain = sender.getId()
+                .equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId());
 
         if (!isAdmin && !isCaptain) {
             throw new ForbiddenException("Only admin or captain");

@@ -134,7 +134,7 @@ public class UserService {
                 if (newTeamId != null) {
                     Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
                     Student student = existing.getStudent();
-                    teamService.addStudentToTeam(newTeam, student);
+                    teamService.addStudentToTeam(newTeam, student, false);
                 }
             }
 
@@ -161,7 +161,7 @@ public class UserService {
                 Long teamId = dto.getStudent().getCurrentTeamId();
                 if (teamId != null) {
                     Team team = teamService.findByIdOrElseThrow(teamId);
-                    teamService.addStudentToTeam(team, student);
+                    teamService.addStudentToTeam(team, student, false);
                 }
             }
 
