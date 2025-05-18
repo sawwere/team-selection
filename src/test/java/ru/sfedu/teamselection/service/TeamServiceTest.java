@@ -10,6 +10,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -223,88 +225,93 @@ class TeamServiceTest extends BasicTestContainerTest {
     void searchByLike() {
         String like = "te";
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 like,
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertTrue(team.getName().toLowerCase().contains(like));
         }
 
-        Assertions.assertEquals(3, actual.size());
+        Assertions.assertEquals(3, actual.getTotalElements());
     }
 
     @Test
     void searchByTrack() {
         Long trackParam = 2L;
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 trackParam,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertEquals(trackParam, team.getCurrentTrack().getId());
         }
 
-        Assertions.assertEquals(2, actual.size());
+        Assertions.assertEquals(2, actual.getTotalElements());
     }
 
     @Test
     void searchByIsFull() {
         Boolean isFullParam = true;
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 null,
                 isFullParam,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertEquals(isFullParam, team.getIsFull());
         }
 
-        Assertions.assertEquals(1, actual.size());
+        Assertions.assertEquals(1, actual.getTotalElements());
     }
 
     @Test
     void searchByProjectType() {
         String projectTypeParam = "Mobile";
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 null,
                 null,
                 projectTypeParam,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertEquals(projectTypeParam, team.getProjectType().getName());
         }
 
-        Assertions.assertEquals(2, actual.size());
+        Assertions.assertEquals(2, actual.getTotalElements());
     }
 
     @Test
     void searchByTechnologies() {
         List<Long> technologiesParam = List.of(2L, 10L, 16L);
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 null,
                 null,
                 null,
-                technologiesParam
+                technologiesParam,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
@@ -315,7 +322,7 @@ class TeamServiceTest extends BasicTestContainerTest {
             );
         }
 
-        Assertions.assertEquals(4, actual.size());
+        Assertions.assertEquals(4, actual.getTotalElements());
     }
 
     @Test

@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -26,6 +27,7 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.mapper.PageResponseMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
@@ -62,6 +64,8 @@ public class TeamControllerTest {
     private TeamDtoMapper teamDtoMapper;
     @MockitoBean
     private StudentDtoMapper studentDtoMapper;
+    @MockitoBean
+    private PageResponseMapper pageResponseMapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -133,12 +137,13 @@ public class TeamControllerTest {
 
     @Test
     public void search() throws Exception {
-        Mockito.doReturn(teams).when(teamService).search(
+        Mockito.doReturn(new PageImpl<>(teams)).when(teamService).search(
                 Mockito.anyString(),
                 Mockito.anyLong(),
                 Mockito.anyBoolean(),
                 Mockito.anyString(),
-                Mockito.anyList()
+                Mockito.anyList(),
+                Mockito.notNull()
         );
 
         mockMvc.perform(get(TeamController.SEARCH_TEAMS)

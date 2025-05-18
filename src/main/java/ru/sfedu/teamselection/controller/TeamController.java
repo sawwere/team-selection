@@ -30,11 +30,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.PageResponse;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
+import ru.sfedu.teamselection.mapper.PageResponseMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
@@ -55,6 +57,7 @@ public class TeamController {
 
     private final TeamDtoMapper teamDtoMapper;
     private final StudentDtoMapper studentDtoMapper;
+    private final PageResponseMapper pageResponseMapper;
 
     private static final Logger LOGGER = Logger.getLogger(TeamController.class.getName());
 
@@ -111,7 +114,7 @@ public class TeamController {
                     @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_TEAMS)
-    public ResponseEntity<Page<TeamDto>> search(
+    public ResponseEntity<PageResponse<TeamDto>> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "track_id", required = false) Long trackId,
             @RequestParam(value = "is_full", required = false) Boolean isFull,
@@ -129,7 +132,7 @@ public class TeamController {
 
         Page<TeamDto> result = teamService.search(like, trackId, isFull, projectType, technologies, pageable)
                 .map(teamDtoMapper::mapToDto);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(pageResponseMapper.toDto(result));
     }
 
     @Operation(

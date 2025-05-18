@@ -28,10 +28,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.PageResponse;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
+import ru.sfedu.teamselection.mapper.PageResponseMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.StudentExportService;
@@ -66,8 +68,11 @@ public class StudentController {
 
     private final StudentDtoMapper studentDtoMapper;
     private final TeamDtoMapper teamDtoMapper;
+    private final PageResponseMapper pageResponseMapper;
 
     private final StudentExportService studentExportService;
+
+
 
     @Operation(
             method = "GET",
@@ -128,7 +133,7 @@ public class StudentController {
                     @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_STUDENTS)
-    public ResponseEntity<Page<StudentDto>> search(
+    public ResponseEntity<PageResponse<StudentDto>> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "course", required = false) Integer course,
             @RequestParam(value = "group_number", required = false) Integer groupNumber,
@@ -157,8 +162,7 @@ public class StudentController {
                         pageable
                 )
                 .map(studentDtoMapper::mapToDto);
-        var r = result;
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(pageResponseMapper.toDto(result));
     }
 
 

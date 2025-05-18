@@ -1,8 +1,10 @@
 package ru.sfedu.teamselection.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -16,9 +18,7 @@ import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
-import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
-import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
@@ -70,7 +70,14 @@ public class TeamService {
     }
 
     /**
-     * Performs search across all students with given filter criteria and pagination
+     * Performs search across all students with given filter criteria
+     * @param like like parameter for the student string representation
+     * @param trackId team is assigned to this track
+     * @param isFull is team full of students
+     * @param projectType project type defined by team's captain
+     * @param technologies team's technologies(skills)
+     * @param pageable pageable
+     * @return the filtered list
      */
     public Page<Team> search(String like,
                              Long trackId,
@@ -234,8 +241,7 @@ public class TeamService {
                        User sender) {
         Team partial = teamUpdateDtoMapper.toEntity(dto);
 
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Team not found " + id));
+        Team team = findByIdOrElseThrow(id);
 
         boolean isAdmin   = sender.getRole().getName().equals("ADMIN");
         boolean isCaptain = sender.getId()
@@ -291,38 +297,6 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
-    /**
-     * Performs search across all students with given filter criteria
-     * @param like like parameter for the student string representation
-     * @param trackId team is assigned to this track
-     * @param isFull is team full of students
-     * @param projectType project type defined by team's captain
-     * @param technologies student's technologies(skills)
-     * @return the filtered list
-     */
-    public List<Team> search(String like,
-                             Long trackId,
-                             Boolean isFull,
-                             String projectType,
-                             List<Long> technologies) {
-        Specification<Team> specification = Specification.allOf();
-        if (like != null) {
-            specification = specification.and(TeamSpecification.like(like));
-        }
-        if (trackId != null) {
-            specification = specification.and(TeamSpecification.byTrack(trackId));
-        }
-        if (isFull != null) {
-            specification = specification.and(TeamSpecification.byIsFull(isFull));
-        }
-        if (projectType != null) {
-            specification = specification.and(TeamSpecification.byProjectType(projectType));
-        }
-        specification = specification.and(TeamSpecification.byTechnologies(technologies));
-
-        return teamRepository.findAll(specification);
-    }
-
     public int getSecondYearsCount(Team team) {
         int res = 0;
         for (Student student: team.getStudents()) {
@@ -335,7 +309,7 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public TeamSearchOptionsDto getSearchOptionsTeams(Long trackId) {
-        var teams = search(null, trackId, null, null, null);
+        var teams = search(null, trackId, null, null, null, Pageable.unpaged());
         TeamSearchOptionsDto teamSearchOptionsDto = new TeamSearchOptionsDto();
         teamSearchOptionsDto
                 .getProjectTypes()
