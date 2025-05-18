@@ -129,14 +129,14 @@ public class StudentService {
      */
     @Transactional
     public Student create(StudentCreationDto dto) {
-        User u = userService.findByIdOrElseThrow(dto.getUserId());
+        User user = userService.findByIdOrElseThrow(dto.getUserId());
         var role = roleRepository.findByName("STUDENT")
                 .orElseThrow(() -> new NotFoundException("Роль STUDENT не найдена"));
-        u.setRole(role);
+        user.setRole(role);
 
-        Student st = studentCreationDtoMapper.mapToEntity(dto);
-        st.setUser(u);
-        return studentRepository.save(st);
+        Student student = studentCreationDtoMapper.mapToEntity(dto);
+        student.setUser(user);
+        return studentRepository.save(student);
     }
 
     /**

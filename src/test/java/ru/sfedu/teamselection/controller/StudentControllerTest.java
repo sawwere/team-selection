@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -26,8 +27,10 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
+import ru.sfedu.teamselection.mapper.PageResponseMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.service.StudentExportService;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
@@ -43,6 +46,8 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 public class StudentControllerTest {
     @MockitoBean
     private TeamService teamService;
+    @MockitoBean
+    private StudentExportService studentExportService;
     @MockitoBean(name = "studentService")
     private StudentService studentService;
     @MockitoBean
@@ -59,6 +64,8 @@ public class StudentControllerTest {
     private TeamDtoMapper teamDtoMapper;
     @MockitoBean
     private StudentDtoMapper studentDtoMapper;
+    @MockitoBean
+    private PageResponseMapper pageResponseMapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -118,6 +125,17 @@ public class StudentControllerTest {
 
     @Test
     public void search() throws Exception {
+        Mockito.doReturn(new PageImpl<>(students)).when(studentService).search(
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any()
+        );
+
         mockMvc.perform(get(StudentController.SEARCH_STUDENTS)
                         .param("input", "")
                         .param("course", "")
@@ -270,7 +288,7 @@ public class StudentControllerTest {
 
     @Test
     public void deleteStudent() throws Exception {
-        Mockito.doNothing().when(studentService).delete(Mockito.notNull());
+        Mockito.doNothing().when(studentService).delete(Mockito.any());
 
         mockMvc.perform(delete(StudentController.DELETE_STUDENT, "1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
