@@ -8,6 +8,7 @@ import lombok.*;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -34,6 +35,7 @@ public class TeamUpdateDto {
     private List<TechnologyDto> technologies;
 
     @NotNull
+    @JsonProperty("captain_id")
     private Long captainId;
 
     /**
@@ -41,7 +43,7 @@ public class TeamUpdateDto {
      * Jackson легко десериализует List<Long>.
      */
     @NotNull
-    private List<Long> studentIds;
+    private Set<Long> studentIds;
 
     /** ID текущего трека **/
     @JsonProperty("current_track_id")

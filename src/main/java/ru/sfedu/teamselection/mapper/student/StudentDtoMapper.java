@@ -10,6 +10,7 @@ import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.mapper.track.TrackCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 
 @Component
@@ -21,6 +22,9 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
     @Lazy
     @Autowired
     private TeamDtoMapper teamDtoMapper;
+
+    @Autowired
+    private TrackCreationDtoMapper trackCreationDtoMapper;
 
     /**
      * {@inheritDoc}
@@ -54,6 +58,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .groupNumber(entity.getGroupNumber())
                 .aboutSelf(entity.getAboutSelf())
                 .contacts(entity.getContacts())
+                .track(trackCreationDtoMapper.mapToDto(entity.getCurrentTrack()))
                 .hasTeam(entity.getHasTeam())
                 .isCaptain(entity.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToDtoWithoutStudents(entity.getCurrentTeam()))
