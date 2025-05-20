@@ -26,10 +26,8 @@ import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
-import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 import ru.sfedu.teamselection.repository.specification.UserSpecification;
-import ru.sfedu.teamselection.service.security.OidcUserImpl;
 
 
 @RequiredArgsConstructor

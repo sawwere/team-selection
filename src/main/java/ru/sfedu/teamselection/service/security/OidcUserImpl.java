@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.service.security;
 
 import java.util.Collection;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;

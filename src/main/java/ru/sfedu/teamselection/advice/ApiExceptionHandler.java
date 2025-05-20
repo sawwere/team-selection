@@ -1,14 +1,14 @@
 package ru.sfedu.teamselection.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.OffsetDateTime;
+import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.sfedu.teamselection.dto.ErrorResponse;
-
-import java.time.OffsetDateTime;
-import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -25,6 +25,13 @@ public class ApiExceptionHandler {
             IllegalArgumentException ex, HttpServletRequest req
     ) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex, req);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedRequest(
+            AccessDeniedException ex, HttpServletRequest req
+    ) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex, req);
     }
 
     @ExceptionHandler(Exception.class)

@@ -212,7 +212,7 @@ public class StudentController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность студента"
             ))
-    @PreAuthorize("hasAuthority('ADMIN') or @studentService.getCurrentStudent().equals(#studentId)")
+    @PreAuthorize("hasRole('ADMIN') or @studentService.getCurrentStudent().equals(#studentId)")
     @PutMapping(value = UPDATE_STUDENT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)

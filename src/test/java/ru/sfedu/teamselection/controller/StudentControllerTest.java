@@ -76,7 +76,7 @@ public class StudentControllerTest {
             .email("admin@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(3L).name("ADMIN").build())
+            .role(Role.builder().id(3L).name("ROLE_ADMIN").build())
             .build();
 
     private final User genericStudentUser = User.builder()
@@ -85,7 +85,7 @@ public class StudentControllerTest {
             .email("example@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(1L).name("STUDENT").build())
+            .role(Role.builder().id(1L).name("ROLE_STUDENT").build())
             .build();
 
     private final Student genericStudent = Student.builder()

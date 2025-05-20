@@ -237,7 +237,7 @@ public class TeamController {
                     @Parameter(name = "studentId", description = "Id студента", in = ParameterIn.PATH),
             }
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(ADD_STUDENT_TO_TEAM)
     public ResponseEntity<TeamDto> addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
