@@ -157,7 +157,7 @@ class TeamServiceTest extends BasicTestContainerTest {
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
-                .studentIds(beforeUpdateTeam.getStudents().stream().map(Student::getId).toList())
+                .studentIds(beforeUpdateTeam.getStudents().stream().map(Student::getId).collect(Collectors.toUnmodifiableSet()))
                 .currentTrackId(1L)
                 .build();
 

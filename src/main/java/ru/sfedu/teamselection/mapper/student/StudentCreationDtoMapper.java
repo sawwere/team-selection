@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection.mapper.student;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
@@ -9,12 +10,12 @@ import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.service.TrackService;
 
 @Component
+@RequiredArgsConstructor
 public class StudentCreationDtoMapper implements DtoMapper<StudentCreationDto, Student> {
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private TrackService trackService;
+    private final TrackService trackService;
 
     @Override
     public Student mapToEntity(StudentCreationDto dto) {

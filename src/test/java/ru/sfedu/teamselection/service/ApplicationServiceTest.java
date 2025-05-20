@@ -850,7 +850,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(BusinessException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.update(dto, userRepository.findById(15L).orElseThrow())
         );
     }
@@ -872,7 +872,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(BusinessException.class,
+        Assertions.assertThrows(ForbiddenException.class,
                 () -> underTest.update(dto, userRepository.findById(2L).orElseThrow())
         );
     }

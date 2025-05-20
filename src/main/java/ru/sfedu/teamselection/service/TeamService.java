@@ -259,7 +259,6 @@ public class TeamService {
     @Transactional
     public Team update(Long id,
                        TeamUpdateDto dto,
-                       Set<Long> studentIds,
                        User sender) {
         Team partial = teamUpdateDtoMapper.toEntity(dto);
 
@@ -299,7 +298,7 @@ public class TeamService {
                 )
         );
 
-        List<Long> newStudentIds = dto.getStudentIds();
+        var newStudentIds = dto.getStudentIds();
         Set<Long> currentIds = team.getStudents().stream()
                 .map(Student::getId)
                 .collect(Collectors.toSet());

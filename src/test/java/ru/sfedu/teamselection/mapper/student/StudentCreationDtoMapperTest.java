@@ -1,18 +1,32 @@
 package ru.sfedu.teamselection.mapper.student;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
+import ru.sfedu.teamselection.service.TrackService;
 
 class StudentCreationDtoMapperTest {
+    private final TrackService trackService = Mockito.mock(TrackService.class);
 
-    private final StudentCreationDtoMapper underTest = new StudentCreationDtoMapper();
+    private final StudentCreationDtoMapper underTest = new StudentCreationDtoMapper(trackService);
 
+    @BeforeEach
+    void beforeEach() {
+        Mockito.doReturn(
+                Track.builder()
+                    .id(1L)
+                .build()
+        ).when(trackService).findByIdOrElseThrow(
+                Mockito.anyLong()
+        );
+    }
 
     @Test
     void mapToEntity() {
