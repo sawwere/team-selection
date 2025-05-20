@@ -5,13 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.dto.TechnologyDto;
+
 
 @Builder
 @Getter
@@ -39,6 +40,7 @@ public class TeamUpdateDto {
     private List<TechnologyDto> technologies = new ArrayList<>();
 
     @NotNull
+    @JsonProperty("captain_id")
     private Long captainId;
 
     /**
@@ -47,7 +49,7 @@ public class TeamUpdateDto {
      */
     @NotNull
     @Builder.Default
-    private List<Long> studentIds = new ArrayList<>();
+    private Set<Long> studentIds = new HashSet<>();
 
     /** ID текущего трека **/
     @JsonProperty("current_track_id")

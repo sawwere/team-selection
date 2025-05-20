@@ -15,6 +15,8 @@ import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 public class ApplicationValidator {
@@ -46,7 +48,7 @@ public class ApplicationValidator {
                 && teamService.getSecondYearsCount(team) >= team.getCurrentTrack().getMaxSecondCourseConstraint()) {
             throw new BusinessException("Невозможно — в команде уже максимальное число второкурсников");
         }
-        if (!studentService.typeOfStudentTrack(student).equals(team.getCurrentTrack().getType())) {
+        if (!Objects.equals(student.getCurrentTrack().getId(), captain.getCurrentTrack().getId())) {
             throw new BusinessException("Невозможно — неверный трек");
         }
     }

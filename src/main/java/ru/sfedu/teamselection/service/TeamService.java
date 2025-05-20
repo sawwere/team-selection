@@ -17,10 +17,12 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
@@ -49,6 +51,10 @@ public class TeamService {
     private final ProjectTypeMapper projectTypeDtoMapper;
     private final TeamCreationDtoMapper teamCreationDtoMapper;
     private final TeamUpdateDtoMapper teamUpdateDtoMapper;
+
+    @Autowired
+    @Lazy
+    private ApplicationService applicationService;
 
     /**
      * Find Team entity by id
@@ -156,6 +162,10 @@ public class TeamService {
     @Transactional
     public void delete(Long id) {
         Team team = findByIdOrElseThrow(id);
+        for (Application application: team.getApplications())
+        {
+            applicationService.delete(application.getId());
+        }
         for (Student teamMember : team.getStudents()) {
             if (Objects.equals(teamMember.getCurrentTeam().getId(), id)) {
                 teamMember.setHasTeam(false);
@@ -202,6 +212,10 @@ public class TeamService {
 
         student.setHasTeam(true);
         student.setCurrentTeam(team);
+        for (Application application: student.getApplications())
+        {
+            application.setStatus(ApplicationStatus.REJECTED.name());
+        }
         return team;
     }
 
@@ -245,6 +259,7 @@ public class TeamService {
     @Transactional
     public Team update(Long id,
                        TeamUpdateDto dto,
+                       Set<Long> studentIds,
                        User sender) {
         Team partial = teamUpdateDtoMapper.toEntity(dto);
 
