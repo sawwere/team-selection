@@ -7,6 +7,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -55,14 +60,19 @@ public class ApplicationController {
             method = "GET",
             summary = "Получение списка всех заявок за все время"
     )
-    @GetMapping(FIND_ALL) // checked
-    public ResponseEntity<List<ApplicationDto>> findAll() {
-        LOGGER.info("ENTER findAll() endpoint");
-        List<ApplicationDto> result = applicationService.findAll()
-                .stream()
-                .map(applicationDtoMapper::mapToDto)
-                .toList();
-        return ResponseEntity.ok(result);
+    @GetMapping(FIND_ALL)
+    public ResponseEntity<Page<ApplicationDto>> findAll(
+            @ParameterObject @PageableDefault(
+                    page = 0,
+                    size = 20,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+        LOGGER.info("ENTER findAll() endpoint with pagination and sorting: " + pageable);
+        Page<ApplicationDto> pageResult = applicationService.findAll(pageable)
+                .map(applicationDtoMapper::mapToDto);
+        return ResponseEntity.ok(pageResult);
     }
 
     @Operation(

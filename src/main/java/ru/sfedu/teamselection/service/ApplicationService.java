@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
@@ -43,8 +45,8 @@ public class ApplicationService {
         return applicationRepository.findById(id).orElseThrow();
     }
 
-    public List<Application> findAll() {
-        return applicationRepository.findAll();
+    public Page<Application> findAll(Pageable pageable) {
+        return applicationRepository.findAll(pageable);
     }
 
     /**
