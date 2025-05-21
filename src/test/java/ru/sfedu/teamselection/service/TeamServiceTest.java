@@ -10,6 +10,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -26,6 +28,7 @@ import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
@@ -149,14 +152,17 @@ class TeamServiceTest extends BasicTestContainerTest {
     void updateFromTeamCaptain() {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
-        TeamDto teamDto = TeamDto.builder()
+        TeamUpdateDto teamDto = TeamUpdateDto.builder()
+                .id(beforeUpdateTeam.getId())
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
-                .quantityOfStudents(22) // should not be updated
+                .studentIds(beforeUpdateTeam.getStudents().stream().map(Student::getId).collect(Collectors.toUnmodifiableSet()))
+                .currentTrackId(1L)
                 .build();
 
-        Team actual = underTest.update(beforeUpdateTeam.getId(),
+        Team actual = underTest.update(
+                beforeUpdateTeam.getId(),
                 teamDto,
                 userService.findByIdOrElseThrow(
                         studentRepository.findById(beforeUpdateTeam.getCaptainId()).orElseThrow().getUser().getId()
@@ -174,15 +180,17 @@ class TeamServiceTest extends BasicTestContainerTest {
     void updateFromAdmin() {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
-        TeamDto teamDto = TeamDto.builder()
+        TeamUpdateDto teamDto = TeamUpdateDto.builder()
+                .id(beforeUpdateTeam.getId())
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(3L).build())
-                .quantityOfStudents(beforeUpdateTeam.getQuantityOfStudents()-1) // should be updated
                 .currentTrackId(3L) // the same as was
-                .captain(StudentDto.builder().id(1L).build()) // should be updated
+                .captainId(1L) // should be updated
+                .currentTrackId(1L)
                 .build();
 
-        Team actual = underTest.update(beforeUpdateTeam.getId(),
+        Team actual = underTest.update(
+                beforeUpdateTeam.getId(),
                 teamDto,
                 userService.findByIdOrElseThrow(1L)
         );
@@ -201,105 +209,115 @@ class TeamServiceTest extends BasicTestContainerTest {
     void updateFromForeignUser() {
         Team beforeUpdateTeam = teamRepository.findById(2L).orElseThrow();
 
-        TeamDto teamDto = TeamDto.builder()
+        TeamUpdateDto teamDto = TeamUpdateDto.builder()
+                .id(beforeUpdateTeam.getId())
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
-                .quantityOfStudents(22) // should not be updated
+                .currentTrackId(beforeUpdateTeam.getCurrentTrack().getId())
                 .build();
 
-        Assertions.assertThrows(ForbiddenException.class, () -> underTest.update(beforeUpdateTeam.getId(),
+        Assertions.assertThrows(
+            ForbiddenException.class,
+            () -> underTest.update(
+                beforeUpdateTeam.getId(),
                 teamDto,
                 userService.findByIdOrElseThrow(2L)
-        ));
+            )
+        );
     }
 
     @Test
     void searchByLike() {
         String like = "te";
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 like,
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertTrue(team.getName().toLowerCase().contains(like));
         }
 
-        Assertions.assertEquals(3, actual.size());
+        Assertions.assertEquals(3, actual.getTotalElements());
     }
 
     @Test
     void searchByTrack() {
         Long trackParam = 2L;
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 trackParam,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertEquals(trackParam, team.getCurrentTrack().getId());
         }
 
-        Assertions.assertEquals(2, actual.size());
+        Assertions.assertEquals(2, actual.getTotalElements());
     }
 
     @Test
     void searchByIsFull() {
         Boolean isFullParam = true;
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 null,
                 isFullParam,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertEquals(isFullParam, team.getIsFull());
         }
 
-        Assertions.assertEquals(1, actual.size());
+        Assertions.assertEquals(1, actual.getTotalElements());
     }
 
     @Test
     void searchByProjectType() {
         String projectTypeParam = "Mobile";
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 null,
                 null,
                 projectTypeParam,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
             Assertions.assertEquals(projectTypeParam, team.getProjectType().getName());
         }
 
-        Assertions.assertEquals(2, actual.size());
+        Assertions.assertEquals(2, actual.getTotalElements());
     }
 
     @Test
     void searchByTechnologies() {
         List<Long> technologiesParam = List.of(2L, 10L, 16L);
 
-        List<Team> actual = underTest.search(
+        Page<Team> actual = underTest.search(
                 null,
                 null,
                 null,
                 null,
-                technologiesParam
+                technologiesParam,
+                Pageable.unpaged()
         );
 
         for (Team team : actual) {
@@ -310,7 +328,7 @@ class TeamServiceTest extends BasicTestContainerTest {
             );
         }
 
-        Assertions.assertEquals(4, actual.size());
+        Assertions.assertEquals(4, actual.getTotalElements());
     }
 
     @Test
@@ -326,22 +344,46 @@ class TeamServiceTest extends BasicTestContainerTest {
 
     @Test
     void addStudentToTeamWhoHasTeamShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(2L, 2L));
+        Assertions.assertThrows(
+                RuntimeException.class,
+                () -> underTest.addStudentToTeam(
+                        2L,
+                        2L,
+                        studentRepository.findById(2L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
     void addStudentToFullTeamShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(1004L, 11L));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.addStudentToTeam(
+                        1004L,
+                        11L,
+                        studentRepository.findById(11L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
     void addSecondYearStudentToTeamOverLimitShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(1003L, 13L));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.addStudentToTeam(1003L,
+                        13L,
+                        studentRepository.findById(13L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
     void addStudentToTeamInWhichWasMemberBeforeShouldFail() {
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.addStudentToTeam(1003L, 1L));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> underTest.addStudentToTeam(
+                        1003L,
+                        1L,
+                        studentRepository.findById(1L).orElseThrow().getUser()
+                )
+        );
     }
 
     @Test
@@ -349,7 +391,7 @@ class TeamServiceTest extends BasicTestContainerTest {
         Long teamId = 2L;
         Long studentId = 7L;
 
-        underTest.addStudentToTeam(teamId, studentId);
+        underTest.addStudentToTeam(teamId, studentId, studentRepository.findById(studentId).orElseThrow().getUser());
 
         Student student = studentRepository.findById(studentId).orElseThrow();
         Team team = teamRepository.findById(teamId).orElseThrow();

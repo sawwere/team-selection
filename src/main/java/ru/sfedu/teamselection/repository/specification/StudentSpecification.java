@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.domain.Team;
 
 public final class StudentSpecification {
     private StudentSpecification() {}
@@ -24,6 +25,11 @@ public final class StudentSpecification {
                         root.get("course"),
                         course
                 );
+    }
+
+    public static Specification<Student> byTrack(Long trackId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("currentTrack").get("id"), trackId);
     }
 
     public static Specification<Student> byGroup(Integer group) {

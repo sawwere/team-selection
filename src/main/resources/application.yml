@@ -1,12 +1,11 @@
 server:
   port: 8080
-  forward-headers-strategy: native
+#  forward-headers-strategy: native
 #  ssl:
-#    key-store-type: PKCS12
-#    key-store: classpath:keystore/ts.p12
-#    key-store-password:
-#    key-alias: ts
-#    enabled: true
+#    key-store: keystore.p12
+#    key-store-password: ${KEY_STORE_PASSWORD}
+#    keyStoreType: PKCS12
+#    keyAlias: titlecounter
 spring:
   application:
     name: team-selection
@@ -46,22 +45,22 @@ spring:
               - openid
               - email
               - profile
-  cloud:
-    azure:
-      active-directory:
-        enabled: false
-        profile:
-          tenant-id: ${AZURE_TENANT_ID}
-        credential:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
-        redirect-uri-template: http://localhost:8080/login/oauth2/code/azure
-        application-type: WEB_APPLICATION
-        authorization-clients:
-          graph:
-            scopes:
-              - https://graph.microsoft.com/User.Read
-              - email
+#  cloud:
+#    azure:
+#      active-directory:
+#        enabled: false
+#        profile:
+#          tenant-id: ${AZURE_TENANT_ID}
+#        credential:
+#          client-id: ${AZURE_CLIENT_ID}
+#          client-secret: ${AZURE_CLIENT_SECRET}
+#        redirect-uri-template: http://localhost:8080/login/oauth2/code/azure
+#        application-type: WEB_APPLICATION
+#        authorization-clients:
+#          graph:
+#            scopes:
+#              - https://graph.microsoft.com/User.Read
+#              - email
 management:
   endpoints:
     web:
@@ -76,16 +75,19 @@ management:
         "[http.server.requests]": true
 
 app:
-  frontendUrl: http://localhost:5173
+  scheduler:
+    enabled: true
+    studentTrack: "0 0 0 * * ?"
 
 cors:
   allowed-origins: http://localhost:8080
 
 frontend:
+  url: http://localhost:5173
   login:
     url: http://localhost:5173/login
 
 # /oauth2/authorization/github
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: TRACE

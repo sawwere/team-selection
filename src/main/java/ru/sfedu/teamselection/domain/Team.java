@@ -55,7 +55,7 @@ public class Team {
 
     @Column(name = "captain_id", nullable = false)
     @Builder.Default
-    private Long captainId = -1L; //TODO check
+    private Long captainId = -1L;
 
     @Column(name = "is_full")
     @Builder.Default
@@ -86,9 +86,14 @@ public class Team {
     private List<Student> students;
 
     @Column
-    @OneToMany(mappedBy = "team")
+    @OneToMany(mappedBy = "team",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
+
+    @Column
+    private String showcaseRef;
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp

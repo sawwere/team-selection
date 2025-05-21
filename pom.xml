@@ -188,6 +188,13 @@
             <version>${org.mapstruct.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.10.0</version>
+        </dependency>
+
+
         <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -231,7 +238,7 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>6.2.1</version>
+                <version>7.12.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -261,7 +268,7 @@
                             <configOptions>
                                 <openApiNullable>false</openApiNullable>
                                 <interfaceOnly>true</interfaceOnly>
-                                <skipDefaultInterface>false</skipDefaultInterface>
+                                <skipDefaultInterface>true</skipDefaultInterface>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useResponseEntity>false</useResponseEntity>
                                 <useSpringController>true</useSpringController>
@@ -284,7 +291,6 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!-- Compiler -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -292,10 +298,6 @@
                     <configuration>
                         <release>${java.release}</release>
                         <parameters>true</parameters>
-
-                        <compilerArgument>-Xlint:all</compilerArgument>
-                        <compilerArgument>-Xdoclint:all</compilerArgument>
-
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>
@@ -307,15 +309,11 @@
                                 <artifactId>mapstruct-processor</artifactId>
                                 <version>${org.mapstruct.version}</version>
                             </path>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok-mapstruct-binding</artifactId>
-                                <version>0.2.0</version>
-                            </path>
-                            <!-- other annotation processors -->
+
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
+
 
                 <!-- Tests -->
                 <plugin>
@@ -406,11 +404,6 @@
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven-checkstyle-plugin.version}</version>
                     <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>${checkstyle.version}</version>
-                        </dependency>
                     </dependencies>
                     <configuration>
                         <configLocation>checkstyle.xml</configLocation>

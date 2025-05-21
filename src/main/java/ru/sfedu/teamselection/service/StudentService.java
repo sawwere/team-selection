@@ -4,17 +4,19 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
-import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.student.StudentCreationDtoMapper;
@@ -30,7 +32,9 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final TechnologyRepository technologyRepository;
 
-    private final UserService userService;
+    @Lazy
+    @Autowired
+    private UserService userService;
 
     private final StudentCreationDtoMapper studentCreationDtoMapper;
     private final TechnologyMapper technologyDtoMapper;
@@ -49,17 +53,74 @@ public class StudentService {
      */
     @Transactional(readOnly = true)
     public Student findByIdOrElseThrow(Long id) throws NotFoundException {
-        return studentRepository.findById(id).orElseThrow();
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Студент не найден, id=" + id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Student> findAllByTrack(Long trackId, Sort sort) {
+        Specification<Student> spec = StudentSpecification.byTrack(trackId);
+        return studentRepository.findAll(spec, sort);
     }
 
     /**
      * Find all students
-     * @return the list of all the students
+     * @return page of students
      */
     @Transactional(readOnly = true)
     public List<Student> findAll() {
         return studentRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public Page<Student> search(String like,
+                                Long trackId,
+                                Integer course,
+                                Integer groupNumber,
+                                Boolean hasTeam,
+                                Boolean isCaptain,
+                                List<Long> technologies,
+                                Pageable pageable) {
+
+        Specification<Student> spec = (root, query, cb) -> cb.conjunction();
+
+        if (like != null) {
+            spec = spec.and(StudentSpecification.like(like));
+        }
+        if (trackId != null) {
+            spec = spec.and(StudentSpecification.byTrack(trackId));
+        }
+        if (course != null) {
+            spec = spec.and(StudentSpecification.byCourse(course));
+        }
+        if (groupNumber != null) {
+            spec = spec.and(StudentSpecification.byGroup(groupNumber));
+        }
+        if (hasTeam != null) {
+            spec = spec.and(StudentSpecification.byHasTeam(hasTeam));
+        }
+        if (isCaptain != null) {
+            spec = spec.and(StudentSpecification.byIsCaptain(isCaptain));
+        }
+        if (technologies != null && !technologies.isEmpty()) {
+            spec = spec.and(StudentSpecification.hasTechnologies(technologies));
+        }
+
+        Sort sort = pageable.getSort();
+        for (Sort.Order order : sort) {
+            if ("name".equals(order.getProperty())) {
+                pageable = PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        Sort.by(order.getDirection(), "user.fio")
+                );
+                break;
+            }
+        }
+
+        return studentRepository.findAll(spec, pageable);
+    }
+
 
     /**
      * Creates student using given data.
@@ -68,14 +129,14 @@ public class StudentService {
      */
     @Transactional
     public Student create(StudentCreationDto dto) {
-        User studentUser = userService.findByIdOrElseThrow(dto.getUserId());
-        Role role = roleRepository.findByName("STUDENT").orElseThrow();
-        Student student = studentCreationDtoMapper.mapToEntity(dto);
+        User user = userService.findByIdOrElseThrow(dto.getUserId());
+        var role = roleRepository.findByName("STUDENT")
+                .orElseThrow(() -> new NotFoundException("Роль STUDENT не найдена"));
+        user.setRole(role);
 
-        studentUser.setRole(role);
-        student.setUser(studentUser);
-        studentRepository.save(student);
-        return student;
+        Student student = studentCreationDtoMapper.mapToEntity(dto);
+        student.setUser(user);
+        return studentRepository.save(student);
     }
 
     /**
@@ -85,53 +146,14 @@ public class StudentService {
      */
     @Transactional
     public void delete(Long id) {
-        Student student = findByIdOrElseThrow(id);
-        if (student.getHasTeam()) {
-            try {
-                teamService.removeStudentFromTeam(student.getCurrentTeam(), student);
-            } catch (ConstraintViolationException ex) {
-                throw new ConstraintViolationException("Can't delete student who is a captain");
-            }
+        Student st = findByIdOrElseThrow(id);
+        if (Boolean.TRUE.equals(st.getHasTeam())) {
+            teamService.removeStudentFromTeam(st.getCurrentTeam(), st);
         }
-        studentRepository.delete(findByIdOrElseThrow(id));
+        studentRepository.delete(st);
     }
 
-    /**
-     * Performs search across all students with given filter criteria
-     * @param like like parameter for the student string representation
-     * @param course student's group
-     * @param groupNumber student's course
-     * @param hasTeam student's status of having team
-     * @param technologies student's technologies(skills)
-     * @return the filtered list
-     */
-    @Transactional(readOnly = true)
-    public List<Student> search(String like,
-                                Integer course,
-                                Integer groupNumber,
-                                Boolean hasTeam,
-                                Boolean isCaptain,
-                                List<Long> technologies) {
-        Specification<Student> specification = Specification.allOf();
-        if (like != null) {
-            specification = specification.and(StudentSpecification.like(like));
-        }
-        if (course != null) {
-            specification = specification.and(StudentSpecification.byCourse(course));
-        }
-        if (groupNumber != null) {
-            specification = specification.and(StudentSpecification.byGroup(groupNumber));
-        }
-        if (hasTeam != null) {
-            specification = specification.and(StudentSpecification.byHasTeam(hasTeam));
-        }
-        if (isCaptain != null) {
-            specification = specification.and(StudentSpecification.byIsCaptain(isCaptain));
-        }
-        specification = specification.and(StudentSpecification.hasTechnologies(technologies));
 
-        return studentRepository.findAll(specification);
-    }
 
 
     /**
@@ -143,22 +165,19 @@ public class StudentService {
      */
     @Transactional
     public Student update(Long id, StudentDto dto, Boolean isUnsafeAllowed) {
-        Student student = findByIdOrElseThrow(id);
+        Student st = findByIdOrElseThrow(id);
 
-        if (isUnsafeAllowed) {
-            student.setHasTeam(dto.getHasTeam());
-            student.setIsCaptain(dto.getIsCaptain());
+        if (Boolean.TRUE.equals(isUnsafeAllowed)) {
+            st.setHasTeam(dto.getHasTeam());
+            st.setIsCaptain(dto.getIsCaptain());
         }
-        // TODO should user be able to change course?
-        // может привести к ошибкам: изменить курс уже после вступления в команду - поломается логика
-        student.setCourse(dto.getCourse());
-        student.setGroupNumber(dto.getGroupNumber());
-        student.setAboutSelf(dto.getAboutSelf());
-        student.setContacts(dto.getContacts());
-        student.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
+        st.setCourse(dto.getCourse());
+        st.setGroupNumber(dto.getGroupNumber());
+        st.setAboutSelf(dto.getAboutSelf());
+        st.setContacts(dto.getContacts());
+        st.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
 
-        studentRepository.save(student);
-        return student;
+        return studentRepository.save(st);
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")

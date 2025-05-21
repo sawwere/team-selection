@@ -2,27 +2,37 @@ package ru.sfedu.teamselection.service;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
+import ru.sfedu.teamselection.dto.UserSearchCriteria;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
-import ru.sfedu.teamselection.service.security.OidcUserImpl;
+import ru.sfedu.teamselection.repository.specification.UserSpecification;
 
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
-    private final EntityManager entityManager;
     private final UserRepository userRepository;
 
     private final UserMapper userMapper;
@@ -30,6 +40,18 @@ public class UserService {
     private final RoleRepository roleRepository;
 
     private final StudentRepository studentRepository;
+
+    @Lazy
+    @Autowired
+    private TeamService teamService;
+
+
+    @Transactional(readOnly = true)
+    public Page<UserDto> search(UserSearchCriteria criteria, Pageable pageable) {
+        Specification<User> spec = UserSpecification.build(criteria);
+        return userRepository.findAll(spec, pageable)
+                .map(userMapper::mapToDto);
+    }
 
 
     /**
@@ -39,15 +61,29 @@ public class UserService {
      * @throws NotFoundException in case there is no user with such id
      */
     public User findByIdOrElseThrow(Long id) throws NotFoundException {
-        return userRepository.findById(id).orElseThrow();
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id.toString()));
+    }
+
+    public List<User> findAllUsers()
+    {
+        return userRepository.findAll();
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User u = userRepository.findByEmail(email);
+        if (u == null) {
+            throw new NotFoundException(email);
+        }
+        return u;
     }
 
     public User findByUsername(String username) {
-        return userRepository.findByFio(username);
+        User u = userRepository.findByFio(username);
+        if (u == null) {
+            throw new NotFoundException("User with username "+username);
+        }
+        return u;
     }
 
     /**
@@ -55,27 +91,82 @@ public class UserService {
      * @return Authenticated user object
      */
     public User getCurrentUser() {
-        var username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof OidcUserImpl oidcUser) {
-            return userRepository.findByEmail(oidcUser.getEmail());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String principalName = auth.getName();
+        var r = auth.getAuthorities();
+        if (auth.getPrincipal() instanceof OidcUser oidc) {
+            return findByEmail(oidc.getEmail());
+        } else {
+            return findByUsername(principalName);
         }
-        return findByUsername(username);
     }
 
     @Transactional
-    public User createOrUpdate(UserDto userDto) {
-        User user = userMapper.mapToEntity(userDto);
-        if (userDto.getId() != null) {
-            user = entityManager.getReference(User.class, userDto.getId());
-            user.setFio(userDto.getFio());
-            user.setEmail(userDto.getEmail());
-            user.setIsRemindEnabled(userDto.getIsRemindEnabled());
-            user.setIsEnabled(userDto.getIsEnabled());
+    public User createOrUpdate(UserDto dto) {
+        if (dto.getId() != null) {
+            // --- обновление ---
+            User existing = findByIdOrElseThrow(dto.getId());
+
+            // обновляем роль
+            Role role = roleRepository.findByName(dto.getRole())
+                    .orElseThrow(() -> new NotFoundException("Роль '" + dto.getRole() + "' не найдена"));
+            existing.setRole(role);
+
+            // сохраняем старый и новый ID команды
+            Long oldTeamId = existing.getStudent() != null && existing.getStudent().getCurrentTeam() != null
+                    ? existing.getStudent().getCurrentTeam().getId()
+                    : null;
+            Long newTeamId = dto.getStudent() != null
+                    ? dto.getStudent().getCurrentTeamId()
+                    : null;
+
+            // если команда изменилась — сначала удалить из старой, потом добавить в новую
+            if (!Objects.equals(oldTeamId, newTeamId)) {
+                // удаляем из старой
+                if (oldTeamId != null) {
+                    Team oldTeam = teamService.findByIdOrElseThrow(oldTeamId);
+                    Student student = existing.getStudent();
+                    teamService.removeStudentFromTeam(oldTeam, student);
+                }
+                // добавляем в новую
+                if (newTeamId != null) {
+                    Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
+                    Student student = existing.getStudent();
+                    teamService.addStudentToTeam(newTeam, student, false);
+                }
+            }
+
+            // обновляем остальные поля
+            existing.setFio(dto.getFio());
+            existing.setEmail(dto.getEmail());
+            existing.setIsEnabled(dto.getIsEnabled());
+            existing.setIsRemindEnabled(dto.getIsRemindEnabled());
+
+            return userRepository.save(existing);
+
+        } else {
+            User user = userMapper.mapToEntity(dto);
+
+            Role role = roleRepository.findByName(dto.getRole())
+                    .orElseThrow(() -> new NotFoundException("Роль '" + dto.getRole() + "' не найдена"));
+            user.setRole(role);
+            if (dto.getStudent() != null) {
+                Student student = Student.builder()
+                        .user(user)
+                        .build();
+                studentRepository.save(student);
+
+                Long teamId = dto.getStudent().getCurrentTeamId();
+                if (teamId != null) {
+                    Team team = teamService.findByIdOrElseThrow(teamId);
+                    teamService.addStudentToTeam(team, student, false);
+                }
+            }
+
+            return userRepository.save(user);
         }
-        userRepository.save(user);
-        return user;
     }
+
 
     @Transactional
     public List<Role> getAllRoles() {
@@ -86,9 +177,9 @@ public class UserService {
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new NotFoundException("Role not found"));
+                .orElseThrow(() -> new NotFoundException("Role "+roleName));
 
-        if (roleName.equals("STUDENT")) {
+        if ("STUDENT".equals(roleName)) {
             Student student = Student.builder()
                     .user(user)
                     .build();
@@ -97,6 +188,14 @@ public class UserService {
 
         user.setRole(role);
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deactivateUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + id + " не найден"));
+        user.setIsEnabled(false);
+        userRepository.save(user);
     }
 
 }

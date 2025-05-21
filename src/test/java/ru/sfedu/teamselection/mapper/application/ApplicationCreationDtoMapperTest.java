@@ -33,7 +33,7 @@ class ApplicationCreationDtoMapperTest {
                 .status(dto.getStatus().toString())
                 .build();
 
-        Application actual = underTest.mapToEntity(dto);
+        Application actual = underTest.mapCreationToEntity(dto);
         Assertions.assertInstanceOf(TeamRequest.class, actual);
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getTeam().getId(), actual.getTeam().getId());
@@ -58,7 +58,7 @@ class ApplicationCreationDtoMapperTest {
                 .status(dto.getStatus().toString())
                 .build();
 
-        Application actual = underTest.mapToEntity(dto);
+        Application actual = underTest.mapCreationToEntity(dto);
         Assertions.assertInstanceOf(TeamInvite.class, actual);
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getTeam().getId(), actual.getTeam().getId());
@@ -84,7 +84,7 @@ class ApplicationCreationDtoMapperTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        ApplicationCreationDto actual = underTest.mapToDto(entity);
+        ApplicationCreationDto actual = underTest.mapToCreationDto(entity);
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getTeamId(), actual.getTeamId());
         Assertions.assertEquals(expected.getStudentId(), actual.getStudentId());
@@ -108,7 +108,7 @@ class ApplicationCreationDtoMapperTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        ApplicationCreationDto actual = underTest.mapToDto(entity);
+        ApplicationCreationDto actual = underTest.mapToCreationDto(entity);
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getTeamId(), actual.getTeamId());
         Assertions.assertEquals(expected.getStudentId(), actual.getStudentId());

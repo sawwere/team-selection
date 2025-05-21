@@ -1,32 +1,33 @@
 package ru.sfedu.teamselection.service;
 
-import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.domain.application.Application;
-import ru.sfedu.teamselection.domain.application.TeamRequest;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
-import ru.sfedu.teamselection.exception.ConstraintViolationException;
-import ru.sfedu.teamselection.exception.ForbiddenException;
+import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
+import ru.sfedu.teamselection.service.validation.ApplicationValidator;
+
+import static ru.sfedu.teamselection.enums.ApplicationStatus.*;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ApplicationService {
     private static final Logger LOGGER = Logger.getLogger(ApplicationService.class.getName());
 
-    private final EntityManager entityManager;
     private final ApplicationRepository applicationRepository;
 
     private final StudentService studentService;
@@ -34,6 +35,8 @@ public class ApplicationService {
     private final TeamService teamService;
 
     private final ApplicationMapper applicationMapper;
+
+    private final ApplicationValidator applicationValidator;
 
 
     public Application findByIdOrElseThrow(Long id) throws NotFoundException {
@@ -58,7 +61,7 @@ public class ApplicationService {
      * @param teamId id of the team
      * @return new list
      */
-    public List<Student> findTeamApplications(Long teamId) {
+    public List<Student> findTeamApplicationsStudents(Long teamId) {
         Team team = teamService.findByIdOrElseThrow(teamId);
         if (team.getApplications().isEmpty()) {
             return new ArrayList<>();
@@ -69,121 +72,12 @@ public class ApplicationService {
         }
     }
 
-    private Application tryCreateApplication(ApplicationCreationDto dto, User sender)
-            throws  ConstraintViolationException {
-        // Creating new application with default status
-        Application application = applicationMapper.mapToEntity(dto);
-        application.setStatus(ApplicationStatus.SENT.toString());
-        application.setStudent(entityManager.getReference(Student.class, dto.getStudentId()));
-        application.setTeam(entityManager.getReference(Team.class, dto.getTeamId()));
+    //public List<ApplicationDto> findTeamApplications(Long teamId)
+    //{
+    //   return applicationRepository.findByTeamId(teamId).stream().map(x->applicationMapper.mapToDto(x)).toList();
+    //  }
 
-        Student student = studentService.findByIdOrElseThrow(dto.getStudentId());
-        // Check that there is actually sender's id in the dto
-        if (!studentService.findByIdOrElseThrow(application.getSenderId()).getUser().getId()
-                .equals(sender.getId())) {
-            throw new ForbiddenException("Tried to create application for another user!");
-        }
 
-        validateStudentHasNoCurrentTeam(student);
-
-        Team team = teamService.findByIdOrElseThrow(dto.getTeamId());
-        // Check if team is full
-        if (team.getIsFull()) {
-            throw new ConstraintViolationException("Cannot apply for full team");
-        }
-        // Check if team already has maximum second year students
-        validateIsNotOverLimitOfSecondYears(student, team);
-        // Check if student is trying to join team from another track
-        if (!studentService.typeOfStudentTrack(student).equals(team.getCurrentTrack().getType())) {
-            throw new ConstraintViolationException("Cannot apply, wrong track");
-        }
-
-        return applicationRepository.save(application);
-    }
-
-    private void validateIsNotOverLimitOfSecondYears(Student student, Team team) {
-        if (student.getCourse() == 2
-                && teamService.getSecondYearsCount(team) == team.getCurrentTrack().getMaxSecondCourseConstraint()) {
-            throw new ConstraintViolationException("Cannot apply, team already has maximum second year students");
-        }
-    }
-
-    private void validateStudentHasNoCurrentTeam(Student student) {
-        if (student.getHasTeam()) {
-            throw new ConstraintViolationException("Student %d already has team"
-                    .formatted(student.getId())
-            );
-        }
-    }
-
-    private void validateSenderIsTarget(Application application, User sender) {
-        Student actualTarget = studentService.findByIdOrElseThrow(application.getTargetId());
-        if (!actualTarget.getUser().getId().equals(sender.getId())) {
-            throw new ForbiddenException();
-        }
-        // TODO возможно стоит сделать покрасивее?
-        if (application instanceof TeamRequest) {
-            if (actualTarget.getCurrentTeam() == null
-                    || !actualTarget.getCurrentTeam().getId().equals(application.getTeam().getId())) {
-                throw new ForbiddenException();
-            }
-        }
-    }
-
-    @Transactional
-    private Application tryAcceptApplication(ApplicationCreationDto dto, User sender)
-            throws ConstraintViolationException {
-        Application application = findByIdOrElseThrow(dto.getId());
-        Student student = studentService.findByIdOrElseThrow(application.getStudent().getId());
-
-        validateStudentHasNoCurrentTeam(student);
-        Team team = teamService.findByIdOrElseThrow(application.getTeam().getId());
-        // Only target can accept application
-        validateSenderIsTarget(application, sender);
-
-        // Check if team is full
-        if (team.getIsFull()) {
-            throw new ConstraintViolationException("Can't apply because team is already full");
-        }
-        // Check if team already has maximum second year students
-        validateIsNotOverLimitOfSecondYears(student, team);
-
-        teamService.addStudentToTeam(team, student);
-
-        application.setStatus(ApplicationStatus.ACCEPTED.toString());
-        if (team.getIsFull()) {
-            applicationRepository.updateStatusByTeam(ApplicationStatus.CANCELLED.toString(), team);
-            applicationRepository.updateStatusByStudent(ApplicationStatus.CANCELLED.toString(), student);
-        }
-
-        return applicationRepository.save(application);
-    }
-
-    @Transactional
-    private Application tryRejectApplication(ApplicationCreationDto dto, User sender)
-            throws ConstraintViolationException {
-        Application application = findByIdOrElseThrow(dto.getId());
-
-        // Only target can reject application
-        validateSenderIsTarget(application, sender);
-
-        application.setStatus(ApplicationStatus.REJECTED.toString());
-        return applicationRepository.save(application);
-    }
-
-    @Transactional
-    private Application trCancelApplication(ApplicationCreationDto dto, User sender)
-            throws ConstraintViolationException {
-        Application application = findByIdOrElseThrow(dto.getId());
-        Student applicationSender = studentService.findByIdOrElseThrow(application.getSenderId());
-        // Check if sender is the sender of the application.
-        if (!applicationSender.getUser().getId().equals(sender.getId())) {
-            throw new ForbiddenException("Only sender of the application can reject application");
-        }
-
-        application.setStatus(ApplicationStatus.CANCELLED.toString());
-        return applicationRepository.save(application);
-    }
 
     /**
      * Updates application entity status based in dto
@@ -193,29 +87,71 @@ public class ApplicationService {
      */
     @Transactional
     public Application update(ApplicationCreationDto dto, User sender) {
-        Application application = findByIdOrElseThrow(dto.getId());
-        if (!application.getStatus().equals(ApplicationStatus.SENT.toString())) {
-            throw new ConstraintViolationException("Can update only applications in status SENT");
-        }
+        log.info("PUT /applications — update dto={} by user={}", dto, sender.getId());
+        var existing = findByIdOrElseThrow(dto.getId());
+        applicationValidator.validateUpdate(dto, sender, existing);
 
-        return switch (dto.getStatus()) {
-            case ACCEPTED -> tryAcceptApplication(dto, sender);
-            case REJECTED -> tryRejectApplication(dto, sender);
-            case CANCELLED -> trCancelApplication(dto, sender);
-            case SENT -> throw new ConstraintViolationException(
-                    "Unexpected application status '%s'".formatted(dto.getStatus())
-            );
-        };
+
+        switch (dto.getStatus()) {
+            case ACCEPTED -> {
+                return accept(existing, sender);
+            }
+            case REJECTED -> {
+                return reject(existing, sender);
+            }
+            case CANCELLED -> {
+                return cancel(existing, sender);
+            }
+            case SENT -> {
+                return resend(existing, sender);
+            }
+            default -> throw new BusinessException("Статус не поддерживается: " + dto.getStatus());
+        }
     }
 
     @Transactional
     public Application create(ApplicationCreationDto dto, User sender) {
-        if (dto.getId() == null) {
-            return tryCreateApplication(dto, sender);
-        } else if (applicationRepository.existsById(dto.getId())) {
+        log.info("POST /applications — create dto={} by user={}", dto, sender.getId());
+        if (dto.getId() != null && applicationRepository.existsById(dto.getId())) {
             return update(dto, sender);
-        } else {
-            throw new NotFoundException("There is no such application to be updated");
         }
+        applicationValidator.validateCreate(dto, sender);
+        var app = applicationMapper.mapCreationToEntity(dto);
+        app.setStatus(SENT.name());
+        app.setStudent(studentService.findByIdOrElseThrow(dto.getStudentId()));
+        app.setTeam(teamService.findByIdOrElseThrow(dto.getTeamId()));
+        return applicationRepository.save(app);
     }
+
+    /**
+     * Finds application by teamId and studentId or throws NotFoundException.
+     */
+    public Application findByTeamAndStudentOrElseThrow(Long teamId, Long studentId) throws NotFoundException {
+        return applicationRepository.findByTeamIdAndStudentId(teamId, studentId)
+                .orElse(null);
+    }
+
+    private Application accept(Application app, User sender) {
+        teamService.addStudentToTeam(app.getTeam(), app.getStudent(), false);
+        app.setStatus(ACCEPTED.name());
+        applicationRepository.updateStatusByTeam(ApplicationStatus.CANCELLED.name(), app.getTeam());
+        applicationRepository.updateStatusByStudent(ApplicationStatus.CANCELLED.name(), app.getStudent());
+        return app;
+    }
+
+    private Application reject(Application app, User sender) {
+        app.setStatus(REJECTED.name());
+        return app;
+    }
+
+    private Application cancel(Application app, User sender) {
+        app.setStatus(ApplicationStatus.CANCELLED.name());
+        return app;
+    }
+
+    private Application resend(Application app, User sender) {
+        app.setStatus(SENT.name());
+        return app;
+    }
+
 }

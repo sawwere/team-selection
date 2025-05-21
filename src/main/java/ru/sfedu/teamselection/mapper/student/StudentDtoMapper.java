@@ -10,6 +10,7 @@ import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.mapper.track.TrackCreationDtoMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 
 @Component
@@ -21,6 +22,9 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
     @Lazy
     @Autowired
     private TeamDtoMapper teamDtoMapper;
+
+    @Autowired
+    private TrackCreationDtoMapper trackCreationDtoMapper;
 
     /**
      * {@inheritDoc}
@@ -36,6 +40,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .hasTeam(dto.getHasTeam())
                 .isCaptain(dto.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToEntity(dto.getCurrentTeam()))
+                .teams(dto.getTeams().stream().map(x->teamDtoMapper.mapToEntity(x)).toList())
                 //.user(dto.getUser())
                 .technologies(dto.getTechnologies().stream().map(technologyDtoMapper::mapToEntity).toList())
                 .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
@@ -53,9 +58,11 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .groupNumber(entity.getGroupNumber())
                 .aboutSelf(entity.getAboutSelf())
                 .contacts(entity.getContacts())
+                .track(trackCreationDtoMapper.mapToDto(entity.getCurrentTrack()))
                 .hasTeam(entity.getHasTeam())
                 .isCaptain(entity.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToDtoWithoutStudents(entity.getCurrentTeam()))
+                .teams(entity.getTeams().stream().map(x->teamDtoMapper.mapToDtoWithoutStudents(x)).toList())
                 .user(userMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
                 .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())

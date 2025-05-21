@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -26,9 +27,11 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.mapper.PageResponseMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
+import ru.sfedu.teamselection.service.TeamExportService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
@@ -41,6 +44,8 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 @Import(SecurityConfig.class)
 @WebMvcTest({TeamController.class})
 public class TeamControllerTest {
+    @MockitoBean
+    private TeamExportService teamExportService;
     @MockitoBean
     private TeamService teamService;
     @MockitoBean
@@ -59,6 +64,8 @@ public class TeamControllerTest {
     private TeamDtoMapper teamDtoMapper;
     @MockitoBean
     private StudentDtoMapper studentDtoMapper;
+    @MockitoBean
+    private PageResponseMapper pageResponseMapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -69,7 +76,7 @@ public class TeamControllerTest {
             .email("admin@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(3L).name("ADMIN").build())
+            .role(Role.builder().id(3L).name("ROLE_ADMIN").build())
             .build();
 
     private final User genericStudentUser = User.builder()
@@ -78,7 +85,7 @@ public class TeamControllerTest {
             .email("example@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(1L).name("STUDENT").build())
+            .role(Role.builder().id(1L).name("ROLE_STUDENT").build())
             .build();
 
     private final Student genericStudent = Student.builder()
@@ -130,12 +137,13 @@ public class TeamControllerTest {
 
     @Test
     public void search() throws Exception {
-        Mockito.doReturn(teams).when(teamService).search(
+        Mockito.doReturn(new PageImpl<>(teams)).when(teamService).search(
                 Mockito.anyString(),
                 Mockito.anyLong(),
                 Mockito.anyBoolean(),
                 Mockito.anyString(),
-                Mockito.anyList()
+                Mockito.anyList(),
+                Mockito.notNull()
         );
 
         mockMvc.perform(get(TeamController.SEARCH_TEAMS)
@@ -227,7 +235,8 @@ public class TeamControllerTest {
     public void addStudentToTeam() throws Exception {
         Mockito.doReturn(genericTeam).when(teamService).addStudentToTeam(
                 Mockito.anyLong(),
-                Mockito.anyLong()
+                Mockito.anyLong(),
+                Mockito.any()
         );
 
         mockMvc.perform(put(TeamController.ADD_STUDENT_TO_TEAM, "1", "1")
@@ -241,7 +250,8 @@ public class TeamControllerTest {
     public void addStudentToTeamNotFromAdminShouldFail() throws Exception {
         Mockito.doReturn(genericTeam).when(teamService).addStudentToTeam(
                 Mockito.anyLong(),
-                Mockito.anyLong()
+                Mockito.anyLong(),
+                Mockito.any()
         );
 
         mockMvc.perform(put(TeamController.ADD_STUDENT_TO_TEAM, "1", "1")

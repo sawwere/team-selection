@@ -7,7 +7,9 @@ CREATE TABLE "students" (
   "about_self" character varying(1024),
   "contacts" character varying(255),
   "current_team_id" bigint,
-  "user_id" bigint UNIQUE
+  "user_id" bigint UNIQUE,
+  "current_track_id" bigint,
+  "has_student_debt" boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE "teams" (

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,8 +35,9 @@ public class ProjectTypeController {
             summary = "Получение списка всех возможных типов проектов"
     )
     @GetMapping(FIND_ALL) // checked
-    public List<ProjectTypeDto> findAll() {
-        return projectTypeDtoMapper.mapListToDto(projectTypeRepository.findAll());
+    public ResponseEntity<List<ProjectTypeDto>> findAll() {
+        List<ProjectTypeDto> result = projectTypeDtoMapper.mapListToDto(projectTypeRepository.findAll());
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -43,9 +45,10 @@ public class ProjectTypeController {
             summary = "Создание нового типа проекта"
     )
     @PostMapping(FIND_ALL) // checked
-    public ProjectTypeDto create(@RequestBody @Valid ProjectTypeDto projectTypeDto) {
-        return projectTypeDtoMapper.mapToDto(
+    public ResponseEntity<ProjectTypeDto> create(@RequestBody @Valid ProjectTypeDto projectTypeDto) {
+        ProjectTypeDto result = projectTypeDtoMapper.mapToDto(
                 projectTypeRepository.save(projectTypeDtoMapper.mapToEntity(projectTypeDto))
         );
+        return ResponseEntity.ok(result);
     }
 }

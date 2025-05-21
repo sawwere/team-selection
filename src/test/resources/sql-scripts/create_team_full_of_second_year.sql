@@ -12,11 +12,11 @@ INSERT INTO students (id, course, group_number, is_captain, has_team, about_self
 INSERT INTO teams (id, captain_id, is_full, name, project_description, quantity_of_students, current_track_id, created_at, updated_at, project_type_id) VALUES (5, 20, false, 'Matrix Minds', 'Наша команда создаст интеллектуальную систему мониторинга и аналитики, которая поможет владельцам онлайн-магазинов принимать обоснованные решения на основе данных.', 6, 1, '2024-11-20 18:28:15.047117', '2024-11-20 18:28:15.047117', 1);
 
 --STUDENTS
-INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id) VALUES (25, 2, 1, false, true, 'Product Manager с опытом ведения проектов от идеи до запуска', 'tg', 5, 27);
-INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id) VALUES (24, 2, 1, false, true, 'Data Scientist с опытом анализа больших объемов данных и построения моделей машинного обучения', 'tg', 5, 26);
-INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id) VALUES (23, 2, 1, false, true, 'Системный администратор с опытом настройки и поддержки Linux-серверов', 'tg', 5, 25);
-INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id) VALUES (22, 1, 1, false, true, 'Full Stack Developer с опытом разработки веб-приложений на React.js и Node.js', 'ok', 5, 24);
-INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id) VALUES (21, 1, 1, false, true, 'Владею навыками написания тестов на Python и JavaScript, настройки окружения для тестирования, работы с баг-трекинговыми системами (Jira, Trello)', 'vk', 5, 23);
+INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id, current_track_id) VALUES (25, 2, 1, false, true, 'Product Manager с опытом ведения проектов от идеи до запуска', 'tg', 5, 27, 1);
+INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id, current_track_id) VALUES (24, 2, 1, false, true, 'Data Scientist с опытом анализа больших объемов данных и построения моделей машинного обучения', 'tg', 5, 26, 1);
+INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id, current_track_id) VALUES (23, 2, 1, false, true, 'Системный администратор с опытом настройки и поддержки Linux-серверов', 'tg', 5, 25, 1);
+INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id, current_track_id) VALUES (22, 1, 1, false, true, 'Full Stack Developer с опытом разработки веб-приложений на React.js и Node.js', 'ok', 5, 24, 1);
+INSERT INTO students (id, course, group_number, is_captain, has_team, about_self, contacts, current_team_id, user_id, current_track_id) VALUES (21, 1, 1, false, true, 'Владею навыками написания тестов на Python и JavaScript, настройки окружения для тестирования, работы с баг-трекинговыми системами (Jira, Trello)', 'vk', 5, 23, 1);
 
 UPDATE students
 SET current_team_id = 5

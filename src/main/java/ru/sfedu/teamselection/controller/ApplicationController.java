@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
@@ -42,6 +41,9 @@ public class ApplicationController {
     public static final String CREATE_APPLICATION = "/api/v1/applications";
     public static final String UPDATE_APPLICATION = "/api/v1/applications";
 
+    public static final String FIND_BY_TEAM_AND_STUDENT =
+            "/api/v1/applications/team/{teamId}/student/{studentId}";
+
     private final ApplicationService applicationService;
     private final ApplicationMapper applicationMapper;
 
@@ -54,9 +56,13 @@ public class ApplicationController {
             summary = "Получение списка всех заявок за все время"
     )
     @GetMapping(FIND_ALL) // checked
-    public List<ApplicationDto> findAll() {
+    public ResponseEntity<List<ApplicationDto>> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
-        return applicationService.findAll().stream().map(applicationDtoMapper::mapToDto).toList();
+        List<ApplicationDto> result = applicationService.findAll()
+                .stream()
+                .map(applicationDtoMapper::mapToDto)
+                .toList();
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -64,12 +70,17 @@ public class ApplicationController {
             summary = "Создание заявки",
             parameters = { @Parameter(name = "application", description = "сущность заявки")}
     )
-    @PostMapping(CREATE_APPLICATION) // checked
-    public ApplicationCreationDto createApplication(@RequestBody ApplicationCreationDto application) {
+    @PostMapping(CREATE_APPLICATION)
+    public ResponseEntity<ApplicationCreationDto> createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = userService.getCurrentUser();
-        return applicationMapper.mapToDto(applicationService.create(application, user));
+        ApplicationCreationDto result = applicationMapper.mapToCreationDto(
+                applicationService.create(application, user)
+        );
+        return ResponseEntity.ok(result);
     }
+
+
 
     @Operation(
             method = "PUT",
@@ -77,16 +88,14 @@ public class ApplicationController {
             parameters = {@Parameter(name = "application", description = "DTO с обновлённой информацией о заявке")}
     )
     @PutMapping(UPDATE_APPLICATION)
-    public ApplicationCreationDto updateApplication(@RequestBody ApplicationCreationDto applicationDto) {
-        LOGGER.info("ENTER updateApplication() endpoint");
-        User user = userService.getCurrentUser();
-        try {
-            return applicationMapper.mapToDto(applicationService.update(applicationDto, user));
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found", e);
-        } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        }
+    public ResponseEntity<ApplicationCreationDto> update(
+            @RequestBody ApplicationCreationDto dto
+    ) {
+        User current = userService.getCurrentUser();
+        ApplicationCreationDto result = applicationMapper.mapToCreationDto(
+                applicationService.update(dto, current)
+        );
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -96,10 +105,13 @@ public class ApplicationController {
                     @Parameter(name = "id", description = "id заявки", in = ParameterIn.PATH),
             }
     )
-    @GetMapping(FIND_BY_ID) // checked
-    public ApplicationCreationDto findById(@PathVariable(name = "id") Long applicationId) {
+    @GetMapping(FIND_BY_ID)
+    public ResponseEntity<ApplicationCreationDto> findById(@PathVariable(name = "id") Long applicationId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(applicationId));
-        return applicationMapper.mapToDto(applicationService.findByIdOrElseThrow(applicationId));
+        ApplicationCreationDto result = applicationMapper.mapToCreationDto(
+                applicationService.findByIdOrElseThrow(applicationId)
+        );
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -111,8 +123,30 @@ public class ApplicationController {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_APPLICATION) // checked
-    public void deleteApplication(@PathVariable(value = "id") Long applicationId) {
-        LOGGER.info("ENTER deleteApplication(%d) endpoint".formatted(applicationId));
-        applicationService.delete(applicationId);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        applicationService.delete(id);
+        return ResponseEntity.noContent().build();
     }
+
+    @Operation(
+            method = "GET",
+            summary = "Получение заявки по id команды и id студента",
+            parameters = {
+                    @Parameter(name = "teamId", description = "id команды", in = ParameterIn.PATH),
+                    @Parameter(name = "studentId", description = "id студента", in = ParameterIn.PATH)
+            }
+    )
+    @GetMapping(FIND_BY_TEAM_AND_STUDENT)
+    public ResponseEntity<ApplicationCreationDto> findByTeamAndStudent(
+            @PathVariable Long teamId,
+            @PathVariable Long studentId
+    ) {
+        LOGGER.info("ENTER findByTeamAndStudent(%d, %d) endpoint".formatted(teamId, studentId));
+        ApplicationCreationDto result = applicationMapper.mapToCreationDto(
+                applicationService.findByTeamAndStudentOrElseThrow(teamId, studentId)
+        );
+        return ResponseEntity.ok(result);
+    }
+
+
 }

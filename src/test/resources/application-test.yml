@@ -56,9 +56,12 @@ server:
       timeout: 15m
 
 app:
-  frontendUrl: http://localhost:5173
+  scheduler:
+    enabled: false
+    studentTrack: "0 0 0 * * ?"
 cors:
   allowed-origins: http://localhost:8080
 frontend:
+  url: http://localhost:5173
   login:
     url: http://localhost:5173/login

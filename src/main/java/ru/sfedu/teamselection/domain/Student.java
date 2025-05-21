@@ -61,9 +61,27 @@ public class Student {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Team currentTeam;
 
+    @Column
+    @ManyToMany
+    @JoinTable(
+            name = "teams_students",
+            joinColumns = @JoinColumn(name = "team_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    @Builder.Default
+    private List<Team> teams = new ArrayList<>();
+
     @Column(name = "is_captain", nullable = false)
     @Builder.Default
     private Boolean isCaptain = false;
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Track currentTrack;
+
+    @Column(name="hasStudentDebt")
+    @Builder.Default
+    private Boolean hasStudentDebt = false;
 
     @Column
     @ManyToMany
@@ -80,6 +98,7 @@ public class Student {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
-    @OneToOne(cascade = {CascadeType.MERGE})
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

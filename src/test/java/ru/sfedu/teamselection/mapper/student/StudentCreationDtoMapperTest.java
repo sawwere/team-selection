@@ -1,17 +1,32 @@
 package ru.sfedu.teamselection.mapper.student;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
+import ru.sfedu.teamselection.service.TrackService;
 
 class StudentCreationDtoMapperTest {
+    private final TrackService trackService = Mockito.mock(TrackService.class);
 
-    private final StudentCreationDtoMapper underTest = new StudentCreationDtoMapper();
+    private final StudentCreationDtoMapper underTest = new StudentCreationDtoMapper(trackService);
 
+    @BeforeEach
+    void beforeEach() {
+        Mockito.doReturn(
+                Track.builder()
+                    .id(1L)
+                .build()
+        ).when(trackService).findByIdOrElseThrow(
+                Mockito.anyLong()
+        );
+    }
 
     @Test
     void mapToEntity() {
@@ -21,6 +36,7 @@ class StudentCreationDtoMapperTest {
                 .userId(1L)
                 .aboutSelf("about self")
                 .contacts("tg 80@a")
+                .trackId(1L)
                 .build();
 
         Student expected = Student.builder()
@@ -30,6 +46,11 @@ class StudentCreationDtoMapperTest {
                 .contacts(dto.getContacts())
                 .currentTeam(null)
                 .user(null)
+                .currentTrack(
+                        Track.builder()
+                                .id(1L)
+                                .build()
+                )
                 .build();
 
         Student actual = underTest.mapToEntity(dto);
@@ -38,6 +59,7 @@ class StudentCreationDtoMapperTest {
         Assertions.assertEquals(expected.getAboutSelf(), actual.getAboutSelf());
         Assertions.assertEquals(expected.getContacts(), actual.getContacts());
         Assertions.assertEquals(expected.getCurrentTeam(), actual.getCurrentTeam());
+        Assertions.assertEquals(expected.getCurrentTrack().getId(), actual.getCurrentTrack().getId());
     }
 
     @Test
@@ -61,6 +83,11 @@ class StudentCreationDtoMapperTest {
                                 .build())
                         .isRemindEnabled(true)
                         .build())
+                .currentTrack(
+                        Track.builder()
+                                .id(1L)
+                                .build()
+                )
                 .build();
 
         StudentCreationDto expected = StudentCreationDto.builder()
@@ -69,12 +96,13 @@ class StudentCreationDtoMapperTest {
                 .userId(entity.getUser().getId())
                 .aboutSelf(entity.getAboutSelf())
                 .contacts(entity.getContacts())
+                .trackId(1L)
                 .build();
 
         StudentCreationDto actual = underTest.mapToDto(entity);
         Assertions.assertEquals(expected.getCourse(), actual.getCourse());
         Assertions.assertEquals(expected.getGroupNumber(), actual.getGroupNumber());
         Assertions.assertEquals(expected.getAboutSelf(), actual.getAboutSelf());
-        Assertions.assertEquals(expected.getContacts(), actual.getContacts());
+        Assertions.assertEquals(expected.getTrackId(), actual.getTrackId());
     }
 }

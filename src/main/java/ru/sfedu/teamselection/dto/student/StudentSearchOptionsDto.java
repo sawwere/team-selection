@@ -26,4 +26,6 @@ public class StudentSearchOptionsDto {
     private List<Boolean> isCaptain = List.of(true, false);
     @Builder.Default
     private Set<TechnologyDto> technologies = new HashSet<>();
+    @Builder.Default
+    private Long currentTrackId = null;
 }

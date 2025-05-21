@@ -1,10 +1,16 @@
 package ru.sfedu.teamselection.service.security;
 
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.User;
@@ -21,31 +27,39 @@ public class AzureOidcUserService extends OidcUserService {
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) {
-        var oAuth2User = super.loadUser(userRequest);
-        String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
-        Optional<User> userInDb = userRepository.findByEmailFetchRole(email);
+        OidcUser oidcUser = super.loadUser(userRequest);
 
-        if (userInDb.isEmpty()) {
-            User newUser = User.builder()
-                    .fio(name)
-                    .email(email)
-                    .isEnabled(true)
-                    .role(roleRepository.findById(1L).orElseThrow())
-                    .build();
+        String email = oidcUser.getAttribute("email");
+        String name = oidcUser.getAttribute("name");
 
-            return new OidcUserImpl(oAuth2User.getAuthorities(),
-                    oAuth2User.getIdToken(),
-                    oAuth2User.getUserInfo(),
-                    userRepository.save(newUser)
-            );
-        }
+        // найдём или создадим пользователя в БД
+        User user = userRepository.findByEmailFetchRole(email)
+                .orElseGet(() -> {
+                    User u = User.builder()
+                            .fio(name)
+                            .email(email)
+                            .isEnabled(true)
+                            .role(roleRepository.findById(1L).orElseThrow())
+                            .build();
+                    return userRepository.save(u);
+                });
 
-        return new OidcUserImpl(oAuth2User.getAuthorities(),
-                oAuth2User.getIdToken(),
-                oAuth2User.getUserInfo(),
-                userInDb.orElseThrow()
-                );
+        // ****** вот здесь собираем authorities ******
+        Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+
+        // 1) все authority, которые пришли в токене (OIDC scopes и т.п.)
+        mappedAuthorities.addAll(oidcUser.getAuthorities());
+
+        // 2) добавляем роль из БД (Spring ожидает префикс "ROLE_")
+        String roleName = user.getRole().getName();
+        mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
+
+        // возвращаем DefaultOidcUser с новыми authorities
+        return new DefaultOidcUser(
+                mappedAuthorities,
+                oidcUser.getIdToken(),
+                oidcUser.getUserInfo()
+        );
     }
 }
 

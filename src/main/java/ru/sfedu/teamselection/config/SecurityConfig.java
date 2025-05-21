@@ -33,7 +33,7 @@ public class SecurityConfig {
     private static final String ADMIN_ROLE_NAME = "ADMIN";
     public static final String LOGOUT_URL = "/api/v1/auth/logout";
 
-    @Value("${app.frontendUrl}")
+    @Value("${frontend.url}")
     private String frontendUrl;
     @Value("${frontend.login.url}")
     private String frontendLoginUrl;
@@ -47,10 +47,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/login", "/registration").anonymous()
-                        .requestMatchers(HttpMethod.DELETE).hasAuthority(ADMIN_ROLE_NAME)
+                        .requestMatchers(HttpMethod.DELETE).hasRole(ADMIN_ROLE_NAME)
                         .requestMatchers("/actuator/prometheus")
                             .access(new WebExpressionAuthorizationManager("hasIpAddress('10.5.0.55')"))
                         .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/v1/tracks").permitAll()
                         .anyRequest().permitAll()
                 )
                 .logout(logout -> logout

@@ -45,7 +45,7 @@ public class UserControllerTest {
     private AzureOidcUserService azureOidcUserService;
 
     @MockitoBean
-    private final UserMapper userMapper = UserMapper.INSTANCE;
+    private UserMapper userMapper;
     @MockitoBean
     private RoleMapper roleDtoMapper;
 
@@ -58,7 +58,7 @@ public class UserControllerTest {
             .email("admin@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(3L).name("ADMIN").build())
+            .role(Role.builder().id(3L).name("ROLE_ADMIN").build())
             .build();
 
     private final User genericStudentUser = User.builder()
@@ -67,7 +67,7 @@ public class UserControllerTest {
             .email("example@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(1L).name("STUDENT").build())
+            .role(Role.builder().id(1L).name("ROLE_STUDENT").build())
             .build();
 
     private final List<Role> roleDtoList = List.of(
@@ -166,7 +166,7 @@ public class UserControllerTest {
 
         mockMvc.perform(get(UserController.GET_ROLES)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser)))
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin)))
                 .andExpect(status().isOk());
     }
 

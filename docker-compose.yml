@@ -22,6 +22,7 @@ services:
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
       AZURE_TENANT_ID: ${AZURE_TENANT_ID}
       AZURE_ISSUER_URL: ${AZURE_ISSUER_URL}
+      KEY_STORE_PASSWORD: ${KEY_STORE_PASSWORD}
     logging:
       options:
         max-size: "10m"

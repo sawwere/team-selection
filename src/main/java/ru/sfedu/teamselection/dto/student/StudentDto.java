@@ -17,6 +17,7 @@ import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
+import ru.sfedu.teamselection.dto.track.TrackCreationDto;
 
 
 /**
@@ -51,6 +52,9 @@ public class StudentDto {
     @JsonProperty(value = "is_captain")
     private Boolean isCaptain;
 
+    @JsonProperty(value="teams")
+    private List<TeamDto>  teams;
+
     @JsonProperty(value = "current_team")
     private TeamDto currentTeam;
 
@@ -59,6 +63,10 @@ public class StudentDto {
 
     @Builder.Default
     private List<ApplicationDto> applications = new ArrayList<>();
+
+    @JsonProperty(value = "current_track")
+    @NotNull
+    private TrackCreationDto track;
 
     private UserDto user;
 }

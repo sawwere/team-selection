@@ -8,20 +8,27 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
 import ru.sfedu.teamselection.dto.UserDto;
+import ru.sfedu.teamselection.dto.UserSearchCriteria;
 import ru.sfedu.teamselection.mapper.user.RoleMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.service.UserService;
@@ -33,9 +40,13 @@ import ru.sfedu.teamselection.service.UserService;
 @CrossOrigin
 public class UserController {
     public static final String CURRENT_USER = "/api/v1/users/me";
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String PUT_USER = "/api/v1/users";
+    public static final String FIND_USERS = "/api/v1/users";
+    public static final String DELETE_USER = "/api/v1/users/{id}";
     public static final String GET_ROLES = "/api/v1/roles";
     public static final String GRANT_ROLE = "/api/v1/users/{id}/assign-role";
+
 
     private final UserService userService;
     private final UserMapper userMapper;
@@ -61,12 +72,13 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность пользователя"
             ))
-    @PreAuthorize("hasAuthority('ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
+    @PreAuthorize("hasRole('ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
     @PutMapping(value = PUT_USER,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserDto putUser(@RequestBody @Valid UserDto userDto) {
-        return userMapper.mapToDto(userService.createOrUpdate(userDto));
+    public ResponseEntity<UserDto> putUser(@RequestBody @Valid UserDto userDto) {
+        UserDto result = userMapper.mapToDto(userService.createOrUpdate(userDto));
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -78,9 +90,10 @@ public class UserController {
             summary = "Получение текущего пользователя"
     )
     @GetMapping(CURRENT_USER)
-    public UserDto getCurrentUser() {
+    public ResponseEntity<UserDto> getCurrentUser() {
         User currentUser = userService.getCurrentUser();
-        return userMapper.mapToDto(currentUser);
+        UserDto result = userMapper.mapToDto(currentUser);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -92,6 +105,7 @@ public class UserController {
             summary = "Получение списка всех возможных ролей"
     )
     @GetMapping(GET_ROLES)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RoleDto>> getAllRoles() {
         return ResponseEntity.ok(userService.getAllRoles()
                 .stream()
@@ -120,10 +134,53 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность роли пользователя"
             ))
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(GRANT_ROLE)
     public ResponseEntity<?> assignRole(@PathVariable Long id, @RequestBody RoleDto roleDto) {
         userService.assignRole(id, roleDto.getName());
         return ResponseEntity.ok().build();
     }
+
+    @SuppressWarnings("checkstyle:ParameterNumber")
+    @GetMapping(FIND_USERS)
+    public ResponseEntity<Page<UserDto>> searchUsers(
+            @RequestParam(value = "fio",         required = false) String  fio,
+            @RequestParam(value = "email",       required = false) String  email,
+            @RequestParam(value = "role",        required = false) String  role,
+            @RequestParam(value = "course",      required = false) Integer course,
+            @RequestParam(value = "groupNumber", required = false) Integer groupNumber,
+            @RequestParam(value = "trackId",     required = false) Long    trackId,
+            @RequestParam(value = "isEnabled",   required = false) Boolean isEnabled,
+            @RequestParam(value = "page",        defaultValue = "0")  int     page,
+            @RequestParam(value = "size",        defaultValue = "15") int     size,
+            @RequestParam(value = "sort",        defaultValue = "fio,asc") String sort
+    ) {
+        var criteria = UserSearchCriteria.builder()
+                .fio(fio)
+                .email(email)
+                .role(role)
+                .course(course)
+                .groupNumber(groupNumber)
+                .trackId(trackId)
+                .isEnabled(isEnabled)
+                .build();
+
+        String[] parts = sort.split(",");
+        Sort.Direction dir = parts.length > 1 && parts[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, parts[0]));
+
+        Page<UserDto> result = userService.search(criteria, pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Удалить пользователя", tags = {"ADMIN"})
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(DELETE_USER)
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        userService.deactivateUser(id);
+        return ResponseEntity.ok("User with id: " + id + "was deleted");
+    }
+
 }
