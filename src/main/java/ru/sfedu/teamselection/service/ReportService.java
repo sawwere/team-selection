@@ -1,10 +1,5 @@
 package ru.sfedu.teamselection.service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -24,18 +19,6 @@ import ru.sfedu.teamselection.domain.Track;
 public class ReportService {
 
     public final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
-    public byte[] trackToExcelFile(Path path, Track track) throws IOException {
-        XSSFWorkbook report = createExcelReport(track);
-        File file = new File(String.valueOf(path.resolve(track.getName() + ".xlsx")));
-        report.write(new FileOutputStream(file));
-        report.close();
-        return Files.readAllBytes(file.toPath());
-    }
-
-    public byte[] trackToExcelFile(Track track) throws IOException {
-        return trackToExcelFile(Path.of("/"), track);
-    }
 
     public XSSFWorkbook createExcelReport(Track track) {
         XSSFWorkbook report = createExcelFile();
