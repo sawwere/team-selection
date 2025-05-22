@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class StudentSummaryDto {
+
     private Integer course;
 
     @JsonProperty("group_number")

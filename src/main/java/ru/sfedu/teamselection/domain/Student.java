@@ -57,7 +57,7 @@ public class Student {
     @Builder.Default
     private Boolean hasTeam = false;
 
-    @ManyToOne(fetch = FetchType.LAZY,
+    @ManyToOne(fetch = FetchType.EAGER,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Team currentTeam;
 
@@ -98,7 +98,7 @@ public class Student {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

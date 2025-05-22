@@ -1,6 +1,8 @@
 package ru.sfedu.teamselection.repository;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,6 +21,8 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Long>, JpaSpecificationExecutor<Application> {
 
     boolean existsByTeamIdAndStudentId(Long teamId, Long studentId);
+
+    Page<Application> findAllByTeam_CurrentTrack_Id(Long trackId, Pageable pageable);
 
     List<Application> findByTeamId(Long teamId);
 

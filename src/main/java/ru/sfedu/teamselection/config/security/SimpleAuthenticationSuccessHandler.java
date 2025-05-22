@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.service.UserService;
-import ru.sfedu.teamselection.service.security.OidcUserImpl;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-    @Value("${app.frontendUrl}")
+    @Value("${frontend.url}")
     private String frontendUrl;
 
     private final UserService userService;

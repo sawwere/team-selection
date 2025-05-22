@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,23 +15,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.dto.TechnologyDto;
-import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
-import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.team.TeamCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.team.TeamUpdateDtoMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.TeamSpecification;
-
 
 @RequiredArgsConstructor
 @Service
@@ -40,11 +43,18 @@ public class TeamService {
     private final ProjectTypeRepository projectTypeRepository;
 
     private final TrackService trackService;
-    private final StudentService studentService;
+    @Lazy
+    @Autowired
+    private StudentService studentService;
 
     private final TechnologyMapper technologyDtoMapper;
     private final ProjectTypeMapper projectTypeDtoMapper;
     private final TeamCreationDtoMapper teamCreationDtoMapper;
+    private final TeamUpdateDtoMapper teamUpdateDtoMapper;
+
+    @Autowired
+    @Lazy
+    private ApplicationService applicationService;
 
     /**
      * Find Team entity by id
@@ -66,7 +76,14 @@ public class TeamService {
     }
 
     /**
-     * Performs search across all students with given filter criteria and pagination
+     * Performs search across all students with given filter criteria
+     * @param like like parameter for the student string representation
+     * @param trackId team is assigned to this track
+     * @param isFull is team full of students
+     * @param projectType project type defined by team's captain
+     * @param technologies team's technologies(skills)
+     * @param pageable pageable
+     * @return the filtered list
      */
     public Page<Team> search(String like,
                              Long trackId,
@@ -119,7 +136,7 @@ public class TeamService {
             team.setCurrentTrack(trackService.findByIdOrElseThrow(trackId));
 
             Student captain = studentService.findByIdOrElseThrow(dto.getCaptainId());
-            addStudentToTeam(team, captain);
+            addStudentToTeam(team, captain, false);
             team.setCaptainId(captain.getId());
             captain.setHasTeam(true);
             captain.setIsCaptain(true);
@@ -145,6 +162,10 @@ public class TeamService {
     @Transactional
     public void delete(Long id) {
         Team team = findByIdOrElseThrow(id);
+        for (Application application: team.getApplications())
+        {
+            applicationService.delete(application.getId());
+        }
         for (Student teamMember : team.getStudents()) {
             if (Objects.equals(teamMember.getCurrentTeam().getId(), id)) {
                 teamMember.setHasTeam(false);
@@ -156,11 +177,11 @@ public class TeamService {
     }
 
     @Transactional
-    public Team addStudentToTeam(Team team, Student student) {
+    public Team addStudentToTeam(Team team, Student student, Boolean skipRestrictions) {
         if (student.getHasTeam()) {
             throw new ConstraintViolationException("Student already has a team");
         }
-        if (team.getIsFull()) {
+        if (!skipRestrictions && team.getIsFull()) {
             throw new ConstraintViolationException("Cannot add student to a full team");
         }
         // ограничение по второму курсу
@@ -191,6 +212,10 @@ public class TeamService {
 
         student.setHasTeam(true);
         student.setCurrentTeam(team);
+        for (Application application: student.getApplications())
+        {
+            application.setStatus(ApplicationStatus.REJECTED.name());
+        }
         return team;
     }
 
@@ -208,11 +233,18 @@ public class TeamService {
         return team;
     }
 
+    /**
+     *
+     * @param teamId
+     * @param studentId
+     * @param sender
+     * @return
+     */
     @Transactional
-    public Team addStudentToTeam(Long teamId, Long studentId) {
+    public Team addStudentToTeam(Long teamId, Long studentId, User sender) {
         Team team = findByIdOrElseThrow(teamId);
         Student student = studentService.findByIdOrElseThrow(studentId);
-        addStudentToTeam(team, student);
+        addStudentToTeam(team, student, isAdmin(sender));
 
         return team;
     }
@@ -221,52 +253,58 @@ public class TeamService {
      * Updates entity using data given in dto
      * # WARNING: unsafe method. No business-logic validation is performed here depending on sender authorities.
      * @param id id of entity
-     * @param dto dto containing updated values
      * @return updated entity
      * @apiNote   possibly UNSAFE
      */
     @Transactional
-    public Team update(Long id, TeamDto dto, User sender) {
+    public Team update(Long id,
+                       TeamUpdateDto dto,
+                       User sender) {
+        Team partial = teamUpdateDtoMapper.toEntity(dto);
+
         Team team = findByIdOrElseThrow(id);
 
-        boolean isAdmin = sender.getRole().getName().equals("ADMIN");
-        boolean isCaptainOfThis = sender.getId()
+
+        boolean isAdmin = isAdmin(sender);
+        boolean isCaptain = sender.getId()
                 .equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId());
 
-        if (!isAdmin && !isCaptainOfThis) {
-            throw new ForbiddenException("Only admin or the team’s captain can modify this team");
+        if (!isAdmin && !isCaptain) {
+            throw new ForbiddenException("Only admin or captain");
         }
 
-
+        // Только admin может менять эти поля:
         if (isAdmin) {
-            team.setName(dto.getName());
-            team.setQuantityOfStudents(dto.getQuantityOfStudents());
-            team.setIsFull(dto.getIsFull());
-            if (!Objects.equals(dto.getCurrentTrackId(), team.getCurrentTrack().getId())) {
-                team.setCurrentTrack(trackService.findByIdOrElseThrow(dto.getCurrentTrackId()));
+            team.setName(partial.getName());
+            team.setIsFull(partial.getIsFull());
+            if (!Objects.equals(partial.getCurrentTrack().getId(),
+                    team.getCurrentTrack().getId())) {
+                team.setCurrentTrack(
+                        trackService.findByIdOrElseThrow(partial.getCurrentTrack().getId())
+                );
             }
-            team.setCaptainId(dto.getCaptain().getId());
+            team.setCaptainId(partial.getCaptainId());
         }
 
-        team.setProjectDescription(dto.getProjectDescription());
-        team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
+        // Всегда можно менять:
+        team.setProjectDescription(partial.getProjectDescription());
+        team.setProjectType(partial.getProjectType());
         team.setTechnologies(
                 technologyRepository.findAllByIdIn(
-                        dto.getTechnologies().stream().map(TechnologyDto::getId).toList()
+                        partial.getTechnologies()
+                                .stream()
+                                .map(Technology::getId)
+                                .collect(Collectors.toList())
                 )
         );
 
-
-        List<Long> newStudentIds = dto.getStudents().stream()
-                .map(StudentDto::getId)
-                .toList();
+        var newStudentIds = dto.getStudentIds();
         Set<Long> currentIds = team.getStudents().stream()
                 .map(Student::getId)
                 .collect(Collectors.toSet());
 
         for (Student s : new ArrayList<>(team.getStudents())) {
             if (!newStudentIds.contains(s.getId())) {
-
                 removeStudentFromTeam(team, s);
             }
         }
@@ -274,44 +312,11 @@ public class TeamService {
         for (Long sid : newStudentIds) {
             if (!currentIds.contains(sid)) {
                 Student student = studentService.findByIdOrElseThrow(sid);
-                addStudentToTeam(team, student);
+                addStudentToTeam(team, student, isAdmin);
             }
         }
 
         return teamRepository.save(team);
-    }
-
-
-    /**
-     * Performs search across all students with given filter criteria
-     * @param like like parameter for the student string representation
-     * @param trackId team is assigned to this track
-     * @param isFull is team full of students
-     * @param projectType project type defined by team's captain
-     * @param technologies student's technologies(skills)
-     * @return the filtered list
-     */
-    public List<Team> search(String like,
-                             Long trackId,
-                             Boolean isFull,
-                             String projectType,
-                             List<Long> technologies) {
-        Specification<Team> specification = Specification.allOf();
-        if (like != null) {
-            specification = specification.and(TeamSpecification.like(like));
-        }
-        if (trackId != null) {
-            specification = specification.and(TeamSpecification.byTrack(trackId));
-        }
-        if (isFull != null) {
-            specification = specification.and(TeamSpecification.byIsFull(isFull));
-        }
-        if (projectType != null) {
-            specification = specification.and(TeamSpecification.byProjectType(projectType));
-        }
-        specification = specification.and(TeamSpecification.byTechnologies(technologies));
-
-        return teamRepository.findAll(specification);
     }
 
     public int getSecondYearsCount(Team team) {
@@ -326,7 +331,7 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public TeamSearchOptionsDto getSearchOptionsTeams(Long trackId) {
-        var teams = search(null, trackId, null, null, null);
+        var teams = search(null, trackId, null, null, null, Pageable.unpaged());
         TeamSearchOptionsDto teamSearchOptionsDto = new TeamSearchOptionsDto();
         teamSearchOptionsDto
                 .getProjectTypes()
@@ -344,5 +349,9 @@ public class TeamService {
 
     public List<Team> getTeamHistoryForStudent(Long studentId) {
         return teamRepository.findAllByStudent(studentId);
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole().getName().equals("ADMIN");
     }
 }

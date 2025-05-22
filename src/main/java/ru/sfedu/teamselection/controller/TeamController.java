@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,14 +28,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.PageResponse;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
+import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
+import ru.sfedu.teamselection.mapper.PageResponseMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
+import ru.sfedu.teamselection.service.TeamExportService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 
@@ -49,6 +57,7 @@ public class TeamController {
 
     private final TeamDtoMapper teamDtoMapper;
     private final StudentDtoMapper studentDtoMapper;
+    private final PageResponseMapper pageResponseMapper;
 
     private static final Logger LOGGER = Logger.getLogger(TeamController.class.getName());
 
@@ -65,6 +74,8 @@ public class TeamController {
     public static final String ADD_STUDENT_TO_TEAM = "/api/v1/teams/{teamId}/students/{studentId}";
 
     public static final String GET_SEARCH_OPTIONS = "/api/v1/teams/filters";
+
+    private final TeamExportService teamExportService;
 
 
     @Operation(
@@ -103,7 +114,7 @@ public class TeamController {
                     @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_TEAMS)
-    public ResponseEntity<Page<TeamDto>> search(
+    public ResponseEntity<PageResponse<TeamDto>> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "track_id", required = false) Long trackId,
             @RequestParam(value = "is_full", required = false) Boolean isFull,
@@ -121,7 +132,7 @@ public class TeamController {
 
         Page<TeamDto> result = teamService.search(like, trackId, isFull, projectType, technologies, pageable)
                 .map(teamDtoMapper::mapToDto);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(pageResponseMapper.toDto(result));
     }
 
     @Operation(
@@ -169,6 +180,32 @@ public class TeamController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping(value = "/api/v1/teams/export/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> exportTeamsCsv(
+            @RequestParam("trackId") Long trackId) {
+        byte[] data = teamExportService.exportTeamsToCsvByTrack(trackId);
+        String filename = "teams_track_" + trackId + ".csv";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(data);
+    }
+
+    @GetMapping(value = "/api/v1/teams/export/excel", produces =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    public ResponseEntity<byte[]> exportTeamsExcel(
+            @RequestParam("trackId") Long trackId) {
+        byte[] data = teamExportService.exportTeamsToExcelByTrack(trackId);
+        String filename = "teams_track_" + trackId + ".xlsx";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(data);
+    }
+
     @Operation(
             method = "POST",
             summary = "Создание команды",
@@ -200,11 +237,12 @@ public class TeamController {
                     @Parameter(name = "studentId", description = "Id студента", in = ParameterIn.PATH),
             }
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(ADD_STUDENT_TO_TEAM)
     public ResponseEntity<TeamDto> addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
-        TeamDto result = teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId));
+        User user = userService.getCurrentUser();
+        TeamDto result = teamDtoMapper.mapToDto(teamService.addStudentToTeam(teamId, studentId, user));
         return ResponseEntity.ok(result);
     }
 
@@ -231,11 +269,17 @@ public class TeamController {
                     description = "Сущность команды"
             ))
     @PutMapping(UPDATE_TEAM)
-    public ResponseEntity<TeamDto> updateTeam(@PathVariable(value = "id") Long teamId,
-                                    @RequestBody TeamDto team) {
-        LOGGER.info("ENTER updateTeam(%d) endpoint".formatted(teamId));
+    public ResponseEntity<TeamDto> updateTeam(
+            @PathVariable Long id,
+            @RequestBody @Valid TeamUpdateDto dto
+    ) {
+        if (!id.equals(dto.getId())) {
+            return ResponseEntity.badRequest().build();
+        }
+
         User user = userService.getCurrentUser();
-        TeamDto result = teamDtoMapper.mapToDto(teamService.update(teamId, team, user));
+        Team updated = teamService.update(id, dto, user);
+        TeamDto result = teamDtoMapper.mapToDto(updated);
         return ResponseEntity.ok(result);
     }
 }

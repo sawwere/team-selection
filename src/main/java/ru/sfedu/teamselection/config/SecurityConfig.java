@@ -33,7 +33,7 @@ public class SecurityConfig {
     private static final String ADMIN_ROLE_NAME = "ADMIN";
     public static final String LOGOUT_URL = "/api/v1/auth/logout";
 
-    @Value("${app.frontendUrl}")
+    @Value("${frontend.url}")
     private String frontendUrl;
     @Value("${frontend.login.url}")
     private String frontendLoginUrl;

@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection.service.validation;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
@@ -10,6 +11,7 @@ import ru.sfedu.teamselection.domain.application.TeamRequest;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.BusinessException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.ResourceNotFoundException;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
@@ -32,7 +34,7 @@ public class ApplicationValidator {
                 ? captain
                 : student;
         if (!applicationSender.getUser().getId().equals(sender.getId())) {
-            throw new BusinessException("Вы не можете подать заявку от имени другого студента");
+            throw new ForbiddenException("Вы не можете подать заявку от имени другого студента");
         }
         if (student.getHasTeam()) {
             throw new BusinessException("Студент уже состоит в команде");
@@ -46,7 +48,7 @@ public class ApplicationValidator {
                 && teamService.getSecondYearsCount(team) >= team.getCurrentTrack().getMaxSecondCourseConstraint()) {
             throw new BusinessException("Невозможно — в команде уже максимальное число второкурсников");
         }
-        if (!studentService.typeOfStudentTrack(student).equals(team.getCurrentTrack().getType())) {
+        if (!Objects.equals(student.getCurrentTrack().getId(), captain.getCurrentTrack().getId())) {
             throw new BusinessException("Невозможно — неверный трек");
         }
     }
@@ -78,7 +80,7 @@ public class ApplicationValidator {
                     );
                 }
                 if (!sender.getUser().getId().equals(requestSender.getId())) {
-                    throw new BusinessException("Только отправитель может отменить заявку");
+                    throw new ForbiddenException("Только отправитель может отменить заявку");
                 }
             }
             case SENT -> {
@@ -91,15 +93,17 @@ public class ApplicationValidator {
     private void validateSenderIsTarget(Application application, User sender) {
         Student actualTarget = studentService.findByIdOrElseThrow(application.getTargetId());
         if (!actualTarget.getUser().getId().equals(sender.getId())) {
-            throw new BusinessException("Принять заявку может только ее адресат");
+            throw new ForbiddenException(ONLY_TARGET_CAN_ACCEPT_ERROR);
         }
         // TODO возможно стоит сделать покрасивее?
         if (application instanceof TeamRequest) {
             if (actualTarget.getCurrentTeam() == null
                     || !actualTarget.getCurrentTeam().getId().equals(application.getTeam().getId())) {
-                throw new BusinessException("Принять заявку может только ее адресат");
+                throw new ForbiddenException(ONLY_TARGET_CAN_ACCEPT_ERROR);
             }
         }
     }
+
+    private static final String ONLY_TARGET_CAN_ACCEPT_ERROR = "Принять заявку может только ее адресат";
 }
 

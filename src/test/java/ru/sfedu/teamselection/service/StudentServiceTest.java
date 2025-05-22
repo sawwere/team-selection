@@ -120,6 +120,7 @@ class StudentServiceTest extends BasicTestContainerTest {
                 .course(2)
                 .groupNumber(2)
                 .userId(21L)
+                .trackId(1L)
                 .build();
 
         Student actual = underTest.create(studentDto);

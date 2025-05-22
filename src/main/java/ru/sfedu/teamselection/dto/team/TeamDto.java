@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.sfedu.teamselection.dto.TechnologyDto;
-import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 
@@ -42,7 +41,6 @@ public class TeamDto {
 
     @JsonProperty(value = "captain")
     @NotNull
-    //@JsonManagedReference
     private StudentDto captain;
 
     @JsonProperty(value = "is_full")
@@ -50,10 +48,10 @@ public class TeamDto {
     private Boolean isFull = false;
 
     @JsonProperty(value = "current_track")
-    //@JsonBackReference
     private Long currentTrackId;
 
-    private List<StudentDto> students;
+    @Builder.Default
+    private List<StudentDto> students = new ArrayList<>();
 
     @JsonProperty(value = "showcase_ref")
     private String showcaseRef;

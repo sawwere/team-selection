@@ -14,15 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
@@ -56,23 +48,21 @@ public class ApplicationController {
 
     private final UserService userService;
 
-    @Operation(
-            method = "GET",
-            summary = "Получение списка всех заявок за все время"
-    )
+
+    @Operation(method = "GET", summary = "Получение списка заявок с пагинацией, сортировкой и фильтром по треку")
     @GetMapping(FIND_ALL)
     public ResponseEntity<Page<ApplicationDto>> findAll(
-            @ParameterObject @PageableDefault(
-                    page = 0,
-                    size = 20,
-                    sort = "id",
-                    direction = Sort.Direction.ASC
-            ) Pageable pageable
+            @RequestParam(name = "track_id", required = false) Long trackId,
+            @RequestParam(name="status", required = false) String status,
+            @ParameterObject
+            @PageableDefault(page = 0, size = 20, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
     ) {
-        LOGGER.info("ENTER findAll() endpoint with pagination and sorting: " + pageable);
-        Page<ApplicationDto> pageResult = applicationService.findAll(pageable)
+        LOGGER.info("ENTER findAll(trackId=" + trackId + ", pageable=" + pageable + ")");
+        Page<ApplicationDto> page = applicationService
+                .findAll(trackId, status, pageable)
                 .map(applicationDtoMapper::mapToDto);
-        return ResponseEntity.ok(pageResult);
+        return ResponseEntity.ok(page);
     }
 
     @Operation(

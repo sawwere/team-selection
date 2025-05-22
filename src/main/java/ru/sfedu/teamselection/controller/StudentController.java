@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +28,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.PageResponse;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamDto;
+import ru.sfedu.teamselection.mapper.PageResponseMapper;
 import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.mapper.team.TeamDtoMapper;
+import ru.sfedu.teamselection.service.StudentExportService;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
@@ -64,6 +68,11 @@ public class StudentController {
 
     private final StudentDtoMapper studentDtoMapper;
     private final TeamDtoMapper teamDtoMapper;
+    private final PageResponseMapper pageResponseMapper;
+
+    private final StudentExportService studentExportService;
+
+
 
     @Operation(
             method = "GET",
@@ -75,6 +84,38 @@ public class StudentController {
         StudentSearchOptionsDto result = studentService.getSearchOptionsStudents();
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * Экспорт студентов в CSV по заданному треку.
+     */
+    @Operation(method = "GET", summary = "Экспорт студентов в CSV по trackId")
+    @GetMapping(value = "/api/v1/students/export/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> exportCsvByTrack(
+            @RequestParam("trackId") Long trackId) {
+        byte[] csvData = studentExportService.exportStudentsToCsvByTrack(trackId);
+        String filename = "students_track_" + trackId + ".csv";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvData);
+    }
+
+    /**
+     * Экспорт студентов в Excel по заданному треку.
+     */
+    @Operation(method = "GET", summary = "Экспорт студентов в Excel по trackId")
+    @GetMapping(value = "/api/v1/students/export/excel", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    public ResponseEntity<byte[]> exportExcelByTrack(
+            @RequestParam("trackId") Long trackId) {
+        byte[] xlsxData = studentExportService.exportStudentsToExcelByTrack(trackId);
+        String filename = "students_track_" + trackId + ".xlsx";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(xlsxData);
+    }
+
 
     @SuppressWarnings("checkstyle:ParameterNumber")
     @Operation(
@@ -92,7 +133,7 @@ public class StudentController {
                     @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_STUDENTS)
-    public ResponseEntity<Page<StudentDto>> search(
+    public ResponseEntity<PageResponse<StudentDto>> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "course", required = false) Integer course,
             @RequestParam(value = "group_number", required = false) Integer groupNumber,
@@ -121,7 +162,7 @@ public class StudentController {
                         pageable
                 )
                 .map(studentDtoMapper::mapToDto);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(pageResponseMapper.toDto(result));
     }
 
 
@@ -171,7 +212,7 @@ public class StudentController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность студента"
             ))
-    @PreAuthorize("hasAuthority('ADMIN') or @studentService.getCurrentStudent().equals(#studentId)")
+    @PreAuthorize("hasRole('ADMIN') or @studentService.getCurrentStudent().equals(#studentId)")
     @PutMapping(value = UPDATE_STUDENT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
