@@ -62,11 +62,11 @@ public class Student {
     private Team currentTeam;
 
     @Column
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "teams_students",
-            joinColumns = @JoinColumn(name = "team_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id")
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_id")
     )
     @Builder.Default
     private List<Team> teams = new ArrayList<>();

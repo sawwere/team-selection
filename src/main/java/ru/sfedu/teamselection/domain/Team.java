@@ -75,8 +75,8 @@ public class Team {
     private Track currentTrack;
 
     @Column
-    @OneToMany(
-            fetch = FetchType.EAGER,
+    @ManyToMany(
+            fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "teams_students",

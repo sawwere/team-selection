@@ -72,7 +72,7 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность пользователя"
             ))
-    @PreAuthorize("hasRole('ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
     @PutMapping(value = PUT_USER,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
