@@ -16,12 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,15 +27,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClient;
-import reactor.core.publisher.Mono;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
-import ru.sfedu.teamselection.exception.NotFoundException;
+import ru.sfedu.teamselection.exception.AzureException;
 import ru.sfedu.teamselection.mapper.user.RoleMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
+import ru.sfedu.teamselection.service.PhotoService;
 import ru.sfedu.teamselection.service.UserService;
 
 @RestController
@@ -56,9 +50,12 @@ public class UserController {
     public static final String DELETE_USER = "/api/v1/users/{id}";
     public static final String GET_ROLES = "/api/v1/roles";
     public static final String GRANT_ROLE = "/api/v1/users/{id}/assign-role";
+    public static final String GET_USER_PHOTO = "/api/v1/users/{id}/photo";
 
 
     private final UserService userService;
+    private final PhotoService photoService;
+
     private final UserMapper userMapper;
     private final RoleMapper roleDtoMapper;
 
@@ -193,41 +190,21 @@ public class UserController {
         return ResponseEntity.ok("User with id: " + id + "was deleted");
     }
 
-    private RestClient restClient = RestClient.builder()
-            .baseUrl("https://graph.microsoft.com/v1.0")
-            .build();
-
-    private final OAuth2AuthorizedClientService authorizedClientService;
-
-    public byte[] getUserPhoto(OAuth2AuthenticationToken authentication) {
-        // Получаем токен доступа
-        OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
-                "azure",
-                authentication.getName()
-        );
-        String accessToken = client.getAccessToken().getTokenValue();
-
-        // Выполняем запрос к Graph API
-        return restClient.get()
-                .uri("/users/{user-id}/photo/$value")
-                .header("Authorization", "Bearer " + accessToken)
-                .retrieve()
-                .onStatus(status -> status.value() == 404, (request, response) -> {
-                    throw new NotFoundException("Фото не найдено");
-                })
-                .body(byte[].class);
-    }
-
-    @GetMapping("/photo")
-    public ResponseEntity<byte[]> getPhoto(OAuth2AuthenticationToken authentication) {
+    @GetMapping(GET_USER_PHOTO)
+    public ResponseEntity<byte[]> getPhoto(
+            OAuth2AuthenticationToken authentication,
+            @PathVariable(value = "id") Long id
+    ) {
+        byte[] photoBytes;
         try {
-            byte[] photoBytes = this.getUserPhoto(authentication);
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
-                    .body(photoBytes);
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
+            photoBytes = photoService.getAzureUserPhoto(id, authentication);
+
+        } catch (AzureException azureException) {
+            photoBytes = photoService.getPlaceholder();
         }
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(photoBytes);
     }
 }

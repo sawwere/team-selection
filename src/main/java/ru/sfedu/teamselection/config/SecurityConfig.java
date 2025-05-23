@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE).hasRole(ADMIN_ROLE_NAME)
                         .requestMatchers("/actuator/prometheus")
                             .access(new WebExpressionAuthorizationManager("hasIpAddress('10.5.0.55')"))
-                        .requestMatchers("/api/**").authenticated()
+                        //.requestMatchers("/api/**").authenticated()
                         .requestMatchers("/api/v1/tracks").permitAll()
                         .anyRequest().permitAll()
                 )

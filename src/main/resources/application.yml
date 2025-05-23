@@ -45,6 +45,7 @@ spring:
               - openid
               - email
               - profile
+              - User.Read
 #  cloud:
 #    azure:
 #      active-directory:
