@@ -12,9 +12,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,10 +32,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
+import reactor.core.publisher.Mono;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
+import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.user.RoleMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.service.UserService;
@@ -72,7 +82,7 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность пользователя"
             ))
-    @PreAuthorize("hasRole('ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
     @PutMapping(value = PUT_USER,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -183,4 +193,41 @@ public class UserController {
         return ResponseEntity.ok("User with id: " + id + "was deleted");
     }
 
+    private RestClient restClient = RestClient.builder()
+            .baseUrl("https://graph.microsoft.com/v1.0")
+            .build();
+
+    private final OAuth2AuthorizedClientService authorizedClientService;
+
+    public byte[] getUserPhoto(OAuth2AuthenticationToken authentication) {
+        // Получаем токен доступа
+        OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
+                "azure",
+                authentication.getName()
+        );
+        String accessToken = client.getAccessToken().getTokenValue();
+
+        // Выполняем запрос к Graph API
+        return restClient.get()
+                .uri("/users/{user-id}/photo/$value")
+                .header("Authorization", "Bearer " + accessToken)
+                .retrieve()
+                .onStatus(status -> status.value() == 404, (request, response) -> {
+                    throw new NotFoundException("Фото не найдено");
+                })
+                .body(byte[].class);
+    }
+
+    @GetMapping("/photo")
+    public ResponseEntity<byte[]> getPhoto(OAuth2AuthenticationToken authentication) {
+        try {
+            byte[] photoBytes = this.getUserPhoto(authentication);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                    .body(photoBytes);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
