@@ -59,7 +59,6 @@ public class UserController {
     private final UserMapper userMapper;
     private final RoleMapper roleDtoMapper;
 
-
     @Operation(
             method = "PUT",
             summary = "Изменить данные пользователя",
