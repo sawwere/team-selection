@@ -23,6 +23,7 @@ import ru.sfedu.teamselection.exception.CustomExceptionHandler;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.user.RoleMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
+import ru.sfedu.teamselection.service.PhotoService;
 import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
@@ -36,6 +37,8 @@ import ru.sfedu.teamselection.service.security.Oauth2UserService;
 public class UserControllerTest {
     @MockitoBean(name = "userService")
     private UserService userService;
+    @MockitoBean
+    private PhotoService photoService;
 
     @MockitoBean
     private SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;

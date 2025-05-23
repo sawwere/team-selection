@@ -12,9 +12,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +31,10 @@ import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.RoleDto;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
+import ru.sfedu.teamselection.exception.AzureException;
 import ru.sfedu.teamselection.mapper.user.RoleMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
+import ru.sfedu.teamselection.service.PhotoService;
 import ru.sfedu.teamselection.service.UserService;
 
 @RestController
@@ -46,12 +50,14 @@ public class UserController {
     public static final String DELETE_USER = "/api/v1/users/{id}";
     public static final String GET_ROLES = "/api/v1/roles";
     public static final String GRANT_ROLE = "/api/v1/users/{id}/assign-role";
+    public static final String GET_USER_PHOTO = "/api/v1/users/{id}/photo";
 
 
     private final UserService userService;
+    private final PhotoService photoService;
+
     private final UserMapper userMapper;
     private final RoleMapper roleDtoMapper;
-
 
     @Operation(
             method = "PUT",
@@ -72,7 +78,7 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность пользователя"
             ))
-    @PreAuthorize("hasRole('ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @userService.getCurrentUser().getId().equals(#userDto.getId())")
     @PutMapping(value = PUT_USER,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -183,4 +189,21 @@ public class UserController {
         return ResponseEntity.ok("User with id: " + id + "was deleted");
     }
 
+    @GetMapping(GET_USER_PHOTO)
+    public ResponseEntity<byte[]> getPhoto(
+            OAuth2AuthenticationToken authentication,
+            @PathVariable(value = "id") Long id
+    ) {
+        byte[] photoBytes;
+        try {
+            photoBytes = photoService.getAzureUserPhoto(id, authentication);
+
+        } catch (AzureException azureException) {
+            photoBytes = photoService.getPlaceholder();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(photoBytes);
+    }
 }

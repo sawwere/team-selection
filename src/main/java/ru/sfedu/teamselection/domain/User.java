@@ -32,6 +32,9 @@ public class User implements OAuth2User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "azure_oid", unique = true)
+    private String azureId;
+
     @Column
     private String fio;
 

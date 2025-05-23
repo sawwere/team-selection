@@ -54,18 +54,18 @@ public class TeamDtoMapper implements DtoMapper<TeamDto, Team> {
      */
     @Override
     public TeamDto mapToDto(Team entity) {
-        Optional<Student> captain = entity
-                .getStudents()
-                .stream()
-                .filter(Student::getIsCaptain)
-                .findFirst();
+        if (entity == null) {
+            return null;
+        }
+        var captain = entityManager.find(Student.class, entity.getCaptainId());
+
         return TeamDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .projectDescription(entity.getProjectDescription())
                 .projectType(projectTypeDtoMapper.mapToDto(entity.getProjectType()))
                 .quantityOfStudents(entity.getQuantityOfStudents())
-                .captain(captain.isEmpty() ? null : studentDtoMapper.mapToDtoWithoutTeam(captain.get()))
+                .captain(studentDtoMapper.mapToDtoWithoutTeam(captain))
                 .isFull(entity.getIsFull())
                 .technologies(technologyDtoMapper.mapListToDto(entity.getTechnologies()))
                 .applications(entity.getApplications().stream().map(applicationMapper::mapToDto).toList())

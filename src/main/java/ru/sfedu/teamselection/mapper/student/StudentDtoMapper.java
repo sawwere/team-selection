@@ -40,7 +40,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .hasTeam(dto.getHasTeam())
                 .isCaptain(dto.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToEntity(dto.getCurrentTeam()))
-                .teams(dto.getTeams().stream().map(x->teamDtoMapper.mapToEntity(x)).toList())
+                .teams(dto.getTeams().stream().map(x -> teamDtoMapper.mapToEntity(x)).toList())
                 //.user(dto.getUser())
                 .technologies(dto.getTechnologies().stream().map(technologyDtoMapper::mapToEntity).toList())
                 .applications(dto.getApplications().stream().map(applicationDtoMapper::mapToEntity).toList())
@@ -52,6 +52,9 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
      */
     @Override
     public StudentDto mapToDto(Student entity) {
+        if (entity == null) {
+            return null;
+        }
         return StudentDto.builder()
                 .id(entity.getId())
                 .course(entity.getCourse())
@@ -62,7 +65,7 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .hasTeam(entity.getHasTeam())
                 .isCaptain(entity.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToDtoWithoutStudents(entity.getCurrentTeam()))
-                .teams(entity.getTeams().stream().map(x->teamDtoMapper.mapToDtoWithoutStudents(x)).toList())
+                .teams(entity.getTeams().stream().map(x -> teamDtoMapper.mapToDtoWithoutStudents(x)).toList())
                 .user(userMapper.mapToDto(entity.getUser()))
                 .technologies(entity.getTechnologies().stream().map(technologyDtoMapper::mapToDto).toList())
                 .applications(entity.getApplications().stream().map(applicationDtoMapper::mapToDto).toList())
@@ -71,6 +74,9 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
 
 
     public StudentDto mapToDtoWithoutTeam(Student entity) {
+        if (entity == null) {
+            return null;
+        }
         return StudentDto.builder()
                 .id(entity.getId())
                 .course(entity.getCourse())

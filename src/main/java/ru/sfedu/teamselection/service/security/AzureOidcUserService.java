@@ -31,6 +31,7 @@ public class AzureOidcUserService extends OidcUserService {
 
         String email = oidcUser.getAttribute("email");
         String name = oidcUser.getAttribute("name");
+        String azureOid = oidcUser.getAttribute("oid");
 
         // найдём или создадим пользователя в БД
         User user = userRepository.findByEmailFetchRole(email)
@@ -40,6 +41,7 @@ public class AzureOidcUserService extends OidcUserService {
                             .email(email)
                             .isEnabled(true)
                             .role(roleRepository.findById(1L).orElseThrow())
+                            .azureId(azureOid)
                             .build();
                     return userRepository.save(u);
                 });
