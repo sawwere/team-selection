@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestClient;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.exception.AzureException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PhotoService {
@@ -46,18 +48,17 @@ public class PhotoService {
         String accessToken = client.getAccessToken().getTokenValue();
         User user = userService.findByIdOrElseThrow(id);
 
-        // Выполняем запрос к Graph API
         return restClient.get()
-                //.uri("/me/photo/$value")
-                .uri("https://graph.microsoft.com/v1.0/7b6c7c07-c588-4c0a-99ec-5753bf8ca6cc/photo/$value")
+                //.uri("https://graph.microsoft.com/v1.0/me/photo/$value")
+                .uri("https://graph.microsoft.com/v1.0/users/" + user.getAzureId() + "/photo/$value")
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    throw new AzureException(
-                            "Error while retrieving image from Azure: "
-                                    + response.getStatusCode().value() + " "
-                                    + response.getStatusText()
-                    );
+                    String errorMessage = "Error while retrieving image from Azure: "
+                            + response.getStatusCode().value() + " "
+                            + response.getStatusText();
+                    log.error(errorMessage);
+                    throw new AzureException(errorMessage);
                 })
                 .body(byte[].class);
     }
