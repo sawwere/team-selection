@@ -61,6 +61,7 @@ public class StudentController {
     public static final String DELETE_STUDENT = "/api/v1/students/{id}";
     public static final String FIND_TEAM_HISTORY = "/api/v1/students/{id}/teams";
     public static final String GET_SEARCH_OPTIONS = "/api/v1/students/filters";
+    public static final String GET_AVAILABLE_STUDENTS = "/api/v1/students/available";
 
     private final TeamService teamService;
     private final StudentService studentService;
@@ -72,6 +73,15 @@ public class StudentController {
 
     private final StudentExportService studentExportService;
 
+    @Operation(summary = "Список свободных и уже в команде студентов")
+    @GetMapping(GET_AVAILABLE_STUDENTS)
+    public ResponseEntity<List<StudentDto>> getAvailableForTeam(
+            @RequestParam("track_id") Long trackId,
+            @RequestParam("team_id" ) Long teamId
+    ) {
+        List<StudentDto> dtos = studentService.findFreeOrInTeam(trackId, teamId);
+        return ResponseEntity.ok(dtos);
+    }
 
 
     @Operation(
@@ -164,6 +174,8 @@ public class StudentController {
                 .map(studentDtoMapper::mapToDto);
         return ResponseEntity.ok(pageResponseMapper.toDto(result));
     }
+
+
 
 
     @Operation(

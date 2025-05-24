@@ -1,6 +1,8 @@
 package ru.sfedu.teamselection.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -21,6 +23,7 @@ import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.student.StudentCreationDtoMapper;
+import ru.sfedu.teamselection.mapper.student.StudentDtoMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
@@ -45,6 +48,9 @@ public class StudentService {
     @Autowired
     @Lazy
     private TeamService teamService;
+
+    @Autowired
+    private StudentDtoMapper studentDtoMapper;
 
     /**
      * Find Student entity by id
@@ -234,5 +240,18 @@ public class StudentService {
             return studentRepository.findByUserId(currentUser.getId()).getId();
         }
         return null;
+    }
+
+    /**
+     * Возвращает студентов для редактирования состава команды:
+     * – тех, кто уже в команде (currentTeam.id = teamId)
+     * – и свободных на заданном треке (currentTrack.id = trackId && hasTeam = false)
+     */
+    @Transactional(readOnly = true)
+    public List<StudentDto> findFreeOrInTeam(Long trackId, Long teamId) {
+        List<Student> list = studentRepository.findFreeOrInTeam(trackId, teamId);
+        return list.stream()
+                .map(x->studentDtoMapper.mapToDto(x))
+                .collect(Collectors.toList());
     }
 }
