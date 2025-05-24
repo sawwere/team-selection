@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
@@ -17,9 +22,11 @@ import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
+import ru.sfedu.teamselection.repository.specification.ApplicationSpecification;
 import ru.sfedu.teamselection.service.validation.ApplicationValidator;
-
-import static ru.sfedu.teamselection.enums.ApplicationStatus.*;
+import static ru.sfedu.teamselection.enums.ApplicationStatus.ACCEPTED;
+import static ru.sfedu.teamselection.enums.ApplicationStatus.REJECTED;
+import static ru.sfedu.teamselection.enums.ApplicationStatus.SENT;
 
 
 @Service
@@ -43,8 +50,29 @@ public class ApplicationService {
         return applicationRepository.findById(id).orElseThrow();
     }
 
-    public List<Application> findAll() {
-        return applicationRepository.findAll();
+    public Page<Application> findAll(Long trackId, String status, Pageable pageable) {
+
+        Specification<Application> spec = (root, query, cb) -> cb.conjunction();
+
+        if (trackId != null) {
+            spec = spec.and(ApplicationSpecification.byTrack(trackId));
+        }
+        if (status != null) {
+            spec = spec.and(ApplicationSpecification.byStatus(status));
+        }
+
+        Sort sort = pageable.getSort();
+        for (Sort.Order order : sort) {
+            if ("name".equals(order.getProperty())) {
+                pageable = PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        Sort.by(order.getDirection(), "student.fio")
+                );
+                break;
+            }
+        }
+        return applicationRepository.findAll(spec, pageable);
     }
 
     /**
