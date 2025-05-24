@@ -48,6 +48,9 @@ public class ApplicationValidator {
                 && teamService.getSecondYearsCount(team) >= team.getCurrentTrack().getMaxSecondCourseConstraint()) {
             throw new BusinessException("Невозможно — в команде уже максимальное число второкурсников");
         }
+        if (!Objects.equals(student.getCurrentTrack().getId(), team.getCurrentTrack().getId())) {
+            throw new BusinessException("Невозможно — неверный трек");
+        }
         if (!Objects.equals(student.getCurrentTrack().getId(), captain.getCurrentTrack().getId())) {
             throw new BusinessException("Невозможно — неверный трек");
         }

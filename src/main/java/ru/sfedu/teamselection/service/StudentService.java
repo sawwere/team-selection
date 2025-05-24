@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
@@ -176,6 +177,18 @@ public class StudentService {
         st.setAboutSelf(dto.getAboutSelf());
         st.setContacts(dto.getContacts());
         st.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
+        Long newTeamId = dto.getCurrentTeam().getId();
+        if (newTeamId != null) {
+            Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
+
+            st.setCurrentTeam(newTeam);
+
+            if (st.getTeams().stream().noneMatch(t -> t.getId().equals(newTeamId))) {
+                st.getTeams().add(newTeam);
+            }
+        } else {
+            st.setCurrentTeam(null);
+        }
 
         return studentRepository.save(st);
     }

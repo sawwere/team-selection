@@ -111,7 +111,7 @@ public class UserController {
             summary = "Получение списка всех возможных ролей"
     )
     @GetMapping(GET_ROLES)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<RoleDto>> getAllRoles() {
         return ResponseEntity.ok(userService.getAllRoles()
                 .stream()
@@ -140,7 +140,7 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Сущность роли пользователя"
             ))
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(GRANT_ROLE)
     public ResponseEntity<?> assignRole(@PathVariable Long id, @RequestBody RoleDto roleDto) {
         userService.assignRole(id, roleDto.getName());
@@ -182,7 +182,7 @@ public class UserController {
     }
 
     @Operation(summary = "Удалить пользователя", tags = {"ADMIN"})
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(DELETE_USER)
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deactivateUser(id);

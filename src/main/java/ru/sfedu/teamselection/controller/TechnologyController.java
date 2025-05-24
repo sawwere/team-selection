@@ -7,15 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
+import ru.sfedu.teamselection.service.TechnologyService;
 
 @Slf4j
 @RestController
@@ -25,13 +21,13 @@ import ru.sfedu.teamselection.repository.TechnologyRepository;
 @RequiredArgsConstructor
 @CrossOrigin
 public class TechnologyController {
+
+    private final TechnologyService technologyService;
+
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String FIND_ALL = "/api/v1/technologies";
     public static final String CREATE_TECHNOLOGY = "/api/v1/technologies";
-
-    private final TechnologyRepository technologyRepository;
-
-    private final TechnologyMapper technologyDtoMapper;
+    public static final String DELETE_TECHNOLOGY = "/api/v1/technologies/{id}";
 
     @Operation(
             method = "GET",
@@ -40,7 +36,7 @@ public class TechnologyController {
     @GetMapping(FIND_ALL) // checked
     public ResponseEntity<List<TechnologyDto>> findAll() {
         log.info("ENTER findAll() endpoint");
-        List<TechnologyDto> result = technologyDtoMapper.mapListToDto(technologyRepository.findAll());
+        List<TechnologyDto> result = technologyService.findAll();
         return ResponseEntity.ok(result);
     }
 
@@ -51,13 +47,25 @@ public class TechnologyController {
                     description = "Сущность технологии"
             )
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(CREATE_TECHNOLOGY)
     public ResponseEntity<TechnologyDto> createTechnology(@RequestBody TechnologyDto technology) {
         log.info("ENTER createTechnology() endpoint");
-        TechnologyDto result = technologyDtoMapper.mapToDto(
-                technologyRepository.save(technologyDtoMapper.mapToEntity(technology))
-        );
+        TechnologyDto result = technologyService.create(technology);
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(
+            method = "DELETE",
+            summary = "Удаление технологии"
+    )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping(DELETE_TECHNOLOGY)
+    public ResponseEntity<String> deleteTechnology(
+            @PathVariable("id") Long id
+    ) {
+        log.info("ENTER deleteTechnology() endpoint with id={}", id);
+        technologyService.delete(id);
+        return ResponseEntity.ok("Technology with id: " + id + "was deleted");
     }
 }

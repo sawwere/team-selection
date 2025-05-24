@@ -16,10 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sfedu.teamselection.domain.Role;
-import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.domain.*;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
 import ru.sfedu.teamselection.exception.NotFoundException;
@@ -44,6 +41,9 @@ public class UserService {
     @Lazy
     @Autowired
     private TeamService teamService;
+
+    @Autowired
+    private TrackService trackService;
 
 
     @Transactional(readOnly = true)
@@ -133,6 +133,20 @@ public class UserService {
                     Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
                     Student student = existing.getStudent();
                     teamService.addStudentToTeam(newTeam, student, false);
+                }
+            }
+
+            Long oldTrackId = existing.getStudent() != null && existing.getStudent().getCurrentTrack() != null
+                    ? existing.getStudent().getCurrentTrack().getId()
+                    : null;
+            Long newTrackId = dto.getStudent() != null
+                    ? dto.getStudent().getCurrentTrackId()
+                    : null;
+
+            if (!Objects.equals(oldTrackId, newTrackId)) {
+                if (newTrackId != null) {
+                    Track newTrack = trackService.findByIdOrElseThrow(newTrackId);
+                    existing.getStudent().setCurrentTrack(newTrack);
                 }
             }
 
