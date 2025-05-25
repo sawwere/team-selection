@@ -2,7 +2,6 @@ package ru.sfedu.teamselection.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -183,13 +182,13 @@ public class StudentService {
         st.setAboutSelf(dto.getAboutSelf());
         st.setContacts(dto.getContacts());
         st.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
-        Long newTeamId = dto.getCurrentTeam().getId();
-        if (newTeamId != null) {
-            Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
+        var newTeamDto = dto.getCurrentTeam();
+        if (newTeamDto != null && newTeamDto.getId() != null) {
+            Team newTeam = teamService.findByIdOrElseThrow(newTeamDto.getId());
 
             st.setCurrentTeam(newTeam);
 
-            if (st.getTeams().stream().noneMatch(t -> t.getId().equals(newTeamId))) {
+            if (st.getTeams().stream().noneMatch(t -> t.getId().equals(newTeamDto.getId()))) {
                 st.getTeams().add(newTeam);
             }
         } else {
@@ -251,7 +250,7 @@ public class StudentService {
     public List<StudentDto> findFreeOrInTeam(Long trackId, Long teamId) {
         List<Student> list = studentRepository.findFreeOrInTeam(trackId, teamId);
         return list.stream()
-                .map(x->studentDtoMapper.mapToDto(x))
+                .map(x -> studentDtoMapper.mapToDto(x))
                 .collect(Collectors.toList());
     }
 }
