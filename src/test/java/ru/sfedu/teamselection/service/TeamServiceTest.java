@@ -22,11 +22,13 @@ import ru.sfedu.teamselection.TeamSelectionApplication;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
+import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
@@ -49,6 +51,10 @@ class TeamServiceTest extends BasicTestContainerTest {
 
     @Autowired
     private StudentRepository studentRepository;
+
+    private User getAdmin() {
+        return userService.findByIdOrElseThrow(1L);
+    }
 
 
     @BeforeEach
@@ -88,7 +94,7 @@ class TeamServiceTest extends BasicTestContainerTest {
                 .currentTrackId(1L)
                 .build();
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.create(teamCreationDto));
+        Assertions.assertThrows(RuntimeException.class, () -> underTest.create(teamCreationDto, getAdmin()));
     }
 
     @Test
@@ -101,7 +107,7 @@ class TeamServiceTest extends BasicTestContainerTest {
                 .currentTrackId(1L)
                 .build();
 
-        Team actual = underTest.create(teamCreationDto);
+        Team actual = underTest.create(teamCreationDto, getAdmin());
 
         Assertions.assertEquals(teamCreationDto.getName(), actual.getName());
         Assertions.assertEquals(teamCreationDto.getProjectDescription(), actual.getProjectDescription());
@@ -110,7 +116,7 @@ class TeamServiceTest extends BasicTestContainerTest {
     }
 
     @Test
-    void createOnExistingTeamShouldUpdate() {
+    void createOnExistingTeamShouldFail() {
         TeamCreationDto teamCreationDto = TeamCreationDto.builder()
                 .name("Almost full")
                 .projectDescription("new projectDescription")
@@ -119,12 +125,7 @@ class TeamServiceTest extends BasicTestContainerTest {
                 .currentTrackId(1L)
                 .build();
 
-        Team actual = underTest.create(teamCreationDto);
-
-        Assertions.assertEquals(teamCreationDto.getName(), actual.getName());
-        Assertions.assertEquals(teamCreationDto.getProjectDescription(), actual.getProjectDescription());
-        Assertions.assertEquals(teamCreationDto.getProjectType().getId(), actual.getProjectType().getId());
-        Assertions.assertTrue(actual.getQuantityOfStudents() > 0);
+        Assertions.assertThrows(BusinessException.class, ()-> underTest.create(teamCreationDto, getAdmin()));
     }
 
     @Test

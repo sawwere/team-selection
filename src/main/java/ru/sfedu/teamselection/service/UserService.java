@@ -62,12 +62,7 @@ public class UserService {
      */
     public User findByIdOrElseThrow(Long id) throws NotFoundException {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(id.toString()));
-    }
-
-    public List<User> findAllUsers()
-    {
-        return userRepository.findAll();
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
     }
 
     public User findByEmail(String email) {
@@ -81,7 +76,7 @@ public class UserService {
     public User findByUsername(String username) {
         User u = userRepository.findByFio(username);
         if (u == null) {
-            throw new NotFoundException("User with username "+username);
+            throw new NotFoundException("User with username " + username);
         }
         return u;
     }
@@ -93,7 +88,7 @@ public class UserService {
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String principalName = auth.getName();
-        var r = auth.getAuthorities();
+        var authAuthorities = auth.getAuthorities();
         if (auth.getPrincipal() instanceof OidcUser oidc) {
             return findByEmail(oidc.getEmail());
         } else {
@@ -191,7 +186,7 @@ public class UserService {
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new NotFoundException("Role "+roleName));
+                .orElseThrow(() -> new NotFoundException("Role " + roleName));
 
         if ("STUDENT".equals(roleName)) {
             Student student = Student.builder()
@@ -206,8 +201,7 @@ public class UserService {
 
     @Transactional
     public void deactivateUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + id + " не найден"));
+        User user = findByIdOrElseThrow(id);
         user.setIsEnabled(false);
         userRepository.save(user);
     }
