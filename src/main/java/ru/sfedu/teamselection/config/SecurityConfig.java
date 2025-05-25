@@ -30,7 +30,7 @@ public class SecurityConfig {
     private final Oauth2UserService oauth2UserService;
     private final AzureOidcUserService oidcUserService;
     private final SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
-    private static final String ADMIN_ROLE_NAME = "ADMIN";
+    private static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
     public static final String LOGOUT_URL = "/api/v1/auth/logout";
 
     @Value("${frontend.url}")
@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/login", "/registration").anonymous()
-                        .requestMatchers(HttpMethod.DELETE).hasRole(ADMIN_ROLE_NAME)
+                        .requestMatchers(HttpMethod.DELETE).hasAuthority(ADMIN_ROLE_NAME)
                         .requestMatchers("/actuator/prometheus")
                             .access(new WebExpressionAuthorizationManager("hasIpAddress('10.5.0.55')"))
                         .requestMatchers("/api/**").authenticated()

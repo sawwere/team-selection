@@ -92,7 +92,7 @@ public class Team {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
-    @Column
+    @Column(name = "showcase_ref")
     private String showcaseRef;
 
     @Column(name = "created_at", nullable = false)

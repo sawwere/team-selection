@@ -181,9 +181,12 @@ public class TeamService {
                 teamMember.setHasTeam(false);
                 teamMember.setCurrentTeam(null);
                 teamMember.setIsCaptain(false);
+                teamMember.getTeams().remove(team);
             }
-            teamRepository.deleteById(id);
         }
+        team.getStudents().clear();
+        team.getTechnologies().clear();
+        teamRepository.deleteById(id);
     }
 
     @Transactional

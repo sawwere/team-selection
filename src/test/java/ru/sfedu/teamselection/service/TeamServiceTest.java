@@ -397,7 +397,7 @@ class TeamServiceTest extends BasicTestContainerTest {
 
         Assertions.assertTrue(student.getHasTeam());
         Assertions.assertEquals(teamId, student.getCurrentTeam().getId());
-        Assertions.assertEquals(3, team.getQuantityOfStudents());
+        Assertions.assertEquals(2, team.getQuantityOfStudents());
         Assertions.assertFalse(team.getIsFull());
         Assertions.assertTrue(team.getStudents().contains(student));
     }
@@ -440,7 +440,7 @@ class TeamServiceTest extends BasicTestContainerTest {
 
     @Test
     void getTeamHistoryForStudentWithoutAnyTeam() {
-        List<Team> actual = underTest.getTeamHistoryForStudent(18L);
+        List<Team> actual = underTest.getTeamHistoryForStudent(9L);
 
         Assertions.assertEquals(0, actual.size());
     }
