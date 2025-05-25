@@ -1,17 +1,14 @@
 package ru.sfedu.teamselection.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +16,18 @@ public class TechnologyService {
 
     private final TechnologyRepository technologyRepository;
     private final TechnologyMapper technologyMapper;
+
+    /**
+     * Найти технологию по идентификатору.
+     * @return сущность-технология с заданным id
+     * @throws NotFoundException если технология не найдена.
+     */
+    @Transactional(readOnly = true)
+    public Technology findByIdOrElseThrow(Long id) {
+        return technologyRepository.findById(id).orElseThrow(() ->
+            new NotFoundException("Технология c id=" + id + " не найдена")
+        );
+    }
 
     /**
      * Получить все технологии.
@@ -45,12 +54,9 @@ public class TechnologyService {
      */
     @Transactional
     public void delete(Long id) {
-        Optional<Technology> technologyOpt = technologyRepository.findById(id);
-        if (!technologyOpt.isPresent()) {
-            throw new NotFoundException("Технология c id=" + id + " не найдена");
-        }
-        Technology technology = technologyOpt.get();
+        Technology technology = findByIdOrElseThrow(id);
         technology.getStudents().clear();
+        technology.getTeams().clear();
         technologyRepository.save(technology);
         technologyRepository.deleteById(id);
     }

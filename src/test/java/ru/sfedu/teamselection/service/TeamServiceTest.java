@@ -22,11 +22,9 @@ import ru.sfedu.teamselection.TeamSelectionApplication;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
-import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
-import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.exception.ForbiddenException;
@@ -56,7 +54,7 @@ class TeamServiceTest extends BasicTestContainerTest {
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.openMocks(this);
-        Mockito.doNothing().when(teamRepository).delete(Mockito.isNotNull(Team.class));
+        Mockito.doNothing().when(teamRepository).delete(Mockito.notNull(Team.class));
     }
 
     @Test
@@ -333,7 +331,7 @@ class TeamServiceTest extends BasicTestContainerTest {
 
     @Test
     void getSecondYearsCount() {
-        Team team = underTest.findByIdOrElseThrow(4L);
+        Team team = underTest.findByIdOrElseThrow(1L);
 
         int expected = 1;
 
@@ -405,15 +403,15 @@ class TeamServiceTest extends BasicTestContainerTest {
 
     @Test
     void removeStudentFromTeam() {
-        Student deleteStudent = studentRepository.findById(4L).orElseThrow();
+        Student deleteStudent = studentRepository.findById(16L).orElseThrow();
 
         Team teamBeforeDelete = teamRepository.findById(deleteStudent.getCurrentTeam().getId()).orElseThrow();
 
         Team teamAfterDelete = underTest.removeStudentFromTeam(teamBeforeDelete, deleteStudent);
 
-        Assertions.assertEquals(1, teamAfterDelete.getQuantityOfStudents());
+        Assertions.assertEquals(4, teamAfterDelete.getQuantityOfStudents());
         Assertions.assertEquals(false, teamAfterDelete.getIsFull());
-        Assertions.assertEquals(1, teamAfterDelete.getStudents().size());
+        Assertions.assertEquals(4, teamAfterDelete.getStudents().size());
     }
 
     @Test

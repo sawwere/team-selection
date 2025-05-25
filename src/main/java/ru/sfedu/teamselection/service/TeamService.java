@@ -162,8 +162,7 @@ public class TeamService {
     @Transactional
     public void delete(Long id) {
         Team team = findByIdOrElseThrow(id);
-        for (Application application: team.getApplications())
-        {
+        for (Application application: team.getApplications()) {
             applicationService.delete(application.getId());
         }
         for (Student teamMember : team.getStudents()) {
@@ -212,8 +211,7 @@ public class TeamService {
 
         student.setHasTeam(true);
         student.setCurrentTeam(team);
-        for (Application application: student.getApplications())
-        {
+        for (Application application: student.getApplications()) {
             application.setStatus(ApplicationStatus.REJECTED.name());
         }
         return team;
@@ -234,19 +232,18 @@ public class TeamService {
     }
 
     /**
-     *
-     * @param teamId
-     * @param studentId
-     * @param sender
-     * @return
+     * Добавляет студента в команду
+     * @param teamId идентификатор команды, в которую будет добавлен студент
+     * @param studentId идентификатор студента, который будет добавлен в команду
+     * @param sender пользователь, инициирующий действие
+     * @return обновленная команда
      */
     @Transactional
     public Team addStudentToTeam(Long teamId, Long studentId, User sender) {
         Team team = findByIdOrElseThrow(teamId);
         Student student = studentService.findByIdOrElseThrow(studentId);
-        addStudentToTeam(team, student, isAdmin(sender));
 
-        return team;
+        return addStudentToTeam(team, student, isAdmin(sender));
     }
 
     /**

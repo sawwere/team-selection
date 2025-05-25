@@ -2,10 +2,7 @@ package ru.sfedu.teamselection.service.report;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -17,7 +14,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.jupiter.api.AfterAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -108,7 +104,12 @@ public class TrackExcelExporterTest {
         team.setProjectType(new ProjectType(1L, "Web"));
         team.setQuantityOfStudents(1);
         team.setIsFull(false);
-        team.setTechnologies(List.of(new Technology(1L, "Java"), new Technology(2L, "Spring")));
+        team.setTechnologies(
+                List.of(
+                        Technology.builder().id(1L).name("Java").build(),
+                        Technology.builder().id(1L).name("Spring").build()
+                )
+        );
 
 
         Student student = Student.builder()
@@ -123,7 +124,11 @@ public class TrackExcelExporterTest {
                 .groupNumber(12)
                 .aboutSelf("about self")
                 .contacts("contacts")
-                .technologies(List.of(new Technology(53L, "Python")))
+                .technologies(
+                    List.of(
+                        Technology.builder().id(53L).name("Python").build()
+                    )
+                )
                 .isCaptain(true)
                 .currentTeam(team)
                 .build();

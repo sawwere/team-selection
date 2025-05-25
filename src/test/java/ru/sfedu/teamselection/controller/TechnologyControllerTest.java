@@ -12,6 +12,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,7 +24,7 @@ import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.exception.CustomExceptionHandler;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
-import ru.sfedu.teamselection.repository.TechnologyRepository;
+import ru.sfedu.teamselection.service.TechnologyService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
 
@@ -42,7 +43,7 @@ public class TechnologyControllerTest {
     private AzureOidcUserService azureOidcUserService;
 
     @MockitoBean
-    private TechnologyRepository technologyRepository;
+    private TechnologyService technologyService;
     @MockitoBean
     private TechnologyMapper technologyDtoMapper;
 
@@ -55,7 +56,7 @@ public class TechnologyControllerTest {
             .email("admin@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(3L).name("ADMIN").build())
+            .role(Role.builder().id(3L).name("ROLE_ADMIN").build())
             .build();
 
     private final User genericStudentUser = User.builder()
@@ -64,13 +65,13 @@ public class TechnologyControllerTest {
             .email("example@.com")
             .isEnabled(true)
             .isRemindEnabled(true)
-            .role(Role.builder().id(1L).name("STUDENT").build())
+            .role(Role.builder().id(1L).name("ROLE_STUDENT").build())
             .build();
 
     private final List<Technology> technologyList = List.of(
-            new Technology(1L, "1"),
-            new Technology(2L, "2"),
-            new Technology(3L, "3")
+            Technology.builder().id(1L).name("1").build(),
+            Technology.builder().id(1L).name("1").build(),
+            Technology.builder().id(1L).name("1").build()
     );
 
     private final List<TechnologyDto> technologyDtoList = List.of(
@@ -93,9 +94,9 @@ public class TechnologyControllerTest {
         Mockito.doReturn(technologyDtoList.get(0))
                 .when(technologyDtoMapper)
                 .mapToDto(Mockito.notNull());
-        Mockito.doReturn(technologyList.get(0))
-                .when(technologyRepository)
-                .save(Mockito.notNull());
+        Mockito.doReturn(technologyDtoList.get(0))
+                .when(technologyService)
+                .create(Mockito.notNull());
 
     }
 
@@ -137,5 +138,27 @@ public class TechnologyControllerTest {
                         .content(technology)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void deleteTechnologyFromAdmin() throws Exception {
+        Mockito.doNothing().when(technologyService).delete(Mockito.any());
+
+        mockMvc.perform(delete(TechnologyController.DELETE_TECHNOLOGY.replace("{id}", "2"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void deleteTechnologyFromGenericUserShouldFail() throws Exception {
+        Mockito.doNothing().when(technologyService).delete(Mockito.any());
+
+        mockMvc.perform(delete(TechnologyController.DELETE_TECHNOLOGY.replace("{id}", "2"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 }
