@@ -71,6 +71,7 @@ public class Team {
     @Builder.Default
     private List<Technology> technologies = new ArrayList<>();
 
+    @JoinColumn(name = "current_track_id", nullable = false)
     @ManyToOne(fetch = FetchType.EAGER)
     private Track currentTrack;
 

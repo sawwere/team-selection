@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 
@@ -46,6 +47,11 @@ public class AzureOidcUserService extends OidcUserService {
                     return userRepository.save(u);
                 });
 
+        if (!user.isEnabled()) {
+            throw new ForbiddenException(
+                    "Аккаунт отключен. По вопросам возвращения доступа обращаться к администратору ресурса."
+            );
+        }
         // ****** вот здесь собираем authorities ******
         Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 

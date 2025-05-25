@@ -77,7 +77,7 @@ public class TrackController {
             )
     )
     @PostMapping(CREATE_TRACK)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrackDto> createTrack(@RequestBody TrackCreationDto trackDto) {
         LOGGER.info("ENTER createTrack() endpoint");
         TrackDto result = trackDtoMapper.mapToDto(trackService.create(trackDto));
@@ -96,7 +96,7 @@ public class TrackController {
                     description = "Сущность трека"
             )
     )
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(UPDATE_TRACK)
     public ResponseEntity<TrackDto> updateTrack(@PathVariable(value = "id") Long trackId,
                                 @RequestBody TrackDto trackDto) {
@@ -112,9 +112,9 @@ public class TrackController {
                     @Parameter(name = "id", description = "id трека", in = ParameterIn.PATH),
             }
     )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_TRACK)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTrack(@PathVariable(value = "id") Long trackId) {
         LOGGER.info("ENTER deleteTrack(%d) endpoint".formatted(trackId));
         trackService.deleteById(trackId);

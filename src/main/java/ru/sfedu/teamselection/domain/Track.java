@@ -67,4 +67,8 @@ public class Track {
     @OneToMany(mappedBy = "currentTrack", fetch = FetchType.LAZY)
     @Builder.Default
     List<Team> currentTeams = new ArrayList<>();
+
+    @OneToMany(mappedBy = "currentTrack", fetch = FetchType.LAZY)
+    @Builder.Default
+    List<Student> students = new ArrayList<>();
 }

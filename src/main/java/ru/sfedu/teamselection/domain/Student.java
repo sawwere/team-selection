@@ -75,11 +75,11 @@ public class Student {
     @Builder.Default
     private Boolean isCaptain = false;
 
-
+    @JoinColumn(name = "current_track_id")
     @ManyToOne(fetch = FetchType.EAGER)
     private Track currentTrack;
 
-    @Column(name="hasStudentDebt")
+    @Column(name = "has_student_debt")
     @Builder.Default
     private Boolean hasStudentDebt = false;
 
