@@ -294,6 +294,11 @@ public class TeamService {
                         trackService.findByIdOrElseThrow(partial.getCurrentTrack().getId())
                 );
             }
+            if (!Objects.equals(team.getCaptainId(), dto.getCaptainId())) {
+                Student oldCaptain = studentService.findByIdOrElseThrow(team.getCaptainId());
+                oldCaptain.setIsCaptain(false);
+            }
+
             team.setCaptainId(partial.getCaptainId());
         }
 
@@ -326,6 +331,9 @@ public class TeamService {
                 addStudentToTeam(team, student, isAdmin);
             }
         }
+
+        Student newCaptain = studentService.findByIdOrElseThrow(partial.getCaptainId());
+        newCaptain.setIsCaptain(true);
 
         return teamRepository.save(team);
     }

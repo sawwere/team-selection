@@ -153,6 +153,7 @@ class TeamServiceTest extends BasicTestContainerTest {
 
         TeamUpdateDto teamDto = TeamUpdateDto.builder()
                 .id(beforeUpdateTeam.getId())
+                .captainId(beforeUpdateTeam.getCaptainId())
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
                 .projectType(ProjectTypeDto.builder().id(1L).build())
