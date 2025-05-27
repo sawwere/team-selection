@@ -52,7 +52,7 @@ public class StudentDto {
     @JsonProperty(value = "is_captain")
     private Boolean isCaptain;
 
-    @JsonProperty(value="teams")
+    @JsonProperty(value = "teams")
     private List<TeamDto>  teams;
 
     @JsonProperty(value = "current_team")

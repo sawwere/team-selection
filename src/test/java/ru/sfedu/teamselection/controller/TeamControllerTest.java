@@ -210,7 +210,7 @@ public class TeamControllerTest {
 
     @Test
     public void createTeam() throws Exception {
-        Mockito.doReturn(genericTeam).when(teamService).create(Mockito.notNull());
+        Mockito.doReturn(genericTeam).when(teamService).create(Mockito.notNull(), Mockito.notNull());
 
         String team = """
                 {

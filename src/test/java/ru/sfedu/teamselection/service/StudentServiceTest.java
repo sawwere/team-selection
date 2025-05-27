@@ -34,6 +34,7 @@ import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
+import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
@@ -140,24 +141,21 @@ class StudentServiceTest extends BasicTestContainerTest {
     @Test
     @Transactional
     void deleteStudentWithTeam() {
-        Student deleteStudent = studentRepository.findById(4L).orElseThrow();
+        Student deleteStudent = studentRepository.findById(8L).orElseThrow();
 
         Team teamBeforeDelete = teamRepository.findById(deleteStudent.getCurrentTeam().getId()).orElseThrow();
 
-        underTest.delete(4L);
+        underTest.delete(8L);
         Team teamAfterDelete = teamRepository.findById(teamBeforeDelete.getId()).orElseThrow();
 
-        Assertions.assertEquals(1, teamAfterDelete.getQuantityOfStudents());
+        Assertions.assertEquals(4, teamAfterDelete.getQuantityOfStudents());
         Assertions.assertEquals(false, teamAfterDelete.getIsFull());
-        Assertions.assertEquals(1, teamAfterDelete.getStudents().size());
+        Assertions.assertEquals(4, teamAfterDelete.getStudents().size());
     }
 
     @Test
     @Transactional
     void deleteCaptainFromTeam() {
-        Student deleteStudent = studentRepository.findById(3L).orElseThrow();
-
-        Team teamBeforeDelete = teamRepository.findById(deleteStudent.getCurrentTeam().getId()).orElseThrow();
         Assertions.assertThrows(ConstraintViolationException.class, () -> underTest.delete(3L));
     }
 
@@ -250,7 +248,7 @@ class StudentServiceTest extends BasicTestContainerTest {
             Assertions.assertEquals(hasTeamParam, student.getHasTeam());
         }
 
-        Assertions.assertEquals(11, actual.getTotalElements());
+        Assertions.assertEquals(10, actual.getTotalElements());
     }
 
     @Test
@@ -315,9 +313,11 @@ class StudentServiceTest extends BasicTestContainerTest {
                 .groupNumber(2)
                 .hasTeam(!beforeUpdateStudent.getHasTeam())
                 .isCaptain(!beforeUpdateStudent.getHasTeam())
+                .currentTeam(TeamDto.builder().id(beforeUpdateStudent.getCurrentTeam().getId()).build())
                 .build();
 
-        Student actual = underTest.update(beforeUpdateStudent.getId(),
+        Student actual = underTest.update(
+                beforeUpdateStudent.getId(),
                 studentDto,
                 false
         );
@@ -344,9 +344,11 @@ class StudentServiceTest extends BasicTestContainerTest {
                 .groupNumber(2)
                 .hasTeam(!beforeUpdateStudent.getHasTeam())
                 .isCaptain(!beforeUpdateStudent.getHasTeam())
+                .currentTeam(TeamDto.builder().id(beforeUpdateStudent.getCurrentTeam().getId()).build())
                 .build();
 
-        Student actual = underTest.update(beforeUpdateStudent.getId(),
+        Student actual = underTest.update(
+                beforeUpdateStudent.getId(),
                 studentDto,
                 true
         );

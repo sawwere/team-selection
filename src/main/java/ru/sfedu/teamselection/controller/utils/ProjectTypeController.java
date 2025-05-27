@@ -6,12 +6,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
@@ -29,6 +25,7 @@ public class ProjectTypeController {
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public static final String CREATE = "/api/v1/projectTypes";
     public static final String FIND_ALL = "/api/v1/projectTypes";
+    public static final String DELETE_PROJECT_TYPE = "/api/v1/projectTypes/{id}";
 
     @Operation(
             method = "GET",
@@ -50,5 +47,24 @@ public class ProjectTypeController {
                 projectTypeRepository.save(projectTypeDtoMapper.mapToEntity(projectTypeDto))
         );
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(
+            method  = "DELETE",
+            summary = "Удаление типа проекта"
+    )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping(DELETE_PROJECT_TYPE)
+    public ResponseEntity<String> deleteProjectType(
+            @PathVariable("id") Long id
+    ) {
+
+        if (!projectTypeRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        projectTypeRepository.deleteById(id);
+
+        return ResponseEntity.ok("Project type with id: " + id + "was deleted");
     }
 }

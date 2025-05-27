@@ -3,13 +3,14 @@ package ru.sfedu.teamselection.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.track.TrackCreationDto;
 import ru.sfedu.teamselection.dto.track.TrackDto;
 import ru.sfedu.teamselection.enums.TrackType;
+import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.track.TrackCreationDtoMapper;
@@ -17,6 +18,7 @@ import ru.sfedu.teamselection.mapper.track.TrackDtoMapper;
 import ru.sfedu.teamselection.repository.TrackRepository;
 
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TrackService {
@@ -37,8 +39,7 @@ public class TrackService {
                 .orElseThrow(() -> new NotFoundException(id.toString()));
     }
 
-    public List<TrackDto> findAll()
-    {
+    public List<TrackDto> findAll() {
         return trackRepository.findAll().stream().map(trackDtoMapper::mapToDto).toList();
     }
 
@@ -55,10 +56,13 @@ public class TrackService {
         Track track = trackCreationDtoMapper.mapToEntity(dto);
 
         // проверяем дубликат
-        trackRepository.findByNameIgnoreCaseAndType(track.getName(),track.getType())
+        trackRepository.findByNameIgnoreCaseAndType(track.getName(), track.getType())
                 .ifPresent(t -> {
                     throw new ConstraintViolationException(
-                            String.format("Track with name '%s' and type '%s' already exists", dto.getName(), dto.getType())
+                            String.format("Track with name '%s' and type '%s' already exists",
+                                    dto.getName(),
+                                    dto.getType()
+                            )
                     );
                 });
 
@@ -94,6 +98,16 @@ public class TrackService {
     @Transactional
     public void deleteById(Long id) {
         Track track = findByIdOrElseThrow(id);
+        if (!track.getStudents().isEmpty()) {
+            log.error(
+                    "Track delete failed with BusinessException. Tried to delete track {}, but it has students",
+                    id
+            );
+            throw new BusinessException(
+                    "Нельзя удалить трек, в котором уже есть участники. "
+                    + "Сначала нужно удалить из него всех студентов и команды."
+            );
+        }
         trackRepository.delete(track);
     }
 }

@@ -6,12 +6,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
@@ -23,6 +25,7 @@ import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
+import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
@@ -35,6 +38,7 @@ import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.TeamSpecification;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TeamService {
@@ -114,33 +118,40 @@ public class TeamService {
      * @param dto TeamDto
      * @return the team
      */
-    @Transactional
-    public Team create(TeamCreationDto dto) {
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public Team create(TeamCreationDto dto, User sender) {
         String name    = dto.getName();
         Long trackId   = dto.getCurrentTrackId();
-
-        Team team;
-        if (teamRepository.existsByNameIgnoreCaseAndCurrentTrackId(name, trackId)) {
-            team = teamRepository
-                    .findByNameIgnoreCaseAndCurrentTrackId(name, trackId)
-                    .orElseThrow(() -> new NotFoundException(
-                            "Existing team '" + name + "' on track " + trackId + " not found"
-                    ));
-            // просто обновляем поля
-            team.setName(dto.getName());
-            team.setProjectDescription(dto.getProjectDescription());
-            team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
-        } else {
-            // новая команда
-            team = teamCreationDtoMapper.mapToEntity(dto);
-            team.setCurrentTrack(trackService.findByIdOrElseThrow(trackId));
-
-            Student captain = studentService.findByIdOrElseThrow(dto.getCaptainId());
-            addStudentToTeam(team, captain, false);
-            team.setCaptainId(captain.getId());
-            captain.setHasTeam(true);
-            captain.setIsCaptain(true);
+        // айди капитана в заявке должен совпадать с айди студента, отправившего заявку
+        // либо отправитель должен быть админом
+        if (!(isAdmin(sender)
+            || sender.getId().equals(studentService.findByIdOrElseThrow(dto.getCaptainId()).getUser().getId()))
+        ) {
+            log.error(
+                    "Team creation failed with ForbiddenException. User {} tried to create team with captainId {}",
+                    sender.getId(),
+                    dto.getCaptainId()
+            );
+            throw new ForbiddenException("Нельзя создать команду для другого пользователя");
         }
+
+        if (teamRepository.existsByNameIgnoreCaseAndCurrentTrackId(name, trackId)) {
+            log.error(
+                    "Team creation failed with BusinessException. User {} tried to create team with name {}",
+                    sender.getId(),
+                    dto.getName()
+            );
+            throw new BusinessException("В данном треке уже есть команда с названием '%s'".formatted(name));
+        }
+        // новая команда
+        Team team = teamCreationDtoMapper.mapToEntity(dto);
+        team.setCurrentTrack(trackService.findByIdOrElseThrow(trackId));
+
+        Student captain = studentService.findByIdOrElseThrow(dto.getCaptainId());
+        addStudentToTeam(team, captain, false);
+        team.setCaptainId(captain.getId());
+        captain.setHasTeam(true);
+        captain.setIsCaptain(true);
 
         // технологии
         team.setTechnologies(
@@ -162,8 +173,7 @@ public class TeamService {
     @Transactional
     public void delete(Long id) {
         Team team = findByIdOrElseThrow(id);
-        for (Application application: team.getApplications())
-        {
+        for (Application application: team.getApplications()) {
             applicationService.delete(application.getId());
         }
         for (Student teamMember : team.getStudents()) {
@@ -171,9 +181,12 @@ public class TeamService {
                 teamMember.setHasTeam(false);
                 teamMember.setCurrentTeam(null);
                 teamMember.setIsCaptain(false);
+                teamMember.getTeams().remove(team);
             }
-            teamRepository.deleteById(id);
         }
+        team.getStudents().clear();
+        team.getTechnologies().clear();
+        teamRepository.deleteById(id);
     }
 
     @Transactional
@@ -212,8 +225,7 @@ public class TeamService {
 
         student.setHasTeam(true);
         student.setCurrentTeam(team);
-        for (Application application: student.getApplications())
-        {
+        for (Application application: student.getApplications()) {
             application.setStatus(ApplicationStatus.REJECTED.name());
         }
         return team;
@@ -234,19 +246,18 @@ public class TeamService {
     }
 
     /**
-     *
-     * @param teamId
-     * @param studentId
-     * @param sender
-     * @return
+     * Добавляет студента в команду
+     * @param teamId идентификатор команды, в которую будет добавлен студент
+     * @param studentId идентификатор студента, который будет добавлен в команду
+     * @param sender пользователь, инициирующий действие
+     * @return обновленная команда
      */
     @Transactional
     public Team addStudentToTeam(Long teamId, Long studentId, User sender) {
         Team team = findByIdOrElseThrow(teamId);
         Student student = studentService.findByIdOrElseThrow(studentId);
-        addStudentToTeam(team, student, isAdmin(sender));
 
-        return team;
+        return addStudentToTeam(team, student, isAdmin(sender));
     }
 
     /**
@@ -283,6 +294,11 @@ public class TeamService {
                         trackService.findByIdOrElseThrow(partial.getCurrentTrack().getId())
                 );
             }
+            if (!Objects.equals(team.getCaptainId(), dto.getCaptainId())) {
+                Student oldCaptain = studentService.findByIdOrElseThrow(team.getCaptainId());
+                oldCaptain.setIsCaptain(false);
+            }
+
             team.setCaptainId(partial.getCaptainId());
         }
 
@@ -315,6 +331,9 @@ public class TeamService {
                 addStudentToTeam(team, student, isAdmin);
             }
         }
+
+        Student newCaptain = studentService.findByIdOrElseThrow(partial.getCaptainId());
+        newCaptain.setIsCaptain(true);
 
         return teamRepository.save(team);
     }

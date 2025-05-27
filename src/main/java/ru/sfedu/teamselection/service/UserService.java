@@ -16,10 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sfedu.teamselection.domain.Role;
-import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.domain.*;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
 import ru.sfedu.teamselection.exception.NotFoundException;
@@ -45,6 +42,9 @@ public class UserService {
     @Autowired
     private TeamService teamService;
 
+    @Autowired
+    private TrackService trackService;
+
 
     @Transactional(readOnly = true)
     public Page<UserDto> search(UserSearchCriteria criteria, Pageable pageable) {
@@ -62,12 +62,7 @@ public class UserService {
      */
     public User findByIdOrElseThrow(Long id) throws NotFoundException {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(id.toString()));
-    }
-
-    public List<User> findAllUsers()
-    {
-        return userRepository.findAll();
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
     }
 
     public User findByEmail(String email) {
@@ -81,7 +76,7 @@ public class UserService {
     public User findByUsername(String username) {
         User u = userRepository.findByFio(username);
         if (u == null) {
-            throw new NotFoundException("User with username "+username);
+            throw new NotFoundException("User with username " + username);
         }
         return u;
     }
@@ -93,7 +88,7 @@ public class UserService {
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String principalName = auth.getName();
-        var r = auth.getAuthorities();
+        var authAuthorities = auth.getAuthorities();
         if (auth.getPrincipal() instanceof OidcUser oidc) {
             return findByEmail(oidc.getEmail());
         } else {
@@ -133,6 +128,20 @@ public class UserService {
                     Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
                     Student student = existing.getStudent();
                     teamService.addStudentToTeam(newTeam, student, false);
+                }
+            }
+
+            Long oldTrackId = existing.getStudent() != null && existing.getStudent().getCurrentTrack() != null
+                    ? existing.getStudent().getCurrentTrack().getId()
+                    : null;
+            Long newTrackId = dto.getStudent() != null
+                    ? dto.getStudent().getCurrentTrackId()
+                    : null;
+
+            if (!Objects.equals(oldTrackId, newTrackId)) {
+                if (newTrackId != null) {
+                    Track newTrack = trackService.findByIdOrElseThrow(newTrackId);
+                    existing.getStudent().setCurrentTrack(newTrack);
                 }
             }
 
@@ -177,7 +186,7 @@ public class UserService {
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new NotFoundException("Role "+roleName));
+                .orElseThrow(() -> new NotFoundException("Role " + roleName));
 
         if ("STUDENT".equals(roleName)) {
             Student student = Student.builder()
@@ -192,8 +201,7 @@ public class UserService {
 
     @Transactional
     public void deactivateUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + id + " не найден"));
+        User user = findByIdOrElseThrow(id);
         user.setIsEnabled(false);
         userRepository.save(user);
     }

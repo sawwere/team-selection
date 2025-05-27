@@ -216,7 +216,8 @@ public class TeamController {
     @PostMapping(CREATE_TEAM)
     public ResponseEntity<TeamDto> createTeam(@RequestBody TeamCreationDto team) {
         LOGGER.info("ENTER createTeam() endpoint");
-        TeamDto result = teamDtoMapper.mapToDto(teamService.create(team));
+        User sender = userService.getCurrentUser();
+        TeamDto result = teamDtoMapper.mapToDto(teamService.create(team, sender));
         return ResponseEntity.ok(result);
     }
 

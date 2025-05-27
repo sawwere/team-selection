@@ -71,6 +71,7 @@ public class Team {
     @Builder.Default
     private List<Technology> technologies = new ArrayList<>();
 
+    @JoinColumn(name = "current_track_id", nullable = false)
     @ManyToOne(fetch = FetchType.EAGER)
     private Track currentTrack;
 
@@ -92,7 +93,7 @@ public class Team {
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
-    @Column
+    @Column(name = "showcase_ref")
     private String showcaseRef;
 
     @Column(name = "created_at", nullable = false)

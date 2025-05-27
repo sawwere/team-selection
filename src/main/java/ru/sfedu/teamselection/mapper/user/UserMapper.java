@@ -49,6 +49,7 @@ public abstract class UserMapper {
     @Mapping(source = "groupNumber",      target = "groupNumber")
     @Mapping(source = "currentTeam.id",   target = "currentTeamId")
     @Mapping(source = "currentTeam.name", target = "currentTeamName")
+    @Mapping(source = "currentTrack.id", target = "currentTrackId")
     protected abstract StudentSummaryDto toStudentSummary(Student s);
 
     /**
