@@ -184,21 +184,22 @@ public class StudentControllerTest {
         Mockito.doReturn(null).when(studentService).getCurrentStudent();
         Mockito.doReturn(genericStudent)
                 .when(studentService)
-                .update(Mockito.notNull(), Mockito.notNull(), Mockito.anyBoolean());
+                .update(Mockito.notNull(), Mockito.notNull(), Mockito.any());
 
         String student = """
                 {
                     "id": 1,
-                    "course": 0,
-                    "groupNumber": 0,
-                    "aboutSelf": "",
-                    "contacts": "",
+                    "course": 1,
+                    "groupNumber": 1,
+                    "aboutSelf": "info",
+                    "contacts": "info",
                     "hasTeam": false,
                     "isCaptain": false,
-                    "currentTeam": {},
+                    "currentTeam": null,
                     "technologies": [],
-                    "applications": [],
-                    "user": {}
+                    "user": {
+                        "id": 2
+                    }
                 }""";
 
         mockMvc.perform(put(StudentController.UPDATE_STUDENT, genericStudent.getId())
@@ -218,16 +219,20 @@ public class StudentControllerTest {
         String student = """
                 {
                     "id": 1,
-                    "course": 0,
-                    "groupNumber": 0,
-                    "aboutSelf": "",
-                    "contacts": "",
+                    "course": 1,
+                    "groupNumber": 1,
+                    "aboutSelf": "info",
+                    "contacts": "info",
                     "hasTeam": false,
                     "isCaptain": false,
-                    "currentTeam": {},
+                    "currentTeam": null,
                     "technologies": [],
-                    "applications": [],
-                    "user": {}
+                    "user": {
+                        "id": 2
+                    },
+                    "currentTrack": {
+                        "id": 1
+                    }
                 }""";
 
         mockMvc.perform(put(StudentController.UPDATE_STUDENT, genericStudent.getId())
@@ -248,16 +253,20 @@ public class StudentControllerTest {
         String student = """
                 {
                     "id": 1,
-                    "course": 0,
-                    "groupNumber": 0,
-                    "aboutSelf": "",
-                    "contacts": "",
+                    "course": 1,
+                    "groupNumber": 1,
+                    "aboutSelf": "info",
+                    "contacts": "info",
                     "hasTeam": false,
                     "isCaptain": false,
-                    "currentTeam": {},
+                    "currentTeam": null,
                     "technologies": [],
-                    "applications": [],
-                    "user": {}
+                    "user": {
+                        "id": 2
+                    },
+                    "currentTrack": {
+                        "id": 1
+                    }
                 }""";
 
         mockMvc.perform(put(StudentController.UPDATE_STUDENT, genericStudent.getId())

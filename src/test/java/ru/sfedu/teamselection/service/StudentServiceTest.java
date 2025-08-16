@@ -30,17 +30,19 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.StudentUpdateDto;
+import ru.sfedu.teamselection.dto.StudentUpdateTeamDto;
+import ru.sfedu.teamselection.dto.StudentUpdateUserDto;
 import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
-import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
-import ru.sfedu.teamselection.dto.team.TeamDto;
 import ru.sfedu.teamselection.enums.TrackType;
 import ru.sfedu.teamselection.exception.ConstraintViolationException;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
+import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)
 @ActiveProfiles("test")
@@ -306,20 +308,20 @@ class StudentServiceTest extends BasicTestContainerTest {
     void updateFromStudentThemself() {
         Student beforeUpdateStudent = studentRepository.findById(2L).orElseThrow();
 
-        StudentDto studentDto = StudentDto.builder()
+        StudentUpdateDto studentDto = new StudentUpdateDto()
                 .aboutSelf("about self")
                 .contacts("contacts")
                 .course(2)
                 .groupNumber(2)
                 .hasTeam(!beforeUpdateStudent.getHasTeam())
                 .isCaptain(!beforeUpdateStudent.getHasTeam())
-                .currentTeam(TeamDto.builder().id(beforeUpdateStudent.getCurrentTeam().getId()).build())
-                .build();
+                .currentTeam(new StudentUpdateTeamDto().id(beforeUpdateStudent.getCurrentTeam().getId()))
+                .user(new StudentUpdateUserDto().id(1L));
 
         Student actual = underTest.update(
                 beforeUpdateStudent.getId(),
                 studentDto,
-                false
+                PermissionLevelUpdate.OWNER
         );
 
         Assertions.assertEquals(studentDto.getAboutSelf(), actual.getAboutSelf());
@@ -337,20 +339,20 @@ class StudentServiceTest extends BasicTestContainerTest {
     void updateFromAdmin() {
         Student beforeUpdateStudent = studentRepository.findById(2L).orElseThrow();
 
-        StudentDto studentDto = StudentDto.builder()
+        StudentUpdateDto studentDto = new StudentUpdateDto()
                 .aboutSelf("about self")
                 .contacts("contacts")
                 .course(2)
                 .groupNumber(2)
                 .hasTeam(!beforeUpdateStudent.getHasTeam())
                 .isCaptain(!beforeUpdateStudent.getHasTeam())
-                .currentTeam(TeamDto.builder().id(beforeUpdateStudent.getCurrentTeam().getId()).build())
-                .build();
+                .currentTeam(new StudentUpdateTeamDto().id(beforeUpdateStudent.getCurrentTeam().getId()))
+                .user(new StudentUpdateUserDto().id(1L));
 
         Student actual = underTest.update(
                 beforeUpdateStudent.getId(),
                 studentDto,
-                true
+                PermissionLevelUpdate.ADMIN
         );
 
         Assertions.assertEquals(studentDto.getAboutSelf(), actual.getAboutSelf());
