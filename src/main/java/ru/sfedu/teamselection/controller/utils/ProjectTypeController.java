@@ -7,7 +7,14 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
@@ -31,7 +38,7 @@ public class ProjectTypeController {
             method = "GET",
             summary = "Получение списка всех возможных типов проектов"
     )
-    @GetMapping(FIND_ALL) // checked
+    @GetMapping(FIND_ALL)
     public ResponseEntity<List<ProjectTypeDto>> findAll() {
         List<ProjectTypeDto> result = projectTypeDtoMapper.mapListToDto(projectTypeRepository.findAll());
         return ResponseEntity.ok(result);
@@ -41,7 +48,8 @@ public class ProjectTypeController {
             method = "GET",
             summary = "Создание нового типа проекта"
     )
-    @PostMapping(FIND_ALL) // checked
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(CREATE)
     public ResponseEntity<ProjectTypeDto> create(@RequestBody @Valid ProjectTypeDto projectTypeDto) {
         ProjectTypeDto result = projectTypeDtoMapper.mapToDto(
                 projectTypeRepository.save(projectTypeDtoMapper.mapToEntity(projectTypeDto))

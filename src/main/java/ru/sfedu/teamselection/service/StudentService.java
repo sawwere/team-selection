@@ -3,6 +3,7 @@ package ru.sfedu.teamselection.service;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -13,8 +14,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.StudentUpdateDto;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
@@ -27,8 +28,11 @@ import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
+import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
+import ru.sfedu.teamselection.service.student.update.StudentUpdateAdminHandler;
+import ru.sfedu.teamselection.service.student.update.StudentUpdateOwnerHandler;
 
-
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class StudentService {
@@ -166,36 +170,20 @@ public class StudentService {
      * Updates student by id using given data.
      * @param id id of the user.
      * @param dto DTO containing new data.
-     * @param isUnsafeAllowed is update limited to safe fields
+     * @param permission regulates if update is limited to safe fields
      * @return updated student
      */
     @Transactional
-    public Student update(Long id, StudentDto dto, Boolean isUnsafeAllowed) {
-        Student st = findByIdOrElseThrow(id);
+    public Student update(Long id, StudentUpdateDto dto, PermissionLevelUpdate permission) {
+        Student student = findByIdOrElseThrow(id);
 
-        if (Boolean.TRUE.equals(isUnsafeAllowed)) {
-            st.setHasTeam(dto.getHasTeam());
-            st.setIsCaptain(dto.getIsCaptain());
-        }
-        st.setCourse(dto.getCourse());
-        st.setGroupNumber(dto.getGroupNumber());
-        st.setAboutSelf(dto.getAboutSelf());
-        st.setContacts(dto.getContacts());
-        st.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
-        var newTeamDto = dto.getCurrentTeam();
-        if (newTeamDto != null && newTeamDto.getId() != null) {
-            Team newTeam = teamService.findByIdOrElseThrow(newTeamDto.getId());
-
-            st.setCurrentTeam(newTeam);
-
-            if (st.getTeams().stream().noneMatch(t -> t.getId().equals(newTeamDto.getId()))) {
-                st.getTeams().add(newTeam);
-            }
-        } else {
-            st.setCurrentTeam(null);
+        switch (permission) {
+            case ADMIN -> new StudentUpdateAdminHandler(teamService, technologyDtoMapper).update(student, dto);
+            case OWNER -> new StudentUpdateOwnerHandler(teamService, technologyDtoMapper).update(student, dto);
+            default -> log.warn("Cannot update student {} using given permission: {}", id, permission);
         }
 
-        return studentRepository.save(st);
+        return studentRepository.save(student);
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")

@@ -88,7 +88,6 @@ public class TrackController {
             method = "PUT",
             summary = "Изменить данные трека",
             description = "Изменяет информацию о треке. Эта операция доступна только администратору.",
-            tags = {"UNSAFE", "ADMIN"},
             parameters = {
                     @Parameter(name = "id", description = "id трека", in = ParameterIn.PATH),
             },

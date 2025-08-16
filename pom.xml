@@ -247,6 +247,8 @@
                         <configuration>
                             <skipValidateSpec>true</skipValidateSpec>
                             <inputSpec>./src/main/resources/openapi.yaml</inputSpec>
+                            <apiPackage>ru.sfedu.teamselection.api</apiPackage>
+                            <modelPackage>ru.sfedu.teamselection.dto</modelPackage>
                             <generatorName>spring</generatorName>
                             <importMappings>
                                 <importMapping>UserDto=ru.sfedu.teamselection.dto.UserDto</importMapping>
@@ -264,13 +266,15 @@
                                 <importMapping>StudentApplicationDto=ru.sfedu.teamselection.dto.application.StudentApplicationDto</importMapping>
                                 <importMapping>ErrorInfo=ru.sfedu.teamselection.dto.exception.ErrorInfo</importMapping>
                                 <importMapping>ConstraintViolation=ru.sfedu.teamselection.dto.exception.ConstraintViolation</importMapping>
+<!--                                <importMapping>PageResponse=ru.sfedu.teamselection.dto.PageResponse</importMapping>-->
                             </importMappings>
                             <configOptions>
                                 <openApiNullable>false</openApiNullable>
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <useSpringBoot3>true</useSpringBoot3>
-                                <useResponseEntity>false</useResponseEntity>
+                                <useResponseEntity>true</useResponseEntity>
+                                <useBeanValidation>true</useBeanValidation>
                                 <useSpringController>true</useSpringController>
                                 <documentationProvider>springdoc</documentationProvider>
                                 <useTags>true</useTags>

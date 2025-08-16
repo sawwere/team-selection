@@ -74,8 +74,7 @@ public class ApplicationController {
 
     @Operation(
             method = "POST",
-            summary = "Создание заявки",
-            parameters = { @Parameter(name = "application", description = "сущность заявки")}
+            summary = "Создание заявки"
     )
     @PostMapping(CREATE_APPLICATION)
     public ResponseEntity<ApplicationCreationDto> createApplication(@RequestBody ApplicationCreationDto application) {
@@ -91,8 +90,7 @@ public class ApplicationController {
 
     @Operation(
             method = "PUT",
-            summary = "Обновление статуса заявки",
-            parameters = {@Parameter(name = "application", description = "DTO с обновлённой информацией о заявке")}
+            summary = "Обновление статуса заявки"
     )
     @PutMapping(UPDATE_APPLICATION)
     public ResponseEntity<ApplicationCreationDto> update(
