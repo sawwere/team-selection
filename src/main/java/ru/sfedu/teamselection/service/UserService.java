@@ -150,6 +150,8 @@ public class UserService {
             existing.setEmail(dto.getEmail());
             existing.setIsEnabled(dto.getIsEnabled());
             existing.setIsRemindEnabled(dto.getIsRemindEnabled());
+            existing.getStudent().setCourse(dto.getStudent().getCourse());
+            existing.getStudent().setGroupNumber(dto.getStudent().getGroupNumber());
 
             return userRepository.save(existing);
 
