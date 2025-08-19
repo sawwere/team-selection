@@ -4,27 +4,36 @@ import java.util.Objects;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.Track;
 import ru.sfedu.teamselection.dto.StudentUpdateDto;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.service.TeamService;
+import ru.sfedu.teamselection.service.TrackService;
 
 @Component
 public class StudentUpdateAdminHandler extends StudentUpdateCommonHandler {
+    private final TrackService trackService;
 
-    public StudentUpdateAdminHandler(TeamService teamService, TechnologyMapper technologyDtoMapper) {
+    public StudentUpdateAdminHandler(
+            TeamService teamService,
+            TechnologyMapper technologyDtoMapper,
+            TrackService trackService
+    ) {
         super(teamService, technologyDtoMapper);
+        this.trackService = trackService;
     }
 
     @Override
     public void update(Student student, StudentUpdateDto dto) {
         super.update(student, dto);
 
-        student.setHasTeam(dto.getHasTeam());
-        student.setIsCaptain(dto.getIsCaptain());
+        student.setCourse(dto.getCourse());
+        student.setGroupNumber(dto.getGroupNumber());
 
         updateTrack(student, dto);
         updateTeam(student, dto);
 
+        student.getUser().setFio(dto.getUser().getFio());
         student.getUser().setIsEnabled(dto.getUser().getIsEnabled());
         student.getUser().setEmail(dto.getUser().getEmail());
     }
@@ -60,11 +69,11 @@ public class StudentUpdateAdminHandler extends StudentUpdateCommonHandler {
                 ? dto.getCurrentTrack().getId()
                 : null;
 
-//        if (!Objects.equals(oldTrackId, newTrackId)) {
-//            if (newTrackId != null) {
-//                Track newTrack = trackService.findByIdOrElseThrow(newTrackId);
-//                existing.getStudent().setCurrentTrack(newTrack);
-//            }
-//        }
+        if (!Objects.equals(oldTrackId, newTrackId)) {
+            if (newTrackId != null) {
+                Track newTrack = trackService.findByIdOrElseThrow(newTrackId);
+                student.setCurrentTrack(newTrack);
+            }
+        }
     }
 }
