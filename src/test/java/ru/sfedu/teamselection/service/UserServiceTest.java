@@ -14,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.BasicTestContainerTest;
 import ru.sfedu.teamselection.TeamSelectionApplication;
 import ru.sfedu.teamselection.domain.Role;
+import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
+import ru.sfedu.teamselection.dto.student.StudentSummaryDto;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
+import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)
 @Transactional
@@ -97,7 +100,7 @@ class UserServiceTest extends BasicTestContainerTest {
                 .role(Role.builder().id(1L).name("USER").build())
                 .build();
 
-        User actual = underTest.createOrUpdate(dto);
+        User actual = underTest.createOrUpdate(dto, PermissionLevelUpdate.OWNER);
 
         Assertions.assertEquals(expected.getFio(), actual.getFio());
         Assertions.assertEquals(expected.getEmail(), actual.getEmail());
@@ -113,6 +116,10 @@ class UserServiceTest extends BasicTestContainerTest {
                 .role("USER")
                 .isRemindEnabled(false)
                 .isEnabled(false)
+                .student(
+                        StudentSummaryDto.builder()
+                                .build()
+                )
                 .build();
 
         User expected = User.builder()
@@ -122,9 +129,13 @@ class UserServiceTest extends BasicTestContainerTest {
                 .role(Role.builder().id(1L).name("USER").build())
                 .isRemindEnabled(dto.getIsRemindEnabled())
                 .isEnabled(dto.getIsEnabled())
+                .student(
+                        Student.builder()
+                                .build()
+                )
                 .build();
 
-        User actual = underTest.createOrUpdate(dto);
+        User actual = underTest.createOrUpdate(dto, PermissionLevelUpdate.OWNER);
 
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getFio(), actual.getFio());

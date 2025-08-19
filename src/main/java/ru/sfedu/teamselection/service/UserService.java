@@ -1,10 +1,6 @@
 package ru.sfedu.teamselection.service;
 
-import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -16,34 +12,40 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sfedu.teamselection.domain.*;
+import ru.sfedu.teamselection.domain.Role;
+import ru.sfedu.teamselection.domain.Student;
+import ru.sfedu.teamselection.domain.Team;
+import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
 import ru.sfedu.teamselection.exception.NotFoundException;
+import ru.sfedu.teamselection.mapper.UserToStudentUpdateMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.repository.RoleRepository;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 import ru.sfedu.teamselection.repository.specification.UserSpecification;
+import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
+import ru.sfedu.teamselection.service.student.update.StudentUpdateFactory;
 
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
-
-    private final UserMapper userMapper;
-
     private final RoleRepository roleRepository;
-
     private final StudentRepository studentRepository;
 
+    private final StudentUpdateFactory studentUpdateFactory;
+    private final UserToStudentUpdateMapper userToStudentUpdateMapper;
     @Lazy
     @Autowired
     private TeamService teamService;
 
     @Autowired
     private TrackService trackService;
+
+    private final UserMapper userMapper;
 
 
     @Transactional(readOnly = true)
@@ -81,6 +83,11 @@ public class UserService {
         return u;
     }
 
+    public Role findRoleByNameOrElseThrow(String roleName) {
+        return roleRepository.findByName(roleName)
+                .orElseThrow(() -> new NotFoundException("Роль '" + roleName + "' не найдена"));
+    }
+
     /**
      * Get current user based on security context
      * @return Authenticated user object
@@ -97,69 +104,33 @@ public class UserService {
     }
 
     @Transactional
-    public User createOrUpdate(UserDto dto) {
+    public User createOrUpdate(UserDto dto, PermissionLevelUpdate permission) {
         if (dto.getId() != null) {
             // --- обновление ---
             User existing = findByIdOrElseThrow(dto.getId());
 
             // обновляем роль
-            Role role = roleRepository.findByName(dto.getRole())
-                    .orElseThrow(() -> new NotFoundException("Роль '" + dto.getRole() + "' не найдена"));
+            Role role = findRoleByNameOrElseThrow(dto.getRole())
             existing.setRole(role);
-
-            // сохраняем старый и новый ID команды
-            Long oldTeamId = existing.getStudent() != null && existing.getStudent().getCurrentTeam() != null
-                    ? existing.getStudent().getCurrentTeam().getId()
-                    : null;
-            Long newTeamId = dto.getStudent() != null
-                    ? dto.getStudent().getCurrentTeamId()
-                    : null;
-
-            // если команда изменилась — сначала удалить из старой, потом добавить в новую
-            if (!Objects.equals(oldTeamId, newTeamId)) {
-                // удаляем из старой
-                if (oldTeamId != null) {
-                    Team oldTeam = teamService.findByIdOrElseThrow(oldTeamId);
-                    Student student = existing.getStudent();
-                    teamService.removeStudentFromTeam(oldTeam, student);
-                }
-                // добавляем в новую
-                if (newTeamId != null) {
-                    Team newTeam = teamService.findByIdOrElseThrow(newTeamId);
-                    Student student = existing.getStudent();
-                    teamService.addStudentToTeam(newTeam, student, false);
-                }
-            }
-
-            Long oldTrackId = existing.getStudent() != null && existing.getStudent().getCurrentTrack() != null
-                    ? existing.getStudent().getCurrentTrack().getId()
-                    : null;
-            Long newTrackId = dto.getStudent() != null
-                    ? dto.getStudent().getCurrentTrackId()
-                    : null;
-
-            if (!Objects.equals(oldTrackId, newTrackId)) {
-                if (newTrackId != null) {
-                    Track newTrack = trackService.findByIdOrElseThrow(newTrackId);
-                    existing.getStudent().setCurrentTrack(newTrack);
-                }
-            }
 
             // обновляем остальные поля
             existing.setFio(dto.getFio());
             existing.setEmail(dto.getEmail());
             existing.setIsEnabled(dto.getIsEnabled());
             existing.setIsRemindEnabled(dto.getIsRemindEnabled());
-            existing.getStudent().setCourse(dto.getStudent().getCourse());
-            existing.getStudent().setGroupNumber(dto.getStudent().getGroupNumber());
+            if (existing.getStudent() != null) {
+                studentUpdateFactory.getHandler(permission).update(
+                        existing.getStudent(),
+                        userToStudentUpdateMapper.userDtoToStudentUpdateDto(dto)
+                );
+            }
 
             return userRepository.save(existing);
 
         } else {
             User user = userMapper.mapToEntity(dto);
 
-            Role role = roleRepository.findByName(dto.getRole())
-                    .orElseThrow(() -> new NotFoundException("Роль '" + dto.getRole() + "' не найдена"));
+            Role role = findRoleByNameOrElseThrow(dto.getRole());
             user.setRole(role);
             if (dto.getStudent() != null) {
                 Student student = Student.builder()

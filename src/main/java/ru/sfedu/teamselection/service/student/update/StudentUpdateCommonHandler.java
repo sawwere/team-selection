@@ -11,8 +11,8 @@ import ru.sfedu.teamselection.service.TeamService;
 @Component
 @RequiredArgsConstructor
 public class StudentUpdateCommonHandler implements StudentUpdateHandler {
-    private final TeamService teamService;
-    private final TechnologyMapper technologyDtoMapper;
+    protected final TeamService teamService;
+    protected final TechnologyMapper technologyDtoMapper;
 
     @Override
     public void update(Student student, StudentUpdateDto dto) {

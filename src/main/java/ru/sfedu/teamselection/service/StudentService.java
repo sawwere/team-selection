@@ -29,8 +29,7 @@ import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
 import ru.sfedu.teamselection.repository.specification.StudentSpecification;
 import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
-import ru.sfedu.teamselection.service.student.update.StudentUpdateAdminHandler;
-import ru.sfedu.teamselection.service.student.update.StudentUpdateOwnerHandler;
+import ru.sfedu.teamselection.service.student.update.StudentUpdateFactory;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,6 +37,9 @@ import ru.sfedu.teamselection.service.student.update.StudentUpdateOwnerHandler;
 public class StudentService {
     private final StudentRepository studentRepository;
     private final TechnologyRepository technologyRepository;
+    private final RoleRepository roleRepository;
+
+    private final StudentUpdateFactory studentUpdateFactory;
 
     @Lazy
     @Autowired
@@ -46,7 +48,6 @@ public class StudentService {
     private final StudentCreationDtoMapper studentCreationDtoMapper;
     private final TechnologyMapper technologyDtoMapper;
 
-    private final RoleRepository roleRepository;
 
     @Autowired
     @Lazy
@@ -163,9 +164,6 @@ public class StudentService {
         studentRepository.delete(st);
     }
 
-
-
-
     /**
      * Updates student by id using given data.
      * @param id id of the user.
@@ -177,11 +175,7 @@ public class StudentService {
     public Student update(Long id, StudentUpdateDto dto, PermissionLevelUpdate permission) {
         Student student = findByIdOrElseThrow(id);
 
-        switch (permission) {
-            case ADMIN -> new StudentUpdateAdminHandler(teamService, technologyDtoMapper).update(student, dto);
-            case OWNER -> new StudentUpdateOwnerHandler(teamService, technologyDtoMapper).update(student, dto);
-            default -> log.warn("Cannot update student {} using given permission: {}", id, permission);
-        }
+        studentUpdateFactory.getHandler(permission).update(student, dto);
 
         return studentRepository.save(student);
     }
