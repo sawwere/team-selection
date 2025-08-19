@@ -110,7 +110,7 @@ public class UserService {
             User existing = findByIdOrElseThrow(dto.getId());
 
             // обновляем роль
-            Role role = findRoleByNameOrElseThrow(dto.getRole())
+            Role role = findRoleByNameOrElseThrow(dto.getRole());
             existing.setRole(role);
 
             // обновляем остальные поля
