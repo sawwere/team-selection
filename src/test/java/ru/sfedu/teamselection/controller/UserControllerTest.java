@@ -84,7 +84,7 @@ public class UserControllerTest {
     public void putUser() throws Exception {
         Mockito.doReturn(genericStudentUser)
                 .when(userService).getCurrentUser();
-        Mockito.doReturn(genericStudentUser).when(userService).createOrUpdate(Mockito.notNull());
+        Mockito.doReturn(genericStudentUser).when(userService).createOrUpdate(Mockito.notNull(), Mockito.notNull());
 
         String userDto = """
                 {
@@ -108,7 +108,7 @@ public class UserControllerTest {
     public void putUserFromAdmin() throws Exception {
         Mockito.doReturn(admin)
                 .when(userService).getCurrentUser();
-        Mockito.doReturn(genericStudentUser).when(userService).createOrUpdate(Mockito.notNull());
+        Mockito.doReturn(genericStudentUser).when(userService).createOrUpdate(Mockito.notNull(), Mockito.notNull());
 
         String userDto = """
                 {
@@ -132,7 +132,7 @@ public class UserControllerTest {
     public void putUserFromForeignUserShouldFail() throws Exception {
         Mockito.doReturn(genericStudentUser)
                 .when(userService).getCurrentUser();
-        Mockito.doReturn(genericStudentUser).when(userService).createOrUpdate(Mockito.notNull());
+        Mockito.doReturn(genericStudentUser).when(userService).createOrUpdate(Mockito.notNull(), Mockito.notNull());
 
         String userDto = """
                 {

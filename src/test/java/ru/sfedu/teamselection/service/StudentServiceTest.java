@@ -312,11 +312,9 @@ class StudentServiceTest extends BasicTestContainerTest {
                 .aboutSelf("about self")
                 .contacts("contacts")
                 .course(2)
-                .groupNumber(2)
-                .hasTeam(!beforeUpdateStudent.getHasTeam())
-                .isCaptain(!beforeUpdateStudent.getHasTeam())
+                .groupNumber(22)
                 .currentTeam(new StudentUpdateTeamDto().id(beforeUpdateStudent.getCurrentTeam().getId()))
-                .user(new StudentUpdateUserDto().id(1L));
+                .user(new StudentUpdateUserDto().id(1L).fio("newFio"));
 
         Student actual = underTest.update(
                 beforeUpdateStudent.getId(),
@@ -326,12 +324,10 @@ class StudentServiceTest extends BasicTestContainerTest {
 
         Assertions.assertEquals(studentDto.getAboutSelf(), actual.getAboutSelf());
         Assertions.assertEquals(studentDto.getContacts(), actual.getContacts());
-        Assertions.assertEquals(studentDto.getCourse(), actual.getCourse());
-        Assertions.assertEquals(studentDto.getGroupNumber(), actual.getGroupNumber());
 
         // shouldn't be updated
-        Assertions.assertEquals(beforeUpdateStudent.getHasTeam(), actual.getHasTeam());
-        Assertions.assertEquals(beforeUpdateStudent.getIsCaptain(), actual.getIsCaptain());
+        Assertions.assertNotEquals(studentDto.getCourse(), actual.getCourse());
+        Assertions.assertNotEquals(studentDto.getGroupNumber(), actual.getGroupNumber());
     }
 
     @Test
@@ -344,10 +340,8 @@ class StudentServiceTest extends BasicTestContainerTest {
                 .contacts("contacts")
                 .course(2)
                 .groupNumber(2)
-                .hasTeam(!beforeUpdateStudent.getHasTeam())
-                .isCaptain(!beforeUpdateStudent.getHasTeam())
                 .currentTeam(new StudentUpdateTeamDto().id(beforeUpdateStudent.getCurrentTeam().getId()))
-                .user(new StudentUpdateUserDto().id(1L));
+                .user(new StudentUpdateUserDto().id(1L).fio("newFio"));
 
         Student actual = underTest.update(
                 beforeUpdateStudent.getId(),
@@ -361,8 +355,8 @@ class StudentServiceTest extends BasicTestContainerTest {
         Assertions.assertEquals(studentDto.getGroupNumber(), actual.getGroupNumber());
 
         // should be updated
-        Assertions.assertEquals(studentDto.getHasTeam(), actual.getHasTeam());
-        Assertions.assertEquals(studentDto.getIsCaptain(), actual.getIsCaptain());
+        Assertions.assertEquals(studentDto.getUser().getFio(), actual.getUser().getFio());
+        Assertions.assertEquals(studentDto.getUser().getFio(), actual.getUser().getFio());
     }
 
     @Test

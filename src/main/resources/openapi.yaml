@@ -286,8 +286,6 @@ components:
       required:
         - course
         - group_number
-        - has_team
-        - is_captain
         - current_track
         - user
         - technologies
@@ -318,14 +316,6 @@ components:
           description: Контактная информация
           example: "tg: @student_profile"
           nullable: true
-        has_team:
-          type: boolean
-          description: Имеет ли команду
-          example: true
-        is_captain:
-          type: boolean
-          description: Является ли капитаном
-          example: false
         current_team:
           $ref: '#/components/schemas/StudentUpdateTeamDto'
           nullable: true

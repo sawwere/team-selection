@@ -36,6 +36,7 @@ import ru.sfedu.teamselection.mapper.user.RoleMapper;
 import ru.sfedu.teamselection.mapper.user.UserMapper;
 import ru.sfedu.teamselection.service.PhotoService;
 import ru.sfedu.teamselection.service.UserService;
+import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
 
 @RestController
 @RequestMapping()
@@ -83,7 +84,11 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> putUser(@RequestBody @Valid UserDto userDto) {
-        UserDto result = userMapper.mapToDto(userService.createOrUpdate(userDto));
+        User user = userService.getCurrentUser();
+        var permission = user.getRole().getName().equals("ADMIN")
+                ? PermissionLevelUpdate.ADMIN
+                : PermissionLevelUpdate.OWNER;
+        UserDto result = userMapper.mapToDto(userService.createOrUpdate(userDto, permission));
         return ResponseEntity.ok(result);
     }
 
