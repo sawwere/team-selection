@@ -93,8 +93,8 @@ public class StudentController {
     )
     @GetMapping(GET_SEARCH_OPTIONS)
 
-    public ResponseEntity<StudentSearchOptionsDto> getSearchOptionsStudents() {
-        StudentSearchOptionsDto result = studentService.getSearchOptionsStudents();
+    public ResponseEntity<StudentSearchOptionsDto> getSearchOptionsStudents(@RequestParam(value = "track_id") String trackId) {
+        StudentSearchOptionsDto result = studentService.getSearchOptionsStudents(Long.valueOf(trackId));
         return ResponseEntity.ok(result);
     }
 
@@ -150,8 +150,8 @@ public class StudentController {
     @GetMapping(SEARCH_STUDENTS)
     public ResponseEntity<PageResponse<StudentDto>> searchStudents(
             @RequestParam(value = "input", required = false) String input,
-            @RequestParam(value = "course", required = false) Integer course,
-            @RequestParam(value = "group_number", required = false) Integer groupNumber,
+            @RequestParam(value = "course", required = false) List<Integer> course,
+            @RequestParam(value = "group_number", required = false) List<Integer> groupNumber,
             @RequestParam(value = "track_id", required = false) Long trackId,
             @RequestParam(value = "has_team", required = false) Boolean hasTeam,
             @RequestParam(value = "is_captain", required = false) Boolean isCaptain,

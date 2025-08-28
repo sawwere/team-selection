@@ -86,8 +86,8 @@ public class StudentService {
     @Transactional(readOnly = true)
     public Page<Student> search(String like,
                                 Long trackId,
-                                Integer course,
-                                Integer groupNumber,
+                                List<Integer> course,
+                                List<Integer> groupNumber,
                                 Boolean hasTeam,
                                 Boolean isCaptain,
                                 List<Long> technologies,
@@ -101,10 +101,10 @@ public class StudentService {
         if (trackId != null) {
             spec = spec.and(StudentSpecification.byTrack(trackId));
         }
-        if (course != null) {
+        if (course != null && !course.isEmpty()) {
             spec = spec.and(StudentSpecification.byCourse(course));
         }
-        if (groupNumber != null) {
+        if (groupNumber != null && !groupNumber.isEmpty()) {
             spec = spec.and(StudentSpecification.byGroup(groupNumber));
         }
         if (hasTeam != null) {
@@ -194,19 +194,20 @@ public class StudentService {
      * @return new DTO {@link StudentSearchOptionsDto}
      */
     @Transactional(readOnly = true)
-    public StudentSearchOptionsDto getSearchOptionsStudents() {
-        var students = findAll();
+    public StudentSearchOptionsDto getSearchOptionsStudents(Long trackId) {
+        var students = search(null, trackId, null, null, null, null, null, Pageable.unpaged());
 
         StudentSearchOptionsDto studentSearchOptionsDto = new StudentSearchOptionsDto();
         for (Student student : students) {
             studentSearchOptionsDto.getCourses().add(student.getCourse());
             studentSearchOptionsDto.getGroups().add(student.getGroupNumber());
+            studentSearchOptionsDto.getTechnologies().addAll(
+                    student.getTechnologies()
+                    .stream()
+                    .map(technologyDtoMapper::mapToDto)
+                    .toList()
+            );
         }
-        studentSearchOptionsDto.getTechnologies().addAll(technologyRepository.findAll()
-                .stream()
-                .map(technologyDtoMapper::mapToDto)
-                .toList()
-        );
         return studentSearchOptionsDto;
     }
 
