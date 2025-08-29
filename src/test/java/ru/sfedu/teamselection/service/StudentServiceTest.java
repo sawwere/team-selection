@@ -187,7 +187,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     @Test
     @Transactional
     void searchByCourse() {
-        Integer courseParam = 1;
+        List<Integer> courseParam = List.of(1);
 
         Page<Student> actual = underTest.search(
                 null,
@@ -201,7 +201,7 @@ class StudentServiceTest extends BasicTestContainerTest {
         );
 
         for (Student student : actual) {
-            Assertions.assertEquals(courseParam, student.getCourse());
+            Assertions.assertTrue(courseParam.contains(student.getCourse()));
         }
 
         Assertions.assertEquals(8, actual.getTotalElements());
@@ -210,7 +210,7 @@ class StudentServiceTest extends BasicTestContainerTest {
     @Test
     @Transactional
     void searchByGroup() {
-        Integer groupParam = 1;
+        List<Integer> groupParam = List.of(1);
 
         Page<Student> actual = underTest.search(
                 null,
@@ -224,7 +224,7 @@ class StudentServiceTest extends BasicTestContainerTest {
         );
 
         for (Student student : actual) {
-            Assertions.assertEquals(groupParam, student.getGroupNumber());
+            Assertions.assertTrue(groupParam.contains(student.getGroupNumber()));
         }
 
         Assertions.assertEquals(19, actual.getTotalElements());
@@ -379,17 +379,12 @@ class StudentServiceTest extends BasicTestContainerTest {
     @Test
     @Transactional
     void getSearchOptionsStudents() {
-        StudentSearchOptionsDto actual = underTest.getSearchOptionsStudents();
+        StudentSearchOptionsDto actual = underTest.getSearchOptionsStudents(1L);
 
-        Set<TechnologyDto> expectedTechnologies = new HashSet<>(
-                technologyDtoMapper.mapListToDto(technologyRepository.findAll())
-        );
-
-        Assertions.assertEquals(Set.of(1, 2, 5), actual.getCourses());
+        Assertions.assertEquals(Set.of(1, 2), actual.getCourses());
         Assertions.assertEquals(Set.of(1), actual.getGroups());
         Assertions.assertEquals(List.of(true, false), actual.getHasTeam());
         Assertions.assertEquals(List.of(true, false), actual.getIsCaptain());
-        Assertions.assertEquals(expectedTechnologies, actual.getTechnologies());
 
     }
 

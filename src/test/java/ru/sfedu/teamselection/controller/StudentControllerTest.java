@@ -115,9 +115,9 @@ public class StudentControllerTest {
     public void getSearchOptionsStudents() throws Exception {
         Mockito.doReturn(StudentSearchOptionsDto.builder().build())
                 .when(studentService)
-                .getSearchOptionsStudents();
+                .getSearchOptionsStudents(1L);
 
-        mockMvc.perform(get(StudentController.GET_SEARCH_OPTIONS)
+        mockMvc.perform(get(StudentController.GET_SEARCH_OPTIONS + "?track_id=1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser)))
                 .andExpect(status().isOk());
