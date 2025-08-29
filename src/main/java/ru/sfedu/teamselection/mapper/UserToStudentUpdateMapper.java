@@ -1,9 +1,11 @@
 package ru.sfedu.teamselection.mapper;
 
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -56,4 +58,9 @@ public interface UserToStudentUpdateMapper {
     @Mapping(target = "isRemindEnabled", source = "isRemindEnabled")
     @Mapping(target = "isEnabled", source = "isEnabled")
     StudentUpdateUserDto userDtoToStudentUpdateUserDto(UserDto userDto);
+
+    @AfterMapping
+    default void setAdditionalFields(@MappingTarget StudentUpdateDto dto, UserDto source) {
+        dto.setTechnologies(null);
+    }
 }

@@ -11,9 +11,9 @@ import ru.sfedu.teamselection.domain.User;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
-    User findByFio(String fio);
+    Optional<User> findByFio(String fio);
 
     @Transactional
     @Modifying

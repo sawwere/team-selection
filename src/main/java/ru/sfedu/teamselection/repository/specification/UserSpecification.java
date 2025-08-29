@@ -2,9 +2,9 @@ package ru.sfedu.teamselection.repository.specification;
 
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
-import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
+
 public class UserSpecification {
 
     public static Specification<User> withFioLike(String fio) {
@@ -47,10 +47,10 @@ public class UserSpecification {
                 trackId == null
                         ? cb.conjunction()
                         : cb.equal(
-                        root.join("student", JoinType.LEFT)
+                            root.join("student", JoinType.LEFT)
                                 .get("currentTrack").get("id"),
-                        trackId
-                );
+                            trackId
+                        );
     }
 
 
