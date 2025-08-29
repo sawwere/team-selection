@@ -19,12 +19,20 @@ public final class StudentSpecification {
     }
 
 
-    public static Specification<Student> byCourse(Integer course) {
+    public static Specification<Student> byCourse(List<Integer> course) {
+
+        return (root, query, criteriaBuilder) -> {
+            if (course == null || course.isEmpty()) {
+                return criteriaBuilder.conjunction(); // do not filter if list is empty
+            }
+            return root.get("course").in(course);
+        };
+        /*
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(
-                        root.get("course"),
-                        course
-                );
+        criteriaBuilder.equal(
+                root.get("course"),
+                course
+        );*/
     }
 
     public static Specification<Student> byTrack(Long trackId) {
@@ -32,12 +40,20 @@ public final class StudentSpecification {
                 criteriaBuilder.equal(root.get("currentTrack").get("id"), trackId);
     }
 
-    public static Specification<Student> byGroup(Integer group) {
+    public static Specification<Student> byGroup(List<Integer> group) {
+
+        return (root, query, criteriaBuilder) -> {
+            if (group == null || group.isEmpty()) {
+                return criteriaBuilder.conjunction(); // do not filter if list is empty
+            }
+            return root.get("groupNumber").in(group);
+        };
+        /*
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(
                         root.get("groupNumber"),
                         group
-                );
+                );*/
     }
 
     public static Specification<Student> byHasTeam(Boolean hasTeam) {
