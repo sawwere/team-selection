@@ -2,6 +2,7 @@ package ru.sfedu.teamselection.repository.specification;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -35,13 +36,12 @@ public final class TeamSpecification {
                 );
     }
 
-    public static Specification<Team> byProjectType(String projectType) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(
-                        criteriaBuilder.lower(root.get("projectType").get("name")),
-                        projectType.toLowerCase()
-                );
+    public static Specification<Team> byProjectType(List<String> projectTypes) {
+        return (root, query, criteriaBuilder) -> root.get("projectType").get("name").in(projectTypes.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList()));
     }
+
 
     public static Specification<Team> byTechnologies(List<Long> technologies) {
         return (root, cq, cb) -> {

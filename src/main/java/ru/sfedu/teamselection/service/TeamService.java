@@ -92,7 +92,7 @@ public class TeamService {
     public Page<Team> search(String like,
                              Long trackId,
                              Boolean isFull,
-                             String projectType,
+                             List<String> projectType,
                              List<Long> technologies,
                              Pageable pageable) {
         Specification<Team> specification = Specification.allOf();

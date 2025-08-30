@@ -118,7 +118,7 @@ public class TeamController {
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "track_id", required = false) Long trackId,
             @RequestParam(value = "is_full", required = false) Boolean isFull,
-            @RequestParam(value = "project_type", required = false) String projectType,
+            @RequestParam(value = "project_type", required = false) List<String> projectType,
             @RequestParam(value = "technologies", required = false) List<Long> technologies,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
