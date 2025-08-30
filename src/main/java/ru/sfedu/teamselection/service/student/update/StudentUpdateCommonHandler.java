@@ -15,10 +15,15 @@ public class StudentUpdateCommonHandler implements StudentUpdateHandler {
 
     @Override
     public void update(Student student, StudentUpdateDto dto) {
-        student.setAboutSelf(dto.getAboutSelf());
-        student.setContacts(dto.getContacts());
-        student.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
-
+        if (dto.getAboutSelf() != null) {
+            student.setAboutSelf(dto.getAboutSelf());
+        }
+        if (dto.getContacts() != null) {
+            student.setContacts(dto.getContacts());
+        }
+        if (dto.getTechnologies() != null) {
+            student.setTechnologies(technologyDtoMapper.mapListToEntity(dto.getTechnologies()));
+        }
         student.getUser().setIsRemindEnabled(dto.getUser().getIsRemindEnabled());
     }
 }

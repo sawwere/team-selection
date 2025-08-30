@@ -1,7 +1,6 @@
-package ru.sfedu.teamselection.service;
+package ru.sfedu.teamselection.service.student;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
@@ -33,7 +32,6 @@ import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.StudentUpdateDto;
 import ru.sfedu.teamselection.dto.StudentUpdateTeamDto;
 import ru.sfedu.teamselection.dto.StudentUpdateUserDto;
-import ru.sfedu.teamselection.dto.TechnologyDto;
 import ru.sfedu.teamselection.dto.student.StudentCreationDto;
 import ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto;
 import ru.sfedu.teamselection.enums.TrackType;
@@ -42,6 +40,8 @@ import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.TeamRepository;
 import ru.sfedu.teamselection.repository.TechnologyRepository;
+import ru.sfedu.teamselection.service.StudentService;
+import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)

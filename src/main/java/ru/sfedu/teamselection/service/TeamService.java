@@ -68,7 +68,7 @@ public class TeamService {
      */
     public Team findByIdOrElseThrow(Long id) throws NotFoundException {
         return teamRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Team with id " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("Команда с id `" + id + "` не найдена"));
     }
 
     /**
@@ -132,7 +132,7 @@ public class TeamService {
                     sender.getId(),
                     dto.getCaptainId()
             );
-            throw new ForbiddenException("Нельзя создать команду для другого пользователя");
+            throw new ForbiddenException("Нельзя создать команду от имени другого пользователя");
         }
 
         if (teamRepository.existsByNameIgnoreCaseAndCurrentTrackId(name, trackId)) {
@@ -234,7 +234,7 @@ public class TeamService {
     @Transactional
     public Team removeStudentFromTeam(Team team, Student student) {
         if (team.getCaptainId().equals(student.getId())) {
-            throw new ConstraintViolationException("Cannot remove captain from their own team");
+            throw new ConstraintViolationException("Нельзя удалить капитана из собственной команды");
         }
         team.getStudents().removeIf(s -> s.getId().equals(student.getId()));
         team.setQuantityOfStudents(team.getQuantityOfStudents() - 1);
@@ -281,7 +281,7 @@ public class TeamService {
                 .equals(studentService.findByIdOrElseThrow(team.getCaptainId()).getUser().getId());
 
         if (!isAdmin && !isCaptain) {
-            throw new ForbiddenException("Only admin or captain");
+            throw new ForbiddenException("Операция доступна только для капитана команды или администратора");
         }
 
         // Только admin может менять эти поля:
@@ -332,8 +332,10 @@ public class TeamService {
             }
         }
 
-        Student newCaptain = studentService.findByIdOrElseThrow(partial.getCaptainId());
-        newCaptain.setIsCaptain(true);
+        if (isAdmin) {
+            Student newCaptain = studentService.findByIdOrElseThrow(team.getCaptainId());
+            newCaptain.setIsCaptain(true);
+        }
 
         return teamRepository.save(team);
     }

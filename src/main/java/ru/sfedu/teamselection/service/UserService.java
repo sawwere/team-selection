@@ -3,7 +3,6 @@ package ru.sfedu.teamselection.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
-import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.UserDto;
 import ru.sfedu.teamselection.dto.UserSearchCriteria;
@@ -38,9 +36,6 @@ public class UserService {
 
     private final StudentUpdateFactory studentUpdateFactory;
     private final UserToStudentUpdateMapper userToStudentUpdateMapper;
-    @Lazy
-    @Autowired
-    private TeamService teamService;
 
     @Autowired
     private TrackService trackService;
@@ -55,7 +50,6 @@ public class UserService {
                 .map(userMapper::mapToDto);
     }
 
-
     /**
      * Find User entity by id
      * @param id user id
@@ -64,28 +58,22 @@ public class UserService {
      */
     public User findByIdOrElseThrow(Long id) throws NotFoundException {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь с id `" + id + "` не найден"));
     }
 
     public User findByEmail(String email) {
-        User u = userRepository.findByEmail(email);
-        if (u == null) {
-            throw new NotFoundException(email);
-        }
-        return u;
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Пользователь с почтой `" + email + "` не найден"));
     }
 
     public User findByUsername(String username) {
-        User u = userRepository.findByFio(username);
-        if (u == null) {
-            throw new NotFoundException("User with username " + username);
-        }
-        return u;
+        return userRepository.findByFio(username)
+                .orElseThrow(() -> new NotFoundException("Пользователь с именем `" + username + "` не найден"));
     }
 
     public Role findRoleByNameOrElseThrow(String roleName) {
         return roleRepository.findByName(roleName)
-                .orElseThrow(() -> new NotFoundException("Роль '" + roleName + "' не найдена"));
+                .orElseThrow(() -> new NotFoundException("Роль `" + roleName + "` не найдена"));
     }
 
     /**
@@ -109,15 +97,18 @@ public class UserService {
             // --- обновление ---
             User existing = findByIdOrElseThrow(dto.getId());
 
-            // обновляем роль
-            Role role = findRoleByNameOrElseThrow(dto.getRole());
-            existing.setRole(role);
+            if (permission == PermissionLevelUpdate.ADMIN) {
+                // обновляем роль
+                Role role = findRoleByNameOrElseThrow(dto.getRole());
+                existing.setRole(role);
+                // обновляем остальные поля
+                existing.setFio(dto.getFio());
+                existing.setEmail(dto.getEmail());
+                existing.setIsEnabled(dto.getIsEnabled());
+            }
 
-            // обновляем остальные поля
-            existing.setFio(dto.getFio());
-            existing.setEmail(dto.getEmail());
-            existing.setIsEnabled(dto.getIsEnabled());
             existing.setIsRemindEnabled(dto.getIsRemindEnabled());
+
             if (existing.getStudent() != null) {
                 studentUpdateFactory.getHandler(permission).update(
                         existing.getStudent(),
@@ -129,20 +120,15 @@ public class UserService {
 
         } else {
             User user = userMapper.mapToEntity(dto);
-
-            Role role = findRoleByNameOrElseThrow(dto.getRole());
+            // явно прописываем пользователю роль USER, чтобы исключить возможность
+            // регистрации с ролью ADMIN
+            Role role = findRoleByNameOrElseThrow("USER");
             user.setRole(role);
             if (dto.getStudent() != null) {
                 Student student = Student.builder()
                         .user(user)
                         .build();
                 studentRepository.save(student);
-
-                Long teamId = dto.getStudent().getCurrentTeamId();
-                if (teamId != null) {
-                    Team team = teamService.findByIdOrElseThrow(teamId);
-                    teamService.addStudentToTeam(team, student, false);
-                }
             }
 
             return userRepository.save(user);
@@ -158,8 +144,7 @@ public class UserService {
     @Transactional
     public User assignRole(Long userId, String roleName) {
         User user = findByIdOrElseThrow(userId);
-        Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new NotFoundException("Role " + roleName));
+        Role role = findRoleByNameOrElseThrow(roleName);
 
         if ("STUDENT".equals(roleName)) {
             Student student = Student.builder()
