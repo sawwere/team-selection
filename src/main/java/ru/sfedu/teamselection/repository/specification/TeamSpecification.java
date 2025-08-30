@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection.repository.specification;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -37,9 +38,7 @@ public final class TeamSpecification {
     }
 
     public static Specification<Team> byProjectType(List<String> projectTypes) {
-        return (root, query, criteriaBuilder) -> root.get("projectType").get("name").in(projectTypes.stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toList()));
+        return (root, query, criteriaBuilder) -> root.get("projectType").get("name").in(new ArrayList<>(projectTypes));
     }
 
 
