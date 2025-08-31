@@ -289,7 +289,7 @@ class TeamServiceTest extends BasicTestContainerTest {
 
     @Test
     void searchByProjectType() {
-        String projectTypeParam = "Mobile";
+        var projectTypeParam = List.of("Mobile");
 
         Page<Team> actual = underTest.search(
                 null,
@@ -301,7 +301,7 @@ class TeamServiceTest extends BasicTestContainerTest {
         );
 
         for (Team team : actual) {
-            Assertions.assertEquals(projectTypeParam, team.getProjectType().getName());
+            Assertions.assertTrue(projectTypeParam.contains(team.getProjectType().getName()));
         }
 
         Assertions.assertEquals(2, actual.getTotalElements());
