@@ -28,6 +28,12 @@ class RoleDtoMapperTest {
     }
 
     @Test
+    void mapNullToEntity() {
+        Role actual = underTest.mapToEntity(null);
+        Assertions.assertNull(actual);
+    }
+
+    @Test
     void mapToDto() {
         RoleDto expected = RoleDto.builder()
                 .id(1L)
@@ -42,5 +48,12 @@ class RoleDtoMapperTest {
 
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getName(), actual.getName());
+    }
+
+    @Test
+    void mapNullToDto() {
+        RoleDto actual = underTest.mapToDto(null);
+        // then
+        Assertions.assertNull(actual);
     }
 }

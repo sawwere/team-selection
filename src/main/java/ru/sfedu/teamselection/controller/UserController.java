@@ -138,7 +138,6 @@ public class UserController {
 
                 Эта операция может быть выполнена только администратором ресурса.
                 """,
-            tags = {"ADMIN"},
             parameters = {
                     @Parameter(name = "id", description = "Id пользователя", in = ParameterIn.PATH)
             },
@@ -186,7 +185,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "Удалить пользователя", tags = {"ADMIN"})
+    @Operation(summary = "Удалить пользователя")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(DELETE_USER)
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {

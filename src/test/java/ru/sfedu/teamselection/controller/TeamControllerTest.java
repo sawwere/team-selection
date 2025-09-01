@@ -3,6 +3,8 @@ package ru.sfedu.teamselection.controller;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,6 +16,12 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import ru.sfedu.teamselection.config.SecurityConfig;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
 import ru.sfedu.teamselection.domain.Role;
@@ -30,12 +38,6 @@ import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the {@link TeamController}
@@ -135,8 +137,9 @@ public class TeamControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void search() throws Exception {
+    @ParameterizedTest
+    @CsvSource(value = {"name,asc", "name,desc"}, delimiter = ';')
+    public void search(String sort) throws Exception {
         Mockito.doReturn(new PageImpl<>(teams)).when(teamService).search(
                 Mockito.anyString(),
                 Mockito.anyLong(),
@@ -152,6 +155,7 @@ public class TeamControllerTest {
                         .param("is_full", "false")
                         .param("project_type", "")
                         .param("technologies", "")
+                        .param("sort", sort)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("user")))
                 .andExpect(status().isOk())

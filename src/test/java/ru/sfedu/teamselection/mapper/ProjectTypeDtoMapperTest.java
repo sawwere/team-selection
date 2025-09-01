@@ -27,6 +27,12 @@ class ProjectTypeDtoMapperTest {
     }
 
     @Test
+    void mapNullToEntity() {
+        ProjectType actual = underTest.mapToEntity(null);
+        Assertions.assertNull(actual);
+    }
+
+    @Test
     void mapToDto() {
         ProjectTypeDto expected = ProjectTypeDto.builder()
                 .id(12L)
@@ -41,6 +47,13 @@ class ProjectTypeDtoMapperTest {
 
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getName(), actual.getName());
+    }
+
+    @Test
+    void mapNullToDto() {
+        ProjectTypeDto actual = underTest.mapToDto(null);
+        // then
+        Assertions.assertNull(actual);
     }
 
     @Test
@@ -74,6 +87,13 @@ class ProjectTypeDtoMapperTest {
     }
 
     @Test
+    void mapNullListToEntity() {
+        List<ProjectType> actual = underTest.mapListToEntity(null);
+        // then
+        Assertions.assertNull(actual);
+    }
+
+    @Test
     void mapListToDto() {
         ProjectTypeDto expected1 = ProjectTypeDto.builder()
                 .id(12L)
@@ -101,5 +121,12 @@ class ProjectTypeDtoMapperTest {
             Assertions.assertEquals(expected.get(i).getId(), actual.get(i).getId());
             Assertions.assertEquals(expected.get(i).getName(), actual.get(i).getName());
         }
+    }
+
+    @Test
+    void mapNullListToDto() {
+        List<ProjectTypeDto> actual = underTest.mapListToDto(null);
+        // then
+        Assertions.assertNull(actual);
     }
 }

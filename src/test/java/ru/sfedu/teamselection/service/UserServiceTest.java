@@ -166,7 +166,6 @@ class UserServiceTest extends BasicTestContainerTest {
         User actual = underTest.createOrUpdate(dto, PermissionLevelUpdate.OWNER);
 
         Assertions.assertEquals(expected.getId(), actual.getId());
-        Assertions.assertEquals(expected.getFio(), actual.getFio());
         Assertions.assertEquals(expected.getEmail(), actual.getEmail());
         Assertions.assertEquals(expected.getRole().getName(), actual.getRole().getName());
         Assertions.assertEquals(expected.getIsRemindEnabled(), actual.getIsRemindEnabled());

@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.sfedu.teamselection.domain.Role;
 import ru.sfedu.teamselection.domain.Student;
@@ -20,6 +21,7 @@ import ru.sfedu.teamselection.repository.RoleRepository;
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public abstract class UserMapper {
+    public static UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Autowired
     protected RoleRepository roleRepository;
