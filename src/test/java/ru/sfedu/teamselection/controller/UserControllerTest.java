@@ -2,6 +2,7 @@ package ru.sfedu.teamselection.controller;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import ru.sfedu.teamselection.config.SecurityConfig;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
@@ -106,7 +108,15 @@ public class UserControllerTest {
 
     @Test
     public void putUserFromAdmin() throws Exception {
-        Mockito.doReturn(admin)
+        Mockito.doReturn(User.builder()
+                    .id(1L)
+                    .fio("admin")
+                    .email("admin@.com")
+                    .isEnabled(true)
+                    .isRemindEnabled(true)
+                    .role(Role.builder().id(3L).name("ADMIN").build())
+                    .build()
+                )
                 .when(userService).getCurrentUser();
         Mockito.doReturn(genericStudentUser).when(userService).createOrUpdate(Mockito.notNull(), Mockito.notNull());
 
@@ -173,6 +183,20 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
+//    @ParameterizedTest
+//    @CsvSource(value = {"fio,asc", "fio,desc"}, delimiter = ';')
+//    public void search(String sort) throws Exception {
+//        Mockito.doReturn(new PageImpl<>(List.of(admin, genericStudentUser))).when(userService).search(any(), any());
+//
+//        mockMvc.perform(get(UserController.FIND_USERS)
+//                        .param("fio", "")
+//                        .param("course", "1")
+//                        .param("sort", sort)
+//                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+//                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin)))
+//                .andExpect(status().isOk());
+//    }
+
     @Test
     public void assignRole() throws Exception {
         Mockito.doReturn(genericStudentUser).when(userService).assignRole(Mockito.anyLong(), Mockito.anyString());
@@ -227,5 +251,18 @@ public class UserControllerTest {
                         .content(roleDto)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getProfileImage() throws Exception {
+        Mockito.doReturn(
+                new byte[] { 1, 2, 3, 4, 5 }
+        ).when(photoService).getAzureUserPhoto(any(), any());
+
+        mockMvc.perform(get(UserController.GET_USER_PHOTO, 1)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG));
     }
 }

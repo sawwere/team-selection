@@ -192,10 +192,10 @@ public class TeamService {
     @Transactional
     public Team addStudentToTeam(Team team, Student student, Boolean skipRestrictions) {
         if (student.getHasTeam()) {
-            throw new ConstraintViolationException("Student already has a team");
+            throw new ConstraintViolationException("Студент уже состоит в команде");
         }
         if (!skipRestrictions && team.getIsFull()) {
-            throw new ConstraintViolationException("Cannot add student to a full team");
+            throw new ConstraintViolationException("Вступление в полную команду невозможно");
         }
         // ограничение по второму курсу
         if (student.getCourse() == 2) {
@@ -205,13 +205,13 @@ public class TeamService {
             int max2 = team.getCurrentTrack().getMaxSecondCourseConstraint();
             if (count2 >= max2) {
                 throw new ConstraintViolationException(
-                        "Team already has maximum of " + max2 + " second-year students");
+                        "В команде уже достигнуто максимальное число (" + max2 + ") студентов-второкурсников");
             }
         }
         // не дублируем участника
         if (team.getStudents().stream()
                 .anyMatch(s -> s.getId().equals(student.getId()))) {
-            throw new ConstraintViolationException("Student is already in the team");
+            throw new ConstraintViolationException("Студент уже состоит в данной команде");
         }
 
         // добавляем

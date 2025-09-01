@@ -51,9 +51,6 @@ public class ApplicationValidator {
         if (!Objects.equals(student.getCurrentTrack().getId(), team.getCurrentTrack().getId())) {
             throw new BusinessException("Невозможно — неверный трек");
         }
-        if (!Objects.equals(student.getCurrentTrack().getId(), captain.getCurrentTrack().getId())) {
-            throw new BusinessException("Невозможно — неверный трек");
-        }
     }
 
     public void validateUpdate(ApplicationCreationDto dto, User requestSender, Application app) {

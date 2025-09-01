@@ -28,7 +28,6 @@ import static ru.sfedu.teamselection.enums.ApplicationStatus.ACCEPTED;
 import static ru.sfedu.teamselection.enums.ApplicationStatus.REJECTED;
 import static ru.sfedu.teamselection.enums.ApplicationStatus.SENT;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -99,13 +98,6 @@ public class ApplicationService {
                     .toList();
         }
     }
-
-    //public List<ApplicationDto> findTeamApplications(Long teamId)
-    //{
-    //   return applicationRepository.findByTeamId(teamId).stream().map(x->applicationMapper.mapToDto(x)).toList();
-    //  }
-
-
 
     /**
      * Updates application entity status based in dto

@@ -27,6 +27,12 @@ class TechnologyDtoMapperTest {
     }
 
     @Test
+    void mapNullToEntity() {
+        Technology actual = underTest.mapToEntity(null);
+        Assertions.assertNull(actual);
+    }
+
+    @Test
     void mapToDto() {
         TechnologyDto expected = TechnologyDto.builder()
                 .id(12L)
@@ -41,6 +47,13 @@ class TechnologyDtoMapperTest {
 
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getName(), actual.getName());
+    }
+
+    @Test
+    void mapNullToDto() {
+        TechnologyDto actual = underTest.mapToDto(null);
+        // then
+        Assertions.assertNull(actual);
     }
 
     @Test
@@ -74,6 +87,13 @@ class TechnologyDtoMapperTest {
     }
 
     @Test
+    void mapNullListToEntity() {
+        List<Technology> actual = underTest.mapListToEntity(null);
+        // then
+        Assertions.assertNull(actual);
+    }
+
+    @Test
     void mapListToDto() {
         TechnologyDto expected1 = TechnologyDto.builder()
                 .id(12L)
@@ -101,5 +121,12 @@ class TechnologyDtoMapperTest {
             Assertions.assertEquals(expected.get(i).getId(), actual.get(i).getId());
             Assertions.assertEquals(expected.get(i).getName(), actual.get(i).getName());
         }
+    }
+
+    @Test
+    void mapNullListToDto() {
+        List<TechnologyDto> actual = underTest.mapListToDto(null);
+        // then
+        Assertions.assertNull(actual);
     }
 }
