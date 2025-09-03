@@ -26,10 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationResponseDto;
+import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.UserService;
+import ru.sfedu.teamselection.service.validation.ApplicationValidator;
 
 
 @RestController
@@ -142,14 +145,13 @@ public class ApplicationController {
             }
     )
     @GetMapping(FIND_BY_TEAM_AND_STUDENT)
-    public ResponseEntity<ApplicationCreationDto> findByTeamAndStudent(
+    public ResponseEntity<ApplicationResponseDto> findByTeamAndStudent(
             @PathVariable Long teamId,
             @PathVariable Long studentId
     ) {
         LOGGER.info("ENTER findByTeamAndStudent(%d, %d) endpoint".formatted(teamId, studentId));
-        ApplicationCreationDto result = applicationMapper.mapToCreationDto(
-                applicationService.findByTeamAndStudentOrElseThrow(teamId, studentId)
-        );
+        User current = userService.getCurrentUser();
+        ApplicationResponseDto result = applicationService.findByTeamAndStudentOrElseThrow(teamId, studentId, current);
         return ResponseEntity.ok(result);
     }
 

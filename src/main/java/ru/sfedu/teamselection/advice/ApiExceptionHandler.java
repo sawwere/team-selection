@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintDeclarationException;
 import java.time.OffsetDateTime;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.sfedu.teamselection.dto.ErrorResponse;
+import ru.sfedu.teamselection.exception.BusinessException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -20,14 +23,18 @@ public class ApiExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, ex, req);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(value = {
+            IllegalArgumentException.class,
+            ConstraintDeclarationException.class,
+            BusinessException.class
+    })
     public ResponseEntity<ErrorResponse> handleBadRequest(
-            IllegalArgumentException ex, HttpServletRequest req
+            RuntimeException ex, HttpServletRequest req
     ) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex, req);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
+    @ExceptionHandler(value = { ForbiddenException.class, AccessDeniedException.class })
     public ResponseEntity<ErrorResponse> handleAccessDeniedRequest(
             AccessDeniedException ex, HttpServletRequest req
     ) {

@@ -870,7 +870,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void updateInviteSentShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
-                .id(4L)
+                .id(114L)
                 .status(ApplicationStatus.SENT)
                 .studentId(1L)
                 .teamId(3L)
