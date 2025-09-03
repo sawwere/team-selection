@@ -17,14 +17,18 @@ import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationResponseDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.BusinessException;
+import ru.sfedu.teamselection.exception.ForbiddenException;
 import ru.sfedu.teamselection.exception.NotFoundException;
 import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.repository.ApplicationRepository;
 import ru.sfedu.teamselection.repository.specification.ApplicationSpecification;
 import ru.sfedu.teamselection.service.validation.ApplicationValidator;
+import ru.sfedu.teamselection.service.validation.ValidationResult;
 import static ru.sfedu.teamselection.enums.ApplicationStatus.ACCEPTED;
+import static ru.sfedu.teamselection.enums.ApplicationStatus.CANCELLED;
 import static ru.sfedu.teamselection.enums.ApplicationStatus.REJECTED;
 import static ru.sfedu.teamselection.enums.ApplicationStatus.SENT;
 
@@ -109,8 +113,12 @@ public class ApplicationService {
     public Application update(ApplicationCreationDto dto, User sender) {
         log.info("PUT /applications — update dto={} by user={}", dto, sender.getId());
         var existing = findByIdOrElseThrow(dto.getId());
-        applicationValidator.validateUpdate(dto, sender, existing);
-
+        ValidationResult validationResult = applicationValidator.validateUpdate(dto.getStatus(), sender, existing);
+        if (validationResult instanceof ValidationResult.Failure) {
+            throw new BusinessException(((ValidationResult.Failure) validationResult).message);
+        } else if (validationResult instanceof ValidationResult.Forbidden) {
+            throw new ForbiddenException(((ValidationResult.Forbidden) validationResult).message);
+        }
 
         switch (dto.getStatus()) {
             case ACCEPTED -> {
@@ -135,7 +143,12 @@ public class ApplicationService {
         if (dto.getId() != null && applicationRepository.existsById(dto.getId())) {
             return update(dto, sender);
         }
-        applicationValidator.validateCreate(dto, sender);
+        ValidationResult validationResult = applicationValidator.validateCreate(dto, sender);
+        if (validationResult instanceof ValidationResult.Failure) {
+            throw new BusinessException(((ValidationResult.Failure) validationResult).message);
+        } else if (validationResult instanceof ValidationResult.Forbidden) {
+            throw new ForbiddenException(((ValidationResult.Forbidden) validationResult).message);
+        }
         var app = applicationMapper.mapCreationToEntity(dto);
         app.setStatus(SENT.name());
         app.setStudent(studentService.findByIdOrElseThrow(dto.getStudentId()));
@@ -146,9 +159,26 @@ public class ApplicationService {
     /**
      * Finds application by teamId and studentId or throws NotFoundException.
      */
-    public Application findByTeamAndStudentOrElseThrow(Long teamId, Long studentId) throws NotFoundException {
-        return applicationRepository.findByTeamIdAndStudentId(teamId, studentId)
-                .orElse(null);
+    public ApplicationResponseDto findByTeamAndStudentOrElseThrow(Long teamId, Long studentId, User currentUser) {
+        Application application = applicationRepository.findByTeamIdAndStudentId(teamId, studentId).orElse(null);
+        if (application == null) {
+            return null;
+        }
+        ApplicationResponseDto result = applicationMapper.mapToResponseDto(application);
+        result.setPossibleTransitions(new ArrayList<>());
+        if (applicationValidator.validateUpdate(SENT, currentUser, application) instanceof ValidationResult.Success) {
+            result.getPossibleTransitions().add(SENT);
+        }
+        if (applicationValidator.validateUpdate(REJECTED, currentUser, application) instanceof ValidationResult.Success) {
+            result.getPossibleTransitions().add(REJECTED);
+        }
+        if (applicationValidator.validateUpdate(CANCELLED, currentUser, application) instanceof ValidationResult.Success) {
+            result.getPossibleTransitions().add(CANCELLED);
+        }
+        if (applicationValidator.validateUpdate(ACCEPTED, currentUser, application) instanceof ValidationResult.Success) {
+            result.getPossibleTransitions().add(ACCEPTED);
+        }
+        return result;
     }
 
     private Application accept(Application app, User sender) {

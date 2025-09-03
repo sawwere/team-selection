@@ -13,7 +13,9 @@ import ru.sfedu.teamselection.domain.application.TeamInvite;
 import ru.sfedu.teamselection.domain.application.TeamRequest;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
+import ru.sfedu.teamselection.dto.application.ApplicationResponseDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
+
 @Mapper(
         componentModel       = MappingConstants.ComponentModel.SPRING,
         unmappedTargetPolicy = ReportingPolicy.IGNORE
@@ -31,6 +33,11 @@ public interface ApplicationMapper {
     @InheritInverseConfiguration(name = "mapCreationToEntity")
     @Mapping(target = "status", qualifiedByName = "mapStatus")
     ApplicationCreationDto mapToCreationDto(Application entity);
+
+    @InheritInverseConfiguration(name = "mapCreationToEntity")
+    @Mapping(target = "status", qualifiedByName = "mapStatus")
+    @Mapping(target = "possibleTransitions", ignore = true)
+    ApplicationResponseDto mapToResponseDto(Application entity);
 
     // Преобразование Entity -> DTO
     @Mapping(source = "id", target = "id")
