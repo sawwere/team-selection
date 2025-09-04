@@ -79,6 +79,9 @@ public class ApplicationValidator {
                 return validateCancel(requestSender, app);
             }
             case SENT -> {
+                if (ApplicationStatus.of(app.getStatus()).equals(ApplicationStatus.SENT)) {
+                    return new ValidationResult.Failure("Невозможно — заявка уже в статусе `Отправлена`");
+                }
                 return validateCreate(applicationMapper.mapToCreationDto(app), requestSender, true);
             }
             default -> throw new BusinessException("Неподдерживаемый статус заявки: " + status);
