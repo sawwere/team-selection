@@ -12,6 +12,7 @@ import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
+import ru.sfedu.teamselection.repository.ApplicationRepository;
 import ru.sfedu.teamselection.service.StudentService;
 import ru.sfedu.teamselection.service.TeamService;
 
@@ -23,8 +24,16 @@ public class ApplicationValidator {
 
     private final ApplicationMapper applicationMapper;
 
+    private final ApplicationRepository applicationRepository;
+
     @SuppressWarnings("checkstyle:ReturnCount")
     public ValidationResult validateCreate(ApplicationCreationDto dto, User sender) {
+        Application application = applicationRepository
+                .findByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId())
+                .orElse(null);
+        if (application != null) {
+            return new ValidationResult.Failure("Уже есть активная заявка/приглашение");
+        }
         var team = teamService.findByIdOrElseThrow(dto.getTeamId());
         var captain = studentService.findByIdOrElseThrow(team.getCaptainId());
         var student = studentService.findByIdOrElseThrow(dto.getStudentId());
@@ -64,7 +73,7 @@ public class ApplicationValidator {
                 return validateAccept(requestSender, app);
             }
             case REJECTED -> {
-                return validateSenderIsTarget(app, requestSender);
+                return validateReject(requestSender, app);
             }
             case CANCELLED -> {
                 return validateCancel(requestSender, app);
@@ -81,6 +90,10 @@ public class ApplicationValidator {
         if (!(senderIsTarget instanceof ValidationResult.Success)) {
             return senderIsTarget;
         }
+        if (!(ApplicationStatus.of(application.getStatus()).equals(ApplicationStatus.SENT)
+                || ApplicationStatus.of(application.getStatus()).equals(ApplicationStatus.REJECTED))) {
+            return new ValidationResult.Failure("Невозможно одобрить — заявка в неподходящем статусе");
+        }
         var team = application.getTeam();
         if (team.getIsFull()) {
             return new ValidationResult.Failure("Невозможно одобрить — команда уже полная");
@@ -88,10 +101,21 @@ public class ApplicationValidator {
         return new ValidationResult.Success();
     }
 
+    private ValidationResult validateReject(User requestSender, Application application) {
+        ValidationResult senderIsTarget = validateSenderIsTarget(application, requestSender);
+        if (!(senderIsTarget instanceof ValidationResult.Success)) {
+            return senderIsTarget;
+        }
+        if (!application.getStatus().equals(ApplicationStatus.SENT.toString())) {
+            return new ValidationResult.Failure("Невозможно отклонить — заявка не статусе `Отправлена`");
+        }
+        return new ValidationResult.Success();
+    }
+
     private ValidationResult validateCancel(User requestSender, Application application) {
         if (!application.getStatus().toLowerCase().equals(ApplicationStatus.SENT.toString())) {
             return new ValidationResult.Failure(
-                    "Заявку можно отменить только если она находится в статусе Отправлено"
+                    "Заявку можно отменить только если она находится в статусе `Отправлена`"
             );
         }
         var sender = studentService.findByIdOrElseThrow(application.getSenderId());
