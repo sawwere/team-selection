@@ -27,11 +27,11 @@ public class ApplicationValidator {
     private final ApplicationRepository applicationRepository;
 
     @SuppressWarnings("checkstyle:ReturnCount")
-    public ValidationResult validateCreate(ApplicationCreationDto dto, User sender) {
+    public ValidationResult validateCreate(ApplicationCreationDto dto, User sender, Boolean skipExistingCheck) {
         Application application = applicationRepository
                 .findByTeamIdAndStudentId(dto.getTeamId(), dto.getStudentId())
                 .orElse(null);
-        if (application != null) {
+        if (application != null && !skipExistingCheck) {
             return new ValidationResult.Failure("Уже есть активная заявка/приглашение");
         }
         var team = teamService.findByIdOrElseThrow(dto.getTeamId());
@@ -79,7 +79,7 @@ public class ApplicationValidator {
                 return validateCancel(requestSender, app);
             }
             case SENT -> {
-                return validateCreate(applicationMapper.mapToCreationDto(app), requestSender);
+                return validateCreate(applicationMapper.mapToCreationDto(app), requestSender, true);
             }
             default -> throw new BusinessException("Неподдерживаемый статус заявки: " + status);
         }
