@@ -103,7 +103,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void createRequestForAnotherUserShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .status(ApplicationStatus.SENT)
-                .studentId(18L)
+                .studentId(19L)
                 .teamId(1L)
                 .type(ApplicationType.REQUEST)
                 .build();
@@ -117,7 +117,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
     void createInviteForAnotherUserShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .status(ApplicationStatus.SENT)
-                .studentId(18L)
+                .studentId(19L)
                 .teamId(1L)
                 .type(ApplicationType.INVITE)
                 .build();
@@ -855,7 +855,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.REQUEST)
                 .build();
 
-        Assertions.assertThrows(ForbiddenException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(15L).orElseThrow())
         );
     }
@@ -877,7 +877,7 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 .type(ApplicationType.INVITE)
                 .build();
 
-        Assertions.assertThrows(ForbiddenException.class,
+        Assertions.assertThrows(BusinessException.class,
                 () -> underTest.update(dto, userRepository.findById(2L).orElseThrow())
         );
     }
