@@ -143,7 +143,7 @@ public class ApplicationService {
         if (dto.getId() != null && applicationRepository.existsById(dto.getId())) {
             return update(dto, sender);
         }
-        ValidationResult validationResult = applicationValidator.validateCreate(dto, sender);
+        ValidationResult validationResult = applicationValidator.validateCreate(dto, sender, false);
         if (validationResult instanceof ValidationResult.Failure) {
             throw new BusinessException(((ValidationResult.Failure) validationResult).message);
         } else if (validationResult instanceof ValidationResult.Forbidden) {
