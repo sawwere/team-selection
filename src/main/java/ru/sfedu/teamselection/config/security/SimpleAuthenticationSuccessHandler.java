@@ -69,10 +69,10 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             //user = (User) oAuth2User;
         //}
 
-        if (user.getRole().getName().contains("USER")) {
-            redirectStrategy.sendRedirect(request, response, frontendUrl + "/registration");
-        } else {
+        if (user.getRole().getName().contains("STUDENT")) {
             redirectStrategy.sendRedirect(request, response, frontendUrl + "/teams");
+        } else {
+            redirectStrategy.sendRedirect(request, response, frontendUrl + "/registration");
         }
     }
 

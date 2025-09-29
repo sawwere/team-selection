@@ -286,7 +286,6 @@ public class TeamService {
 
         // Только admin может менять эти поля:
         if (isAdmin) {
-            team.setName(partial.getName());
             team.setIsFull(partial.getIsFull());
             if (!Objects.equals(partial.getCurrentTrack().getId(),
                     team.getCurrentTrack().getId())) {
@@ -303,6 +302,7 @@ public class TeamService {
         }
 
         // Всегда можно менять:
+        team.setName(partial.getName());
         team.setProjectDescription(partial.getProjectDescription());
         team.setProjectType(partial.getProjectType());
         team.setTechnologies(
