@@ -36,6 +36,7 @@ import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.TeamExportService;
 import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
+import ru.sfedu.teamselection.service.audit.AuditService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
 
@@ -54,6 +55,8 @@ public class TeamControllerTest {
     private ApplicationService applicationService;
     @MockitoBean
     private UserService userService;
+    @MockitoBean
+    private AuditService auditService;
 
     @MockitoBean
     private SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;

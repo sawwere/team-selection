@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,12 +16,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.config.logging.Auditable;
 import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 
 @RestController
-@RequestMapping()
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "ProjectTypeController",
         description = "API для операций с типами проектов")
 @RequiredArgsConstructor
@@ -39,6 +41,7 @@ public class ProjectTypeController {
             summary = "Получение списка всех возможных типов проектов"
     )
     @GetMapping(FIND_ALL)
+    @Auditable(auditPoint = "ProjectType.FindAll")
     public ResponseEntity<List<ProjectTypeDto>> findAll() {
         List<ProjectTypeDto> result = projectTypeDtoMapper.mapListToDto(projectTypeRepository.findAll());
         return ResponseEntity.ok(result);
@@ -50,6 +53,7 @@ public class ProjectTypeController {
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(CREATE)
+    @Auditable(auditPoint = "ProjectType.Create")
     public ResponseEntity<ProjectTypeDto> create(@RequestBody @Valid ProjectTypeDto projectTypeDto) {
         ProjectTypeDto result = projectTypeDtoMapper.mapToDto(
                 projectTypeRepository.save(projectTypeDtoMapper.mapToEntity(projectTypeDto))
@@ -63,10 +67,10 @@ public class ProjectTypeController {
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(DELETE_PROJECT_TYPE)
+    @Auditable(auditPoint = "ProjectType.Delete")
     public ResponseEntity<String> deleteProjectType(
             @PathVariable("id") Long id
     ) {
-
         if (!projectTypeRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

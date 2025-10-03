@@ -1,5 +1,6 @@
 package ru.sfedu.teamselection.service.audit;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,18 +17,21 @@ public class AuditService {
 
     @Transactional
     public void log(
+            UUID traceId,
             AuditableInterceptor.AuditDetails auditDetails,
             String auditPoint,
             String remoteAddress,
             String payload
     ) {
-        log.info(remoteAddress);
         var jsonPayload = payload.isBlank() ? null : payload;
         auditRepository.save(
-                AuditEntity.builder().auditPoint(auditPoint)
-                .senderEmail(auditDetails.userEmail())
-                .payload(jsonPayload)
-                .build()
+                AuditEntity.builder()
+                        .traceId(traceId)
+                        .auditPoint(auditPoint)
+                        .senderEmail(auditDetails.userEmail())
+                        .remoteAddress(remoteAddress)
+                        .payload(jsonPayload)
+                        .build()
         );
     }
 }

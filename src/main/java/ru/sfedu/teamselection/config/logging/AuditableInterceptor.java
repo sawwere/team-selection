@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 import ru.sfedu.teamselection.component.CachedBodyHttpServletRequest;
+import ru.sfedu.teamselection.component.CachedBodyHttpServletResponse;
 import ru.sfedu.teamselection.service.audit.AuditService;
 
 @Slf4j
@@ -32,38 +34,46 @@ public class AuditableInterceptor implements HandlerInterceptor {
         if (handler instanceof HandlerMethod handlerMethod) {
             var annotation = handlerMethod.getMethodAnnotation(Auditable.class);
             if (annotation != null) {
+                CachedBodyHttpServletRequest cachedRequest = new CachedBodyHttpServletRequest(request);
+
                 AuditDetails auditDetails = getAuditDetails((OAuth2AuthenticationToken) request.getUserPrincipal());
                 request.setAttribute(AUDIT_POINT, annotation.auditPoint());
+                UUID traceId = UUID.randomUUID();
+                request.setAttribute(TRACE_ID, traceId);
+                var responseWrapper = new CachedBodyHttpServletResponse(response);
+                request.setAttribute("responseWrapper", responseWrapper);
 
-                CachedBodyHttpServletRequest cachedRequest = new CachedBodyHttpServletRequest(request);
-                if (isReadableContent(request)) {
-                    String body = getRequestBody(cachedRequest);
-                    auditService.log(
-                        auditDetails,
-                        annotation.auditPoint() + REQUEST_POSTFIX,
-                        request.getRemoteAddr(),
-                        body
-                    );
-                } else {
-                    auditService.log(
-                            auditDetails,
-                            annotation.auditPoint(),
-                            request.getRemoteAddr(),
-                            "__NOT_READABLE__"
-                    );
-                }
+                CompletableFuture.runAsync(() -> {
+                    try {
 
+
+                        String auditPoint = annotation.auditPoint() + REQUEST_POSTFIX;
+                        String payload = isReadableContent(request)
+                                ? getRequestBody(cachedRequest)
+                                : NOT_SERIALIZABLE_PLACEHOLDER;
+
+                        auditService.log(
+                                traceId,
+                                auditDetails,
+                                auditPoint,
+                                request.getRemoteAddr(),
+                                payload
+                        );
+                    } catch (Exception ex) {
+                        log.warn("Error while saving audit for request {}", request.getRequestURI());
+                    }
+                });
             }
         }
         return true;
     }
 
     @Override
-    public void postHandle(
+    public void afterCompletion(
             @NotNull HttpServletRequest request,
             @NotNull HttpServletResponse response,
             @NotNull Object handler,
-            @Nullable ModelAndView modelAndView
+            @Nullable Exception ex
     ) {
         if (handler instanceof HandlerMethod handlerMethod) {
             var annotation = handlerMethod.getMethodAnnotation(Auditable.class);
@@ -71,14 +81,29 @@ public class AuditableInterceptor implements HandlerInterceptor {
             if (annotation != null) {
                 AuditDetails auditDetails = getAuditDetails((OAuth2AuthenticationToken) request.getUserPrincipal());
 
-//                auditService.log(
-//                        auditDetails,
-//                        annotation.auditPoint(),
-//                        request.getRemoteAddr(),
-//                        payload
-//                );
+                var cachedResponse = (CachedBodyHttpServletResponse) response;
+
+
+                    try {
+                        UUID traceId = (UUID) request.getAttribute(TRACE_ID);
+                        String auditPoint = annotation.auditPoint() + RESPONSE_POSTFIX;
+                        String payload = isReadableResponse(response)
+                                ? cachedResponse.getCachedContentAsString()
+                                : NOT_SERIALIZABLE_PLACEHOLDER;
+
+                        auditService.log(
+                                traceId,
+                                auditDetails,
+                                auditPoint,
+                                null,
+                                payload
+                        );
+                    } catch (Exception e) {
+                        log.error("Error logging response: {}", e.getMessage());
+                    }
+               // });
             } else {
-                log.warn("Not sending audit - response code is " + response.getStatus());
+                log.warn("Not saving audit - response code is {}", response.getStatus());
             }
         }
     }
@@ -104,6 +129,15 @@ public class AuditableInterceptor implements HandlerInterceptor {
                 && !contentType.contains("video/");
     }
 
+    private boolean isReadableResponse(HttpServletResponse response) {
+        String contentType = response.getHeader("Content-Type");
+        if (contentType == null) {
+            return true;
+        }
+
+        return contentType.equals("application/json");
+    }
+
     private AuditDetails getAuditDetails(OAuth2AuthenticationToken token) {
         return new AuditDetails(
                 token.getPrincipal().getAttribute("email").toString()
@@ -111,8 +145,10 @@ public class AuditableInterceptor implements HandlerInterceptor {
     }
 
     static final String AUDIT_POINT = "auditPoint";
+    static final String TRACE_ID = "traceId";
     private static final String REQUEST_POSTFIX = ".Request";
     private static final String RESPONSE_POSTFIX = ".Response";
+    private static final String NOT_SERIALIZABLE_PLACEHOLDER = "{\"error\": \"__NOT_SERIALIZABLE__\"}";
 
     public record AuditDetails(
             String userEmail

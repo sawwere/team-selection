@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.config.logging.Auditable;
 import ru.sfedu.teamselection.dto.track.TrackCreationDto;
 import ru.sfedu.teamselection.dto.track.TrackDto;
 import ru.sfedu.teamselection.mapper.track.TrackDtoMapper;
@@ -27,7 +29,7 @@ import ru.sfedu.teamselection.service.TrackService;
 
 
 @RestController
-@RequestMapping("/api/v1/tracks")
+@RequestMapping(value = "/api/v1/tracks", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "TrackController", description = "API для работы с треками")
 @RequiredArgsConstructor
 @CrossOrigin

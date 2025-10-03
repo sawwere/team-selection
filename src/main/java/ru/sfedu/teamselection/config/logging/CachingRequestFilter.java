@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.sfedu.teamselection.component.CachedBodyHttpServletRequest;
+import ru.sfedu.teamselection.component.CachedBodyHttpServletResponse;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,7 +25,8 @@ public class CachingRequestFilter extends OncePerRequestFilter {
             @NotNull FilterChain chain
     ) throws IOException, ServletException {
         CachedBodyHttpServletRequest cachedRequest = new CachedBodyHttpServletRequest(request);
+        CachedBodyHttpServletResponse cachedResponse = new CachedBodyHttpServletResponse(response);
 
-        chain.doFilter(cachedRequest, response);
+        chain.doFilter(cachedRequest, cachedResponse);
     }
 }

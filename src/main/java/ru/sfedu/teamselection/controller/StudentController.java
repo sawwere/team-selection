@@ -47,8 +47,8 @@ import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
 
-
 @RestController
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "StudentController", description = "API для работы со студентами")
 @RequiredArgsConstructor
 @CrossOrigin

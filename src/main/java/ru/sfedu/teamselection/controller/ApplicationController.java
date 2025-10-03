@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,20 +24,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.config.logging.Auditable;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.application.ApplicationCreationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationDto;
 import ru.sfedu.teamselection.dto.application.ApplicationResponseDto;
-import ru.sfedu.teamselection.enums.ApplicationStatus;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationMapper;
 import ru.sfedu.teamselection.service.ApplicationService;
 import ru.sfedu.teamselection.service.UserService;
-import ru.sfedu.teamselection.service.validation.ApplicationValidator;
 
 
 @RestController
-@RequestMapping()
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "ApplicationController", description = "API для работы с заявками")
 @RequiredArgsConstructor
 public class ApplicationController {

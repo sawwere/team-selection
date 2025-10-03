@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.sfedu.teamselection.config.logging.Auditable;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.dto.PageResponse;
@@ -45,7 +46,7 @@ import ru.sfedu.teamselection.service.TeamService;
 import ru.sfedu.teamselection.service.UserService;
 
 @RestController
-@RequestMapping()
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "TeamController", description = "API для работы с командами")
 @RequiredArgsConstructor
 @CrossOrigin

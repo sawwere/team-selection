@@ -26,11 +26,18 @@ public class AuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "trace_id", nullable = false)
+    private UUID traceId;
+
     @Column(name = "audit_point", nullable = false)
     private String auditPoint;
 
-    @Column(name = "sender_email", nullable = false)
+    @Column(name = "sender_email")
     private String senderEmail;
+
+    @Column(name = "remote_address")
+    private String remoteAddress;
 
     @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
