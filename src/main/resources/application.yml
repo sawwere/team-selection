@@ -23,6 +23,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+      boot:
+        allow_jdbc_metadata_access: false
     properties:
       jpa:
         enable_lazy_load_no_trans: true
@@ -91,4 +93,4 @@ frontend:
 # /oauth2/authorization/github
 logging:
   level:
-    org.springframework.security: TRACE
+    org.springframework.security: DEBUG
