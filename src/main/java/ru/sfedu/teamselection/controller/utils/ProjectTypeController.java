@@ -39,6 +39,7 @@ public class ProjectTypeController {
             summary = "Получение списка всех возможных типов проектов"
     )
     @GetMapping(FIND_ALL)
+    @Auditable(auditPoint = "ProjectType.FindAll")
     public ResponseEntity<List<ProjectTypeDto>> findAll() {
         List<ProjectTypeDto> result = projectTypeDtoMapper.mapListToDto(projectTypeRepository.findAll());
         return ResponseEntity.ok(result);
@@ -50,6 +51,7 @@ public class ProjectTypeController {
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(CREATE)
+    @Auditable(auditPoint = "ProjectType.Create")
     public ResponseEntity<ProjectTypeDto> create(@RequestBody @Valid ProjectTypeDto projectTypeDto) {
         ProjectTypeDto result = projectTypeDtoMapper.mapToDto(
                 projectTypeRepository.save(projectTypeDtoMapper.mapToEntity(projectTypeDto))
@@ -63,6 +65,7 @@ public class ProjectTypeController {
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(DELETE_PROJECT_TYPE)
+    @Auditable(auditPoint = "ProjectType.DeleteProjectType")
     public ResponseEntity<String> deleteProjectType(
             @PathVariable("id") Long id
     ) {
