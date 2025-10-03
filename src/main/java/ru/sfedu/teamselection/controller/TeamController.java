@@ -83,6 +83,7 @@ public class TeamController {
             summary = "Получение списка возможных опций для поиска среди команд заданного трека"
     )
     @GetMapping(GET_SEARCH_OPTIONS)
+    @Auditable(auditPoint = "Team.GetSearchOptionsTeams")
     public ResponseEntity<TeamSearchOptionsDto> getSearchOptionsTeams(@RequestParam(value = "track_id") Long trackId) {
         TeamSearchOptionsDto result = teamService.getSearchOptionsTeams(trackId);
         return ResponseEntity.ok(result);
@@ -93,6 +94,7 @@ public class TeamController {
             summary = "Получение списка всех команд за все время"
     )
     @GetMapping(FIND_ALL) // checked
+    @Auditable(auditPoint = "Team.FindAll")
     public ResponseEntity<List<TeamDto>> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
         List<TeamDto> result = teamService.findAll().stream().map(teamDtoMapper::mapToDto).toList();
@@ -114,6 +116,7 @@ public class TeamController {
                     @Parameter(name = "sort", description = "Сортировка (field,asc|desc)", example = "name,asc", in = ParameterIn.QUERY)
             })
     @GetMapping(SEARCH_TEAMS)
+    @Auditable(auditPoint = "Team.Search")
     public ResponseEntity<PageResponse<TeamDto>> search(
             @RequestParam(value = "input", required = false) String like,
             @RequestParam(value = "track_id", required = false) Long trackId,
@@ -144,6 +147,7 @@ public class TeamController {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_TEAM) // checked
+    @Auditable(auditPoint = "Team.DeleteTeam")
     public ResponseEntity<Void> deleteTeam(@PathVariable(value = "id") Long teamId) {
         LOGGER.info("ENTER deleteTeam(%d) endpoint".formatted(teamId));
         teamService.delete(teamId);
@@ -158,6 +162,7 @@ public class TeamController {
             }
     )
     @GetMapping(FIND_BY_ID) // checked
+    @Auditable(auditPoint = "Team.FindById")
     public ResponseEntity<TeamDto> findById(@PathVariable(name = "id") Long teamId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(teamId));
         TeamDto result = teamDtoMapper.mapToDto(teamService.findByIdOrElseThrow(teamId));
@@ -171,6 +176,7 @@ public class TeamController {
                     @Parameter(name = "id", description = "id команды", in = ParameterIn.PATH),
             })
     @GetMapping(FIND_APPLICANTS_BY_ID)
+    @Auditable(auditPoint = "Team.FindApplicantsById")
     public ResponseEntity<List<StudentDto>> findApplicantsById(@PathVariable(value = "id") Long teamId) {
         LOGGER.info("ENTER findApplicantsById(%d) endpoint".formatted(teamId));
         List<StudentDto> result = applicationService.findTeamApplicationsStudents(teamId)
@@ -181,6 +187,7 @@ public class TeamController {
     }
 
     @GetMapping(value = "/api/v1/teams/export/csv", produces = "text/csv")
+    @Auditable(auditPoint = "Team.ExportTeamsCsv")
     public ResponseEntity<byte[]> exportTeamsCsv(
             @RequestParam("trackId") Long trackId) {
         byte[] data = teamExportService.exportTeamsToCsvByTrack(trackId);
@@ -194,6 +201,7 @@ public class TeamController {
 
     @GetMapping(value = "/api/v1/teams/export/excel", produces =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    @Auditable(auditPoint = "Team.ExportTeamsExcel")
     public ResponseEntity<byte[]> exportTeamsExcel(
             @RequestParam("trackId") Long trackId) {
         byte[] data = teamExportService.exportTeamsToExcelByTrack(trackId);
@@ -214,6 +222,7 @@ public class TeamController {
             )
     )
     @PostMapping(CREATE_TEAM)
+    @Auditable(auditPoint = "Team.CreateTeam")
     public ResponseEntity<TeamDto> createTeam(@RequestBody TeamCreationDto team) {
         LOGGER.info("ENTER createTeam() endpoint");
         User sender = userService.getCurrentUser();
@@ -240,6 +249,7 @@ public class TeamController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(ADD_STUDENT_TO_TEAM)
+    @Auditable(auditPoint = "Team.AddStudentToTeam")
     public ResponseEntity<TeamDto> addStudentToTeam(@PathVariable Long teamId, @PathVariable Long studentId) {
         LOGGER.info("ENTER addStudentToTeam() endpoint");
         User user = userService.getCurrentUser();
@@ -270,6 +280,7 @@ public class TeamController {
                     description = "Сущность команды"
             ))
     @PutMapping(UPDATE_TEAM)
+    @Auditable(auditPoint = "Team.UpdateTeam")
     public ResponseEntity<TeamDto> updateTeam(
             @PathVariable Long id,
             @RequestBody @Valid TeamUpdateDto dto

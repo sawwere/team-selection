@@ -39,6 +39,7 @@ public class TechnologyController {
             summary = "Получение списка всех технологий"
     )
     @GetMapping(FIND_ALL) // checked
+    @Auditable(auditPoint = "Technology.FindAll")
     public ResponseEntity<List<TechnologyDto>> findAll() {
         log.info("ENTER findAll() endpoint");
         List<TechnologyDto> result = technologyService.findAll();
@@ -54,6 +55,7 @@ public class TechnologyController {
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(CREATE_TECHNOLOGY)
+    @Auditable(auditPoint = "Technology.CreateTechnology")
     public ResponseEntity<TechnologyDto> createTechnology(@RequestBody TechnologyDto technology) {
         log.info("ENTER createTechnology() endpoint");
         TechnologyDto result = technologyService.create(technology);
@@ -66,6 +68,7 @@ public class TechnologyController {
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(DELETE_TECHNOLOGY)
+    @Auditable(auditPoint = "Technology.DeleteTechnology")
     public ResponseEntity<String> deleteTechnology(
             @PathVariable("id") Long id
     ) {
