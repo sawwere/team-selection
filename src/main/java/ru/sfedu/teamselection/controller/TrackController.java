@@ -50,6 +50,7 @@ public class TrackController {
             summary = "Получение списка всех треков"
     )
     @GetMapping(FIND_ALL)
+    @Auditable(auditPoint = "Track.FindAll")
     public List<TrackDto> findAll() {
         LOGGER.info("ENTER findAll() endpoint");
         return trackService.findAll();
@@ -63,6 +64,7 @@ public class TrackController {
             }
     )
     @GetMapping(FIND_BY_ID)
+    @Auditable(auditPoint = "Track.FindById")
     public ResponseEntity<TrackDto> findById(@PathVariable(name = "id") Long trackId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(trackId));
         TrackDto result = trackDtoMapper.mapToDto(trackService.findByIdOrElseThrow(trackId));
@@ -78,6 +80,7 @@ public class TrackController {
     )
     @PostMapping(CREATE_TRACK)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Auditable(auditPoint = "Track.CreateTrack")
     public ResponseEntity<TrackDto> createTrack(@RequestBody TrackCreationDto trackDto) {
         LOGGER.info("ENTER createTrack() endpoint");
         TrackDto result = trackDtoMapper.mapToDto(trackService.create(trackDto));
@@ -97,6 +100,7 @@ public class TrackController {
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(UPDATE_TRACK)
+    @Auditable(auditPoint = "Track.UpdateTrack")
     public ResponseEntity<TrackDto> updateTrack(@PathVariable(value = "id") Long trackId,
                                 @RequestBody TrackDto trackDto) {
         LOGGER.info("ENTER updateTrack(%d) endpoint".formatted(trackId));
@@ -114,6 +118,7 @@ public class TrackController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_TRACK)
+    @Auditable(auditPoint = "Track.DeleteTrack")
     public ResponseEntity<Void> deleteTrack(@PathVariable(value = "id") Long trackId) {
         LOGGER.info("ENTER deleteTrack(%d) endpoint".formatted(trackId));
         trackService.deleteById(trackId);

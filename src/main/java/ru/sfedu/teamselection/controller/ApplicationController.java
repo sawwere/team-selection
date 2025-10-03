@@ -61,6 +61,7 @@ public class ApplicationController {
 
     @Operation(method = "GET", summary = "Получение списка заявок с пагинацией, сортировкой и фильтром по треку")
     @GetMapping(FIND_ALL)
+    @Auditable(auditPoint = "Application.FindAll")
     public ResponseEntity<Page<ApplicationDto>> findAll(
             @RequestParam(name = "track_id", required = false) Long trackId,
             @RequestParam(name = "status", required = false) String status,
@@ -80,6 +81,7 @@ public class ApplicationController {
             summary = "Создание заявки"
     )
     @PostMapping(CREATE_APPLICATION)
+    @Auditable(auditPoint = "Application.CreateApplication")
     public ResponseEntity<ApplicationCreationDto> createApplication(@RequestBody ApplicationCreationDto application) {
         LOGGER.info("ENTER createApplication() endpoint");
         User user = userService.getCurrentUser();
@@ -96,6 +98,7 @@ public class ApplicationController {
             summary = "Обновление статуса заявки"
     )
     @PutMapping(UPDATE_APPLICATION)
+    @Auditable(auditPoint = "Application.Update")
     public ResponseEntity<ApplicationCreationDto> update(
             @RequestBody ApplicationCreationDto dto
     ) {
@@ -114,6 +117,7 @@ public class ApplicationController {
             }
     )
     @GetMapping(FIND_BY_ID)
+    @Auditable(auditPoint = "Application.FindById")
     public ResponseEntity<ApplicationCreationDto> findById(@PathVariable(name = "id") Long applicationId) {
         LOGGER.info("ENTER findById(%d) endpoint".formatted(applicationId));
         ApplicationCreationDto result = applicationMapper.mapToCreationDto(
@@ -131,6 +135,7 @@ public class ApplicationController {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping(DELETE_APPLICATION) // checked
+    @Auditable(auditPoint = "Application.Delete")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         applicationService.delete(id);
         return ResponseEntity.noContent().build();
@@ -145,6 +150,7 @@ public class ApplicationController {
             }
     )
     @GetMapping(FIND_BY_TEAM_AND_STUDENT)
+    @Auditable(auditPoint = "Application.FindByTeamAndStudent")
     public ResponseEntity<ApplicationResponseDto> findByTeamAndStudent(
             @PathVariable Long teamId,
             @PathVariable Long studentId
