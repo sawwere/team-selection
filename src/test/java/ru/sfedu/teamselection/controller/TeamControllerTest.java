@@ -160,7 +160,7 @@ public class TeamControllerTest {
                         .param("technologies", "")
                         .param("sort", sort)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user")))
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser)))
                 .andExpect(status().isOk())
                 .andDo(print());
     }

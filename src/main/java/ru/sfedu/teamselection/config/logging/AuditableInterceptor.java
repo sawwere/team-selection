@@ -40,13 +40,9 @@ public class AuditableInterceptor implements HandlerInterceptor {
                 request.setAttribute(AUDIT_POINT, annotation.auditPoint());
                 UUID traceId = UUID.randomUUID();
                 request.setAttribute(TRACE_ID, traceId);
-                var responseWrapper = new CachedBodyHttpServletResponse(response);
-                request.setAttribute("responseWrapper", responseWrapper);
 
                 CompletableFuture.runAsync(() -> {
                     try {
-
-
                         String auditPoint = annotation.auditPoint() + REQUEST_POSTFIX;
                         String payload = isReadableContent(request)
                                 ? getRequestBody(cachedRequest)
@@ -60,9 +56,11 @@ public class AuditableInterceptor implements HandlerInterceptor {
                                 payload
                         );
                     } catch (Exception ex) {
-                        log.warn("Error while saving audit for request {}", request.getRequestURI());
+                        log.warn("Error while saving audit for request {} {}", traceId, request.getRequestURI());
                     }
                 });
+            } else {
+                log.warn("Skip saving audit for request {}, method is not annotated", request.getRequestURI());
             }
         }
         return true;
@@ -86,6 +84,7 @@ public class AuditableInterceptor implements HandlerInterceptor {
 
                     try {
                         UUID traceId = (UUID) request.getAttribute(TRACE_ID);
+
                         String auditPoint = annotation.auditPoint() + RESPONSE_POSTFIX;
                         String payload = isReadableResponse(response)
                                 ? cachedResponse.getCachedContentAsString()

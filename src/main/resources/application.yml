@@ -92,5 +92,12 @@ frontend:
 
 # /oauth2/authorization/github
 logging:
+  file:
+    path: resources/logs
   level:
     org.springframework.security: DEBUG
+logback:
+  rollingpolicy:
+    max-file-size: 100MB
+    max-history: 30
+    total-size-cap: 300MB

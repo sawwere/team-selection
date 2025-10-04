@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintDeclarationException;
 import java.time.OffsetDateTime;
 import java.util.NoSuchElementException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -13,6 +14,7 @@ import ru.sfedu.teamselection.dto.ErrorResponse;
 import ru.sfedu.teamselection.exception.BusinessException;
 import ru.sfedu.teamselection.exception.ForbiddenException;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -31,6 +33,7 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequest(
             RuntimeException ex, HttpServletRequest req
     ) {
+        log.error(ex.getMessage());
         return buildResponse(HttpStatus.BAD_REQUEST, ex, req);
     }
 
@@ -38,6 +41,7 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccessDeniedRequest(
             AccessDeniedException ex, HttpServletRequest req
     ) {
+        log.error(ex.getMessage());
         return buildResponse(HttpStatus.FORBIDDEN, ex, req);
     }
 
@@ -45,6 +49,7 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handleServerError(
             Exception ex, HttpServletRequest req
     ) {
+        log.error(ex.getMessage());
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, req);
     }
 

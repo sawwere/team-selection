@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8080
     description: Generated server url
 tags:
-  - name: ProjectTypeController
+  - name: ProjectType
     description: API для операций с типами проектов
   - name: ApplicationController
     description: API для работы с заявками
@@ -279,6 +279,60 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/StudentSearchOptionsDto'
+  /api/v1/projectTypes:
+    get:
+      tags:
+        - ProjectType
+      summary: Получение списка всех возможных типов проектов
+      operationId: findAllProjectTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectTypeDto'
+    post:
+      tags:
+        - ProjectType
+      summary: Создание нового типа проекта
+      operationId: createProjectType
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectTypeDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ProjectTypeDto'
+  /api/v1/projectTypes/{id}:
+    delete:
+      tags:
+        - ProjectType
+      summary: Удаление типа проекта
+      operationId: deleteProjectType
+      parameters:
+        - name: id
+          in: path
+          description: Id типа проекта
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: string
 components:
   schemas:
     StudentUpdateDto:

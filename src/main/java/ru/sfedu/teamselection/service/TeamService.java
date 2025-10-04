@@ -173,19 +173,20 @@ public class TeamService {
     @Transactional
     public void delete(Long id) {
         Team team = findByIdOrElseThrow(id);
-        for (Application application: team.getApplications()) {
-            applicationService.delete(application.getId());
-        }
+
         for (Student teamMember : team.getStudents()) {
-            if (Objects.equals(teamMember.getCurrentTeam().getId(), id)) {
+            if (teamMember.getCurrentTeam() != null && Objects.equals(teamMember.getCurrentTeam().getId(), id)) {
                 teamMember.setHasTeam(false);
                 teamMember.setCurrentTeam(null);
                 teamMember.setIsCaptain(false);
-                teamMember.getTeams().remove(team);
             }
+            teamMember.getTeams().remove(team);
         }
+
+        team.getCurrentTrack().getCurrentTeams().remove(team);
         team.getStudents().clear();
         team.getTechnologies().clear();
+        team.getApplications().clear();
         teamRepository.deleteById(id);
     }
 
