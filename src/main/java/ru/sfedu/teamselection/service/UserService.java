@@ -24,6 +24,7 @@ import ru.sfedu.teamselection.repository.StudentRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 import ru.sfedu.teamselection.repository.specification.UserSpecification;
 import ru.sfedu.teamselection.service.security.PermissionLevelUpdate;
+import ru.sfedu.teamselection.service.security.UserSessionService;
 import ru.sfedu.teamselection.service.student.update.StudentUpdateFactory;
 
 
@@ -39,6 +40,7 @@ public class UserService {
 
     @Autowired
     private TrackService trackService;
+    private final UserSessionService userSessionService;
 
     private final UserMapper userMapper;
 
@@ -99,8 +101,7 @@ public class UserService {
 
             if (permission == PermissionLevelUpdate.ADMIN) {
                 // обновляем роль
-                Role role = findRoleByNameOrElseThrow(dto.getRole());
-                existing.setRole(role);
+                assignRole(existing.getId(), dto.getRole());
                 // обновляем остальные поля
                 existing.setFio(dto.getFio());
                 existing.setEmail(dto.getEmail());
@@ -154,6 +155,7 @@ public class UserService {
         }
 
         user.setRole(role);
+        userSessionService.updateUserAuthorities(user.getEmail());
         return userRepository.save(user);
     }
 
