@@ -48,6 +48,7 @@ spring:
               - email
               - profile
               - User.Read
+              - User.ReadBasic.All
 #  cloud:
 #    azure:
 #      active-directory:

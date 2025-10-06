@@ -147,7 +147,7 @@ public class UserService {
         User user = findByIdOrElseThrow(userId);
         Role role = findRoleByNameOrElseThrow(roleName);
 
-        if ("STUDENT".equals(roleName)) {
+        if ("STUDENT".equals(roleName) && !studentRepository.existsByUserId(userId)) {
             Student student = Student.builder()
                     .user(user)
                     .build();

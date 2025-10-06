@@ -50,7 +50,7 @@ public class PhotoService {
 
         return restClient.get()
                 //.uri("https://graph.microsoft.com/v1.0/me/photo/$value")
-                .uri("https://graph.microsoft.com/v1.0/users/" + user.getAzureId() + "/photo/$value")
+                .uri("https://graph.microsoft.com/v1.0/users/" + user.getEmail() + "/photo/$value")
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, response) -> {

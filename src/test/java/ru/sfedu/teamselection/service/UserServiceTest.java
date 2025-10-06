@@ -256,6 +256,18 @@ class UserServiceTest extends BasicTestContainerTest {
     }
 
     @Test
+    void whenAssignStudentRoleTwiceThenDoNotCreateStudentTwice() {
+        String roleName = "STUDENT";
+        var actual = underTest.assignRole(102L, roleName);
+        // do not throw
+        actual = underTest.assignRole(102L, roleName);
+        Assertions.assertEquals(roleName, actual.getRole().getName());
+
+        // Student should have been created
+        Assertions.assertNotNull(studentRepository.findByUserId(actual.getId()));
+    }
+
+    @Test
     void assignInvalidRoleShouldFail() {
         String roleName = "role";
 
