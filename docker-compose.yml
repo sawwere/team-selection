@@ -5,6 +5,7 @@ services:
       - backend
     volumes:
       - './resources:/resources'
+      - './secrets/keystore.p12:/keystore.p12:ro'
     container_name: 'team-selection'
     ports:
       - '8080:8080'
