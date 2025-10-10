@@ -44,3 +44,4 @@ amplicode.xml
 src/test/resources/application-secure-test.yml
 /resources/sql/*
 /resources/logs
+/secrets/

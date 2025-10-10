@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
-import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
 import ru.sfedu.teamselection.domain.application.Application;
 import ru.sfedu.teamselection.dto.TechnologyDto;
@@ -272,10 +271,7 @@ public class TeamService {
     public Team update(Long id,
                        TeamUpdateDto dto,
                        User sender) {
-        Team partial = teamUpdateDtoMapper.toEntity(dto);
-
-        Team team = findByIdOrElseThrow(id);
-
+       Team team = findByIdOrElseThrow(id);
 
         boolean isAdmin = isAdmin(sender);
         boolean isCaptain = sender.getId()
@@ -287,11 +283,10 @@ public class TeamService {
 
         // Только admin может менять эти поля:
         if (isAdmin) {
-            team.setIsFull(partial.getIsFull());
-            if (!Objects.equals(partial.getCurrentTrack().getId(),
+            if (!Objects.equals(dto.getCurrentTrackId(),
                     team.getCurrentTrack().getId())) {
                 team.setCurrentTrack(
-                        trackService.findByIdOrElseThrow(partial.getCurrentTrack().getId())
+                        trackService.findByIdOrElseThrow(dto.getCurrentTrackId())
                 );
             }
             if (!Objects.equals(team.getCaptainId(), dto.getCaptainId())) {
@@ -299,18 +294,18 @@ public class TeamService {
                 oldCaptain.setIsCaptain(false);
             }
 
-            team.setCaptainId(partial.getCaptainId());
+            team.setCaptainId(dto.getCaptainId());
         }
 
         // Всегда можно менять:
-        team.setName(partial.getName());
-        team.setProjectDescription(partial.getProjectDescription());
-        team.setProjectType(partial.getProjectType());
+        team.setName(dto.getName());
+        team.setProjectDescription(dto.getProjectDescription());
+        team.setProjectType(projectTypeDtoMapper.mapToEntity(dto.getProjectType()));
         team.setTechnologies(
                 technologyRepository.findAllByIdIn(
-                        partial.getTechnologies()
+                        dto.getTechnologies()
                                 .stream()
-                                .map(Technology::getId)
+                                .map(TechnologyDto::getId)
                                 .collect(Collectors.toList())
                 )
         );
