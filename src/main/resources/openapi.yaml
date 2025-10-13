@@ -509,8 +509,8 @@ components:
           nullable: true
         name:
           type: string
-          minLength: 3
-          maxLength: 20
+          minLength: 1
+          maxLength: 32
           description: Название типа проекта
           example: "Mobile"
     TechnologyDto:
@@ -527,7 +527,7 @@ components:
           nullable: true
         name:
           type: string
-          minLength: 3
+          minLength: 1
           description: Название технологии
           example: "C++"
 

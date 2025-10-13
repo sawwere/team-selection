@@ -3,6 +3,8 @@ package ru.sfedu.teamselection.controller;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -127,8 +129,9 @@ public class StudentControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void search() throws Exception {
+    @ParameterizedTest
+    @CsvSource(value = {"name,asc", "name,desc", "name"}, delimiter = ';')
+    public void search(String sort) throws Exception {
         Mockito.doReturn(new PageImpl<>(students)).when(studentService).search(
                 Mockito.any(),
                 Mockito.any(),
@@ -147,6 +150,7 @@ public class StudentControllerTest {
                         .param("has_team", "false")
                         .param("is_captain", "false")
                         .param("technologies", "")
+                        .param("sort", sort)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin)))
                 .andExpect(status().isOk());
@@ -185,7 +189,7 @@ public class StudentControllerTest {
 
     @Test
     public void updateStudentFromAdmin() throws Exception {
-        Mockito.doReturn(null).when(studentService).getCurrentStudent();
+        Mockito.doReturn(admin).when(userService).getCurrentUser();
         Mockito.doReturn(genericStudent)
                 .when(studentService)
                 .update(Mockito.notNull(), Mockito.notNull(), Mockito.any());
@@ -224,6 +228,7 @@ public class StudentControllerTest {
     @Test
     public void updateStudentFromStudentThemselves() throws Exception {
         Mockito.doReturn(genericStudent.getId()).when(studentService).getCurrentStudent();
+        Mockito.doReturn(genericStudentUser).when(userService).getCurrentUser();
         Mockito.doReturn(genericStudent)
                 .when(studentService)
                 .update(Mockito.notNull(), Mockito.notNull(), Mockito.notNull());
@@ -264,14 +269,15 @@ public class StudentControllerTest {
 
     @Test
     public void updateStudentFromForeignStudentShouldFail() throws Exception {
-        Mockito.doReturn(genericStudent.getId()).when(studentService).getCurrentStudent();
+        Mockito.doReturn(genericStudentUser).when(userService).getCurrentUser();
+        Mockito.doReturn(100500L).when(studentService).getCurrentStudent();
         Mockito.doReturn(genericStudent)
                 .when(studentService)
                 .update(Mockito.notNull(), Mockito.notNull(), Mockito.notNull());
 
         String student = """
                 {
-                    "id": 1,
+                    "id": 333,
                     "course": 1,
                     "group_number": 1,
                     "about_self": "info",
@@ -298,7 +304,7 @@ public class StudentControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
                         .content(student)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isForbidden());
     }
 
     @Test

@@ -141,7 +141,7 @@ public class TeamControllerTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"name,asc", "name,desc"}, delimiter = ';')
+    @CsvSource(value = {"name,asc", "name,desc", "name"}, delimiter = ';')
     public void search(String sort) throws Exception {
         Mockito.doReturn(new PageImpl<>(teams)).when(teamService).search(
                 Mockito.anyString(),
@@ -300,6 +300,41 @@ public class TeamControllerTest {
                         .content(team)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void whenUpdateTeamAndPathDiffersFromIdInBodyThenReturn400() throws Exception {
+        Mockito.doReturn(genericTeam).when(teamService).update(
+                Mockito.anyLong(),
+                Mockito.notNull(),
+                Mockito.notNull()
+        );
+
+        String team = """
+                {
+                    "id": 111,
+                    "name": "name",
+                    "project_description": "projectDescription",
+                    "project_type": {
+                        "id": 1,
+                        "name": "name"
+                    },
+                    "quantity_of_students": 0,
+                    "captain_id": 1,
+                    "isFull": false,
+                    "current_track_id": 0,
+                    "students": [],
+                    "applications": [],
+                    "technologies": []
+                }""";
+
+        mockMvc.perform(put(TeamController.UPDATE_TEAM, "1")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
+                        .content(team)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 }
