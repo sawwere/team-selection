@@ -69,6 +69,11 @@
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring-boot.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
 
         <!-- Security -->
         <dependency>
@@ -257,12 +262,10 @@
                             <generatorName>spring</generatorName>
                             <importMappings>
                                 <importMapping>UserDto=ru.sfedu.teamselection.dto.UserDto</importMapping>
-                                <importMapping>TechnologyDto=ru.sfedu.teamselection.dto.TechnologyDto</importMapping>
                                 <importMapping>RoleDto=ru.sfedu.teamselection.dto.RoleDto</importMapping>
                                 <importMapping>StudentCreationDto=ru.sfedu.teamselection.dto.student.StudentCreationDto</importMapping>
                                 <importMapping>StudentDto=ru.sfedu.teamselection.dto.student.StudentDto</importMapping>
                                 <importMapping>StudentSearchOptionsDto=ru.sfedu.teamselection.dto.student.StudentSearchOptionsDto</importMapping>
-                                <importMapping>ProjectTypeDto=ru.sfedu.teamselection.dto.team.ProjectTypeDto</importMapping>
                                 <importMapping>TeamCreationDto=ru.sfedu.teamselection.dto.team.TeamCreationDto</importMapping>
                                 <importMapping>TeamDto=ru.sfedu.teamselection.dto.team.TeamDto</importMapping>
                                 <importMapping>TeamSearchOptionsDto=ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto</importMapping>

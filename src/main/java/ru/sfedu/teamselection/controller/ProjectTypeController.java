@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sfedu.teamselection.api.ProjectTypeApi;
 import ru.sfedu.teamselection.config.logging.Auditable;
-import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
+import ru.sfedu.teamselection.dto.ProjectTypeDto;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 

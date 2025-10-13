@@ -12,10 +12,6 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import ru.sfedu.teamselection.config.SecurityConfig;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
 import ru.sfedu.teamselection.domain.Role;
@@ -28,6 +24,10 @@ import ru.sfedu.teamselection.service.TechnologyService;
 import ru.sfedu.teamselection.service.audit.AuditService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the {@link TechnologyController}
@@ -79,9 +79,9 @@ public class TechnologyControllerTest {
     );
 
     private final List<TechnologyDto> technologyDtoList = List.of(
-            new TechnologyDto(1L, "1"),
-            new TechnologyDto(2L, "2"),
-            new TechnologyDto(3L, "3")
+            new TechnologyDto().id(1L).name("1"),
+            new TechnologyDto().id(2L).name("2"),
+            new TechnologyDto().id(3L).name("3")
             );
 
     @BeforeEach
@@ -106,7 +106,7 @@ public class TechnologyControllerTest {
 
     @Test
     public void findAll() throws Exception {
-        mockMvc.perform(get(TechnologyController.FIND_ALL)
+        mockMvc.perform(get("/api/v1/technologies")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                 .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser)))
                 .andExpect(status().isOk());
@@ -120,7 +120,7 @@ public class TechnologyControllerTest {
                     "name": "abc"
                 }""";
 
-        mockMvc.perform(post(TechnologyController.CREATE_TECHNOLOGY)
+        mockMvc.perform(post("/api/v1/technologies")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
                         .content(technology)
@@ -136,7 +136,7 @@ public class TechnologyControllerTest {
                     "name": "abc"
                 }""";
 
-        mockMvc.perform(post(TechnologyController.CREATE_TECHNOLOGY)
+        mockMvc.perform(post("/api/v1/technologies")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin))
                         .content(technology)
@@ -148,7 +148,7 @@ public class TechnologyControllerTest {
     public void deleteTechnologyFromAdmin() throws Exception {
         Mockito.doNothing().when(technologyService).delete(Mockito.any());
 
-        mockMvc.perform(delete(TechnologyController.DELETE_TECHNOLOGY.replace("{id}", "2"))
+        mockMvc.perform(delete("/api/v1/technologies/{id}".replace("{id}", "2"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -159,7 +159,7 @@ public class TechnologyControllerTest {
     public void deleteTechnologyFromGenericUserShouldFail() throws Exception {
         Mockito.doNothing().when(technologyService).delete(Mockito.any());
 
-        mockMvc.perform(delete(TechnologyController.DELETE_TECHNOLOGY.replace("{id}", "2"))
+        mockMvc.perform(delete("/api/v1/technologies/{id}".replace("{id}", "2"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
                         .contentType(MediaType.APPLICATION_JSON))

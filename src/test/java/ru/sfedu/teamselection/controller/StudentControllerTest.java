@@ -14,12 +14,6 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import ru.sfedu.teamselection.config.SecurityConfig;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
 import ru.sfedu.teamselection.domain.Role;
@@ -37,6 +31,12 @@ import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.audit.AuditService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the {@link StudentController}
@@ -169,8 +169,8 @@ public class StudentControllerTest {
         String student = """
                 {
                     "course": -1,
-                    "groupNumber": 2,
-                    "aboutSelf": "о себе",
+                    "group_number": 2,
+                    "about_self": "о себе",
                     "contacts": "телефонный номер",
                     "userId": 2
                 }""";
@@ -194,15 +194,23 @@ public class StudentControllerTest {
                 {
                     "id": 1,
                     "course": 1,
-                    "groupNumber": 1,
-                    "aboutSelf": "info",
+                    "group_number": 1,
+                    "about_self": "info",
                     "contacts": "info",
-                    "hasTeam": false,
-                    "isCaptain": false,
-                    "currentTeam": null,
+                    "has_team": false,
+                    "is_captain": false,
+                    "current_team": null,
+                    "current_track": {
+                        "id": 1
+                    },
                     "technologies": [],
                     "user": {
-                        "id": 2
+                        "id": 2,
+                        "fio": "A B C",
+                        "email": "example@example.com",
+                        "role": "abc",
+                        "is_enabled": true,
+                        "is_remind_enabled": true
                     }
                 }""";
 
@@ -224,18 +232,25 @@ public class StudentControllerTest {
                 {
                     "id": 1,
                     "course": 1,
-                    "groupNumber": 1,
-                    "aboutSelf": "info",
+                    "group_number": 1,
+                    "about_self": "info",
                     "contacts": "info",
-                    "hasTeam": false,
-                    "isCaptain": false,
-                    "currentTeam": null,
+                    "has_team": false,
+                    "is_captain": false,
+                    "current_team": null,
+                    "current_track": {
+                        "id": 1
+                    },
                     "technologies": [],
                     "user": {
-                        "id": 2
-                    },
-                    "currentTrack": {
-                        "id": 1
+                        "id": 2,
+                        "fio": "A B C",
+                        "email": "example@example.com",
+                        "group_number": 11,
+                        "course": 1,
+                        "is_enabled": true,
+                        "is_remind_enabled": true,
+                        "role": "ROLE_STUDENT"
                     }
                 }""";
 
@@ -258,17 +273,22 @@ public class StudentControllerTest {
                 {
                     "id": 1,
                     "course": 1,
-                    "groupNumber": 1,
-                    "aboutSelf": "info",
+                    "group_number": 1,
+                    "about_self": "info",
                     "contacts": "info",
-                    "hasTeam": false,
-                    "isCaptain": false,
-                    "currentTeam": null,
+                    "has_team": false,
+                    "is_captain": false,
+                    "current_team": null,
                     "technologies": [],
                     "user": {
-                        "id": 2
+                        "id": 2,
+                        "fio": "A B C",
+                        "email": "example@example.com",
+                        "role": "abc",
+                        "is_enabled": true,
+                        "is_remind_enabled": true
                     },
-                    "currentTrack": {
+                    "current_track": {
                         "id": 1
                     }
                 }""";

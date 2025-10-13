@@ -16,12 +16,6 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import ru.sfedu.teamselection.config.SecurityConfig;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
 import ru.sfedu.teamselection.domain.Role;
@@ -39,6 +33,12 @@ import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.audit.AuditService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the {@link TeamController}
@@ -280,24 +280,15 @@ public class TeamControllerTest {
                 {
                     "id": 1,
                     "name": "name",
-                    "projectDescription": "projectDescription",
-                    "projectType": {},
-                    "quantityOfStudents": 0,
-                    "captain": {
+                    "project_description": "projectDescription",
+                    "project_type": {
                         "id": 1,
-                        "course": 0,
-                        "groupNumber": 0,
-                        "aboutSelf": "",
-                        "contacts": "",
-                        "hasTeam": false,
-                        "isCaptain": false,
-                        "currentTeam": {},
-                        "technologies": [],
-                        "applications": [],
-                        "user": {}
+                        "name": "name"
                     },
+                    "quantity_of_students": 0,
+                    "captain_id": 1,
                     "isFull": false,
-                    "currentTrackId": 0,
+                    "current_track_id": 0,
                     "students": [],
                     "applications": [],
                     "technologies": []

@@ -23,8 +23,8 @@ import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
+import ru.sfedu.teamselection.dto.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.TechnologyDto;
-import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.dto.team.TeamSearchOptionsDto;
 import ru.sfedu.teamselection.dto.team.TeamUpdateDto;
@@ -89,7 +89,7 @@ class TeamServiceTest extends BasicTestContainerTest {
         TeamCreationDto teamCreationDto = TeamCreationDto.builder()
                 .name("shouldFail")
                 .projectDescription("projectDescription")
-                .projectType(ProjectTypeDto.builder().id(1L).build())
+                .projectType(new ProjectTypeDto().id(1L))
                 .captainId(2L)
                 .currentTrackId(1L)
                 .build();
@@ -102,7 +102,7 @@ class TeamServiceTest extends BasicTestContainerTest {
         TeamCreationDto teamCreationDto = TeamCreationDto.builder()
                 .name("new")
                 .projectDescription("projectDescription")
-                .projectType(ProjectTypeDto.builder().id(1L).build())
+                .projectType(new ProjectTypeDto().id(1L))
                 .captainId(5L)
                 .currentTrackId(1L)
                 .build();
@@ -120,7 +120,7 @@ class TeamServiceTest extends BasicTestContainerTest {
         TeamCreationDto teamCreationDto = TeamCreationDto.builder()
                 .name("Almost full")
                 .projectDescription("new projectDescription")
-                .projectType(ProjectTypeDto.builder().id(2L).build())
+                .projectType(new ProjectTypeDto().id(2L))
                 .captainId(5L)
                 .currentTrackId(1L)
                 .build();
@@ -156,7 +156,7 @@ class TeamServiceTest extends BasicTestContainerTest {
                 .captainId(beforeUpdateTeam.getCaptainId())
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
-                .projectType(ProjectTypeDto.builder().id(1L).build())
+                .projectType(new ProjectTypeDto().id(1L))
                 .studentIds(beforeUpdateTeam.getStudents().stream().map(Student::getId).collect(Collectors.toUnmodifiableSet()))
                 .currentTrackId(1L)
                 .build();
@@ -183,7 +183,7 @@ class TeamServiceTest extends BasicTestContainerTest {
         TeamUpdateDto teamDto = TeamUpdateDto.builder()
                 .id(beforeUpdateTeam.getId())
                 .projectDescription("contacts")
-                .projectType(ProjectTypeDto.builder().id(3L).build())
+                .projectType(new ProjectTypeDto().id(3L))
                 .currentTrackId(3L) // the same as was
                 .captainId(1L) // should be updated
                 .currentTrackId(1L)
@@ -213,7 +213,7 @@ class TeamServiceTest extends BasicTestContainerTest {
                 .id(beforeUpdateTeam.getId())
                 .name("about self") // should not be updated
                 .projectDescription("contacts")
-                .projectType(ProjectTypeDto.builder().id(1L).build())
+                .projectType(new ProjectTypeDto().id(1L))
                 .currentTrackId(beforeUpdateTeam.getCurrentTrack().getId())
                 .build();
 

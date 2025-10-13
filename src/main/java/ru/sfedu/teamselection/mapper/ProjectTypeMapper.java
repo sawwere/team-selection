@@ -6,7 +6,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import ru.sfedu.teamselection.domain.ProjectType;
-import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
+import ru.sfedu.teamselection.dto.ProjectTypeDto;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProjectTypeMapper extends DtoMapper<ProjectTypeDto, ProjectType>,
