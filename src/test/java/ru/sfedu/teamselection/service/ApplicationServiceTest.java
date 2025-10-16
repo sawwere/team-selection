@@ -361,6 +361,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (111, 4, 1, 'accepted', 'invite');
             """,
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 111;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteAcceptedShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(111L)
@@ -398,6 +403,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (112, 4, 1, 'sent', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 112;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteRejectAllowedOnlyFromTargetStudent() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(112L)
@@ -447,6 +457,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (113, 2, 6, 'sent', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 113;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteReject() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(113L)
@@ -496,6 +511,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (114, 1, 1, 'sent', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 114;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteAcceptAllowedOnlyFromTargetStudent() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(114L)
@@ -589,6 +609,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (115, 1, 1, 'sent', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 115;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteAccept() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(115L)
@@ -661,6 +686,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                         (121, 5, 6, 'sent', 'invite');
                     """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 121;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteAcceptForSecondYear() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(121L)
@@ -716,6 +746,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                         (1014, 1004, 9, 'sent', 'invite');
                     """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 1014;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteAcceptForFullTeamShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(1014L)
@@ -759,6 +794,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                         (101, 5, 6, 'sent', 'invite');
                     """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 101;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteAcceptFromSecondYearForTeamFullOfSecondYearsShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(101L)
@@ -796,6 +836,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (116, 2, 6, 'sent', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 116;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteCancelFromNonSenderShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(116L)
@@ -833,6 +878,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (119, 3, 16, 'rejected', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 119;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteCancelAllowedOnlyForSentApplication() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(119L)
@@ -870,6 +920,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (114, 3, 1, 'sent', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 114;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteSentShouldFail() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(114L)
@@ -917,6 +972,11 @@ class ApplicationServiceTest extends BasicTestContainerTest {
                 (116, 2, 6, 'sent', 'invite');
             """,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = """
+            DELETE FROM applications
+            WHERE id = 116;
+            """,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateInviteCancel() {
         ApplicationCreationDto dto = ApplicationCreationDto.builder()
                 .id(116L)

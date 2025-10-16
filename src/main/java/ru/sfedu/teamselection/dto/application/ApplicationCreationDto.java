@@ -1,6 +1,7 @@
 package ru.sfedu.teamselection.dto.application;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,13 +22,18 @@ import ru.sfedu.teamselection.enums.ApplicationStatus;
 public class ApplicationCreationDto {
 
     private Long id;
+
+    @NotNull
     @JsonProperty(value = "student_id")
     private long studentId;
 
+    @NotNull
     @JsonProperty(value = "team_id")
     private long teamId;
 
+    @NotNull
     private ApplicationStatus status;
 
+    @NotNull
     private ApplicationType type;
 }

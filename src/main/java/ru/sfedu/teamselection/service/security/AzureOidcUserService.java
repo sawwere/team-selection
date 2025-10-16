@@ -2,9 +2,7 @@ package ru.sfedu.teamselection.service.security;
 
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
