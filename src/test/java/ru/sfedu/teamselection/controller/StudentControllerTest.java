@@ -3,6 +3,8 @@ package ru.sfedu.teamselection.controller;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,12 +16,6 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import ru.sfedu.teamselection.config.SecurityConfig;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
 import ru.sfedu.teamselection.domain.Role;
@@ -37,6 +33,12 @@ import ru.sfedu.teamselection.service.UserService;
 import ru.sfedu.teamselection.service.audit.AuditService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the {@link StudentController}
@@ -127,8 +129,9 @@ public class StudentControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void search() throws Exception {
+    @ParameterizedTest
+    @CsvSource(value = {"name,asc", "name,desc", "name"}, delimiter = ';')
+    public void search(String sort) throws Exception {
         Mockito.doReturn(new PageImpl<>(students)).when(studentService).search(
                 Mockito.any(),
                 Mockito.any(),
@@ -147,6 +150,7 @@ public class StudentControllerTest {
                         .param("has_team", "false")
                         .param("is_captain", "false")
                         .param("technologies", "")
+                        .param("sort", sort)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin)))
                 .andExpect(status().isOk());
@@ -169,8 +173,8 @@ public class StudentControllerTest {
         String student = """
                 {
                     "course": -1,
-                    "groupNumber": 2,
-                    "aboutSelf": "о себе",
+                    "group_number": 2,
+                    "about_self": "о себе",
                     "contacts": "телефонный номер",
                     "userId": 2
                 }""";
@@ -185,7 +189,7 @@ public class StudentControllerTest {
 
     @Test
     public void updateStudentFromAdmin() throws Exception {
-        Mockito.doReturn(null).when(studentService).getCurrentStudent();
+        Mockito.doReturn(admin).when(userService).getCurrentUser();
         Mockito.doReturn(genericStudent)
                 .when(studentService)
                 .update(Mockito.notNull(), Mockito.notNull(), Mockito.any());
@@ -194,15 +198,23 @@ public class StudentControllerTest {
                 {
                     "id": 1,
                     "course": 1,
-                    "groupNumber": 1,
-                    "aboutSelf": "info",
+                    "group_number": 1,
+                    "about_self": "info",
                     "contacts": "info",
-                    "hasTeam": false,
-                    "isCaptain": false,
-                    "currentTeam": null,
+                    "has_team": false,
+                    "is_captain": false,
+                    "current_team": null,
+                    "current_track": {
+                        "id": 1
+                    },
                     "technologies": [],
                     "user": {
-                        "id": 2
+                        "id": 2,
+                        "fio": "A B C",
+                        "email": "example@example.com",
+                        "role": "abc",
+                        "is_enabled": true,
+                        "is_remind_enabled": true
                     }
                 }""";
 
@@ -216,6 +228,7 @@ public class StudentControllerTest {
     @Test
     public void updateStudentFromStudentThemselves() throws Exception {
         Mockito.doReturn(genericStudent.getId()).when(studentService).getCurrentStudent();
+        Mockito.doReturn(genericStudentUser).when(userService).getCurrentUser();
         Mockito.doReturn(genericStudent)
                 .when(studentService)
                 .update(Mockito.notNull(), Mockito.notNull(), Mockito.notNull());
@@ -224,18 +237,25 @@ public class StudentControllerTest {
                 {
                     "id": 1,
                     "course": 1,
-                    "groupNumber": 1,
-                    "aboutSelf": "info",
+                    "group_number": 1,
+                    "about_self": "info",
                     "contacts": "info",
-                    "hasTeam": false,
-                    "isCaptain": false,
-                    "currentTeam": null,
+                    "has_team": false,
+                    "is_captain": false,
+                    "current_team": null,
+                    "current_track": {
+                        "id": 1
+                    },
                     "technologies": [],
                     "user": {
-                        "id": 2
-                    },
-                    "currentTrack": {
-                        "id": 1
+                        "id": 2,
+                        "fio": "A B C",
+                        "email": "example@example.com",
+                        "group_number": 11,
+                        "course": 1,
+                        "is_enabled": true,
+                        "is_remind_enabled": true,
+                        "role": "ROLE_STUDENT"
                     }
                 }""";
 
@@ -249,26 +269,32 @@ public class StudentControllerTest {
 
     @Test
     public void updateStudentFromForeignStudentShouldFail() throws Exception {
-        Mockito.doReturn(genericStudent.getId()).when(studentService).getCurrentStudent();
+        Mockito.doReturn(genericStudentUser).when(userService).getCurrentUser();
+        Mockito.doReturn(100500L).when(studentService).getCurrentStudent();
         Mockito.doReturn(genericStudent)
                 .when(studentService)
                 .update(Mockito.notNull(), Mockito.notNull(), Mockito.notNull());
 
         String student = """
                 {
-                    "id": 1,
+                    "id": 333,
                     "course": 1,
-                    "groupNumber": 1,
-                    "aboutSelf": "info",
+                    "group_number": 1,
+                    "about_self": "info",
                     "contacts": "info",
-                    "hasTeam": false,
-                    "isCaptain": false,
-                    "currentTeam": null,
+                    "has_team": false,
+                    "is_captain": false,
+                    "current_team": null,
                     "technologies": [],
                     "user": {
-                        "id": 2
+                        "id": 2,
+                        "fio": "A B C",
+                        "email": "example@example.com",
+                        "role": "abc",
+                        "is_enabled": true,
+                        "is_remind_enabled": true
                     },
-                    "currentTrack": {
+                    "current_track": {
                         "id": 1
                     }
                 }""";
@@ -278,7 +304,7 @@ public class StudentControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
                         .content(student)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isForbidden());
     }
 
     @Test

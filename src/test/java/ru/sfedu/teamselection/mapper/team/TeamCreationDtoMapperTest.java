@@ -12,8 +12,8 @@ import ru.sfedu.teamselection.domain.ProjectType;
 import ru.sfedu.teamselection.domain.Team;
 import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.Track;
+import ru.sfedu.teamselection.dto.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.TechnologyDto;
-import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
 import ru.sfedu.teamselection.dto.team.TeamCreationDto;
 import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
@@ -32,10 +32,9 @@ class TeamCreationDtoMapperTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         Mockito.doReturn(
-                TechnologyDto.builder()
+                new TechnologyDto()
                         .id(1L)
                         .name("tech")
-                        .build()
         ).when (technologyDtoMapper).mapToDto(Mockito.notNull());
         Mockito.doReturn(
                 Technology.builder()
@@ -45,10 +44,9 @@ class TeamCreationDtoMapperTest {
         ).when (technologyDtoMapper).mapToEntity(Mockito.notNull());
 
         Mockito.doReturn(
-                ProjectTypeDto.builder()
+                new ProjectTypeDto()
                         .id(2L)
                         .name("type")
-                        .build()
         ).when (projectTypeDtoMapper).mapToDto(Mockito.notNull());
         Mockito.doReturn(
                 ProjectType.builder()
@@ -64,10 +62,10 @@ class TeamCreationDtoMapperTest {
         TeamCreationDto dto = TeamCreationDto.builder()
                 .name("team name")
                 .projectDescription("")
-                .projectType(ProjectTypeDto.builder()
+                .projectType(new ProjectTypeDto()
                         .id(2L)
                         .name("type")
-                        .build())
+                )
                 .captainId(1L)
                 .technologies(List.of())
                 .currentTrackId(1L)
@@ -126,10 +124,10 @@ class TeamCreationDtoMapperTest {
         TeamCreationDto expected = TeamCreationDto.builder()
                 .name(entity.getName())
                 .projectDescription(entity.getProjectDescription())
-                .projectType(ProjectTypeDto.builder()
+                .projectType(new ProjectTypeDto()
                         .id(entity.getProjectType().getId())
                         .name(entity.getProjectType().getName())
-                        .build())
+                )
                 .captainId(entity.getCaptainId())
                 .technologies(List.of())
                 .currentTrackId(entity.getCurrentTrack().getId())

@@ -17,7 +17,8 @@ public class BasicTestContainerTest {
     public static PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16")
                 .withDatabaseName("team-selection-test")
                 .withUsername("TestUser")
-                .withPassword("1234");
+                .withPassword("1234")
+            .withReuse(true); // Enable container reuse;
 
     @BeforeAll
     public static void beforeAll() {

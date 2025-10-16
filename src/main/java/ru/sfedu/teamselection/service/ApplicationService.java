@@ -164,19 +164,15 @@ public class ApplicationService {
         if (application == null) {
             return null;
         }
+
         ApplicationResponseDto result = applicationMapper.mapToResponseDto(application);
         result.setPossibleTransitions(new ArrayList<>());
-        if (applicationValidator.validateUpdate(SENT, currentUser, application) instanceof ValidationResult.Success) {
-            result.getPossibleTransitions().add(SENT);
-        }
-        if (applicationValidator.validateUpdate(REJECTED, currentUser, application) instanceof ValidationResult.Success) {
-            result.getPossibleTransitions().add(REJECTED);
-        }
-        if (applicationValidator.validateUpdate(CANCELLED, currentUser, application) instanceof ValidationResult.Success) {
-            result.getPossibleTransitions().add(CANCELLED);
-        }
-        if (applicationValidator.validateUpdate(ACCEPTED, currentUser, application) instanceof ValidationResult.Success) {
-            result.getPossibleTransitions().add(ACCEPTED);
+        for (ApplicationStatus status : ApplicationStatus.values()) {
+            if (applicationValidator.validateUpdate(status, currentUser, application)
+                    instanceof ValidationResult.Success
+            ) {
+                result.getPossibleTransitions().add(status);
+            }
         }
         return result;
     }
@@ -195,7 +191,7 @@ public class ApplicationService {
     }
 
     private Application cancel(Application app, User sender) {
-        app.setStatus(ApplicationStatus.CANCELLED.name());
+        app.setStatus(CANCELLED.name());
         return app;
     }
 

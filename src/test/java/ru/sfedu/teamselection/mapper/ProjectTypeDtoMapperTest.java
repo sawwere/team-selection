@@ -4,7 +4,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.sfedu.teamselection.domain.ProjectType;
-import ru.sfedu.teamselection.dto.team.ProjectTypeDto;
+import ru.sfedu.teamselection.dto.ProjectTypeDto;
 
 class ProjectTypeDtoMapperTest {
     private final ProjectTypeMapper underTest = ProjectTypeMapper.INSTANCE;
@@ -16,10 +16,9 @@ class ProjectTypeDtoMapperTest {
                 .name("Name")
                 .build();
 
-        ProjectTypeDto dto = ProjectTypeDto.builder()
+        ProjectTypeDto dto = new ProjectTypeDto()
                 .id(12L)
-                .name("Name")
-                .build();
+                .name("Name");
 
         ProjectType actual = underTest.mapToEntity(dto);
         Assertions.assertEquals(expected.getId(), actual.getId());
@@ -34,10 +33,9 @@ class ProjectTypeDtoMapperTest {
 
     @Test
     void mapToDto() {
-        ProjectTypeDto expected = ProjectTypeDto.builder()
+        ProjectTypeDto expected = new ProjectTypeDto()
                 .id(12L)
-                .name("Name")
-                .build();
+                .name("Name");
 
         ProjectType entity = ProjectType.builder()
                 .id(12L)
@@ -68,14 +66,12 @@ class ProjectTypeDtoMapperTest {
                 .build();
         List<ProjectType> expected = List.of(expected1, expected2);
 
-        ProjectTypeDto dto1 = ProjectTypeDto.builder()
+        ProjectTypeDto dto1 = new ProjectTypeDto()
                 .id(12L)
-                .name("Name")
-                .build();
-        ProjectTypeDto dto2 = ProjectTypeDto.builder()
+                .name("Name");
+        ProjectTypeDto dto2 = new ProjectTypeDto()
                 .id(2L)
-                .name("Another name")
-                .build();
+                .name("Another name");
         List<ProjectTypeDto> dtoList = List.of(dto1, dto2);
 
         List<ProjectType> actual = underTest.mapListToEntity(dtoList);
@@ -95,14 +91,12 @@ class ProjectTypeDtoMapperTest {
 
     @Test
     void mapListToDto() {
-        ProjectTypeDto expected1 = ProjectTypeDto.builder()
+        ProjectTypeDto expected1 = new ProjectTypeDto()
                 .id(12L)
-                .name("Name")
-                .build();
-        ProjectTypeDto expected2 = ProjectTypeDto.builder()
+                .name("Name");
+        ProjectTypeDto expected2 = new ProjectTypeDto()
                 .id(2L)
-                .name("Another name")
-                .build();
+                .name("Another name");
         List<ProjectTypeDto> expected = List.of(expected1, expected2);
 
         ProjectType entity1 = ProjectType.builder()

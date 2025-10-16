@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.sfedu.teamselection.domain.Student;
 import ru.sfedu.teamselection.dto.student.StudentDto;
+import ru.sfedu.teamselection.dto.student.StudentTrackDto;
+import ru.sfedu.teamselection.dto.track.TrackCreationDto;
 import ru.sfedu.teamselection.mapper.DtoMapper;
 import ru.sfedu.teamselection.mapper.TechnologyMapper;
 import ru.sfedu.teamselection.mapper.application.ApplicationDtoMapper;
@@ -61,7 +63,22 @@ public class StudentDtoMapper implements DtoMapper<StudentDto, Student> {
                 .groupNumber(entity.getGroupNumber())
                 .aboutSelf(entity.getAboutSelf())
                 .contacts(entity.getContacts())
-                .track(trackCreationDtoMapper.mapToDto(entity.getCurrentTrack()))
+                .track(
+                        StudentTrackDto.builder()
+                                .name(entity.getCurrentTrack().getName())
+                                .about(entity.getCurrentTrack().getAbout())
+                                .startDate(entity.getCurrentTrack().getStartDate())
+                                .endDate(entity.getCurrentTrack().getEndDate())
+                                .type(
+                                        entity.getCurrentTrack().getType() != null
+                                                ? entity.getCurrentTrack().getType().toString()
+                                                : null
+                                )
+                                .minConstraint(entity.getCurrentTrack().getMinConstraint())
+                                .maxConstraint(entity.getCurrentTrack().getMaxConstraint())
+                                .maxSecondCourseConstraint(entity.getCurrentTrack().getMaxSecondCourseConstraint())
+                                .build()
+                )
                 .hasTeam(entity.getHasTeam())
                 .isCaptain(entity.getIsCaptain())
                 .currentTeam(teamDtoMapper.mapToDtoWithoutStudents(entity.getCurrentTeam()))

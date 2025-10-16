@@ -1,0 +1,2 @@
+INSERT INTO tracks (id, name, about, start_date, end_date, type, min_constraint, max_constraint, max_second_course_constraint)
+VALUES (1000, 'Track Without Students', 'No students here', '2024-02-01', '2024-04-01', 'master', 5, 20, 10);

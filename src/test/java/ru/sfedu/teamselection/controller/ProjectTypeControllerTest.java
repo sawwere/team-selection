@@ -14,28 +14,29 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.sfedu.teamselection.config.SecurityConfig;
 import ru.sfedu.teamselection.config.security.SimpleAuthenticationSuccessHandler;
+import ru.sfedu.teamselection.domain.ProjectType;
 import ru.sfedu.teamselection.domain.Role;
-import ru.sfedu.teamselection.domain.Technology;
 import ru.sfedu.teamselection.domain.User;
-import ru.sfedu.teamselection.dto.TechnologyDto;
+import ru.sfedu.teamselection.dto.ProjectTypeDto;
 import ru.sfedu.teamselection.exception.CustomExceptionHandler;
-import ru.sfedu.teamselection.mapper.TechnologyMapper;
-import ru.sfedu.teamselection.service.TechnologyService;
+import ru.sfedu.teamselection.mapper.ProjectTypeMapper;
+import ru.sfedu.teamselection.repository.ProjectTypeRepository;
 import ru.sfedu.teamselection.service.audit.AuditService;
 import ru.sfedu.teamselection.service.security.AzureOidcUserService;
 import ru.sfedu.teamselection.service.security.Oauth2UserService;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Test class for the {@link TechnologyController}
+ * Test class for the {@link ProjectTypeController}
  */
 @ActiveProfiles("test")
 @Import(SecurityConfig.class)
-@WebMvcTest({TechnologyController.class, CustomExceptionHandler.class})
-public class TechnologyControllerTest {
+@WebMvcTest({ProjectTypeController.class, CustomExceptionHandler.class})
+public class ProjectTypeControllerTest {
     @MockitoBean
     private SimpleAuthenticationSuccessHandler simpleAuthenticationSuccessHandler;
     @MockitoBean
@@ -47,9 +48,9 @@ public class TechnologyControllerTest {
     private AuditService auditService;
 
     @MockitoBean
-    private TechnologyService technologyService;
+    private ProjectTypeRepository projectTypeRepository;
     @MockitoBean
-    private TechnologyMapper technologyDtoMapper;
+    private ProjectTypeMapper projectTypeMapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,83 +73,101 @@ public class TechnologyControllerTest {
             .role(Role.builder().id(1L).name("ROLE_STUDENT").build())
             .build();
 
-    private final List<Technology> technologyList = List.of(
-            Technology.builder().id(1L).name("1").build(),
-            Technology.builder().id(1L).name("2").build(),
-            Technology.builder().id(1L).name("3").build()
+    private final List<ProjectType> projectTypeList = List.of(
+            ProjectType.builder().id(1L).name("1").build(),
+            ProjectType.builder().id(1L).name("1").build(),
+            ProjectType.builder().id(1L).name("1").build()
     );
 
-    private final List<TechnologyDto> technologyDtoList = List.of(
-            new TechnologyDto().id(1L).name("1"),
-            new TechnologyDto().id(2L).name("2"),
-            new TechnologyDto().id(3L).name("3")
-            );
+    private final List<ProjectTypeDto> projectTypeDtoList = List.of(
+            new ProjectTypeDto().id(1L).name("1"),
+            new ProjectTypeDto().id(2L).name("2"),
+            new ProjectTypeDto().id(3L).name("3")
+    );
 
     @BeforeEach
     public void setup() {
-        Mockito.doReturn(technologyDtoList)
-                .when(technologyDtoMapper)
-                .mapListToDto(technologyList);
-        Mockito.doReturn(technologyList)
-                .when(technologyDtoMapper)
-                .mapListToEntity(technologyDtoList);
-        Mockito.doReturn(technologyList.get(0))
-                .when(technologyDtoMapper)
+        Mockito.doReturn(projectTypeDtoList)
+                .when(projectTypeMapper)
+                .mapListToDto(projectTypeList);
+        Mockito.doReturn(projectTypeList)
+                .when(projectTypeMapper)
+                .mapListToEntity(projectTypeDtoList);
+        Mockito.doReturn(projectTypeList.get(0))
+                .when(projectTypeMapper)
                 .mapToEntity(Mockito.notNull());
-        Mockito.doReturn(technologyDtoList.get(0))
-                .when(technologyDtoMapper)
+        Mockito.doReturn(projectTypeDtoList.get(0))
+                .when(projectTypeMapper)
                 .mapToDto(Mockito.notNull());
-        Mockito.doReturn(technologyDtoList.get(0))
-                .when(technologyService)
-                .create(Mockito.notNull());
+        Mockito.doReturn(projectTypeDtoList.get(0))
+                .when(projectTypeRepository)
+                .save(Mockito.notNull());
 
     }
 
     @Test
     public void findAll() throws Exception {
-        mockMvc.perform(get("/api/v1/technologies")
+        mockMvc.perform(get("/api/v1/projectTypes")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser)))
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser)))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void createTechnologyNotFromAdminShouldFail() throws Exception {
-        String technology = """
+    public void createProjectTypeNotFromAdminShouldFail() throws Exception {
+        String projectType = """
                 {
-                    "id": 1,
                     "name": "abc"
                 }""";
 
-        mockMvc.perform(post("/api/v1/technologies")
+        mockMvc.perform(post("/api/v1/projectTypes")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
-                        .content(technology)
+                        .content(projectType)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    public void createTechnology() throws Exception {
-        String technology = """
+    public void createProjectType() throws Exception {
+        Mockito.doReturn(
+                ProjectType.builder()
+                        .id(101L)
+                        .name("abc")
+                        .build()
+        ).when(projectTypeRepository).save(Mockito.any());
+
+        String projectType = """
                 {
-                    "id": 101,
                     "name": "abc"
                 }""";
 
-        mockMvc.perform(post("/api/v1/technologies")
+        mockMvc.perform(post("/api/v1/projectTypes")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin))
-                        .content(technology)
+                        .content(projectType)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void deleteTechnologyFromAdmin() throws Exception {
-        Mockito.doNothing().when(technologyService).delete(Mockito.any());
+    public void deleteNonExistingProjectTypeFromAdmin() throws Exception {
+        Mockito.doReturn(false).when(projectTypeRepository).existsById(2L);
+        Mockito.doNothing().when(projectTypeRepository).delete(Mockito.any());
 
-        mockMvc.perform(delete("/api/v1/technologies/{id}".replace("{id}", "2"))
+        mockMvc.perform(delete("/api/v1/projectTypes/{id}".replace("{id}", "2"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteProjectTypeFromAdmin() throws Exception {
+        Mockito.doReturn(true).when(projectTypeRepository).existsById(2L);
+        Mockito.doNothing().when(projectTypeRepository).delete(Mockito.any());
+
+        mockMvc.perform(delete("/api/v1/projectTypes/{id}".replace("{id}", "2"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(admin))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -156,10 +175,10 @@ public class TechnologyControllerTest {
     }
 
     @Test
-    public void deleteTechnologyFromGenericUserShouldFail() throws Exception {
-        Mockito.doNothing().when(technologyService).delete(Mockito.any());
+    public void deleteProjectTypeFromGenericUserShouldFail() throws Exception {
+        Mockito.doNothing().when(projectTypeRepository).delete(Mockito.any());
 
-        mockMvc.perform(delete("/api/v1/technologies/{id}".replace("{id}", "2"))
+        mockMvc.perform(delete("/api/v1/projectTypes/{id}".replace("{id}", "2"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.oauth2Login().oauth2User(genericStudentUser))
                         .contentType(MediaType.APPLICATION_JSON))

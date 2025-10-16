@@ -16,10 +16,9 @@ class TechnologyDtoMapperTest {
                 .name("Name")
                 .build();
 
-        TechnologyDto dto = TechnologyDto.builder()
+        TechnologyDto dto = new TechnologyDto()
                 .id(12L)
-                .name("Name")
-                .build();
+                .name("Name");
 
         Technology actual = underTest.mapToEntity(dto);
         Assertions.assertEquals(expected.getId(), actual.getId());
@@ -34,10 +33,9 @@ class TechnologyDtoMapperTest {
 
     @Test
     void mapToDto() {
-        TechnologyDto expected = TechnologyDto.builder()
+        TechnologyDto expected = new TechnologyDto()
                 .id(12L)
-                .name("Name")
-                .build();
+                .name("Name");
 
         Technology entity = Technology.builder()
                 .id(12L)
@@ -68,14 +66,12 @@ class TechnologyDtoMapperTest {
                 .build();
         List<Technology> expected = List.of(expected1, expected2);
 
-        TechnologyDto dto1 = TechnologyDto.builder()
+        TechnologyDto dto1 = new TechnologyDto()
                 .id(12L)
-                .name("Name")
-                .build();
-        TechnologyDto dto2 = TechnologyDto.builder()
+                .name("Name");
+        TechnologyDto dto2 = new TechnologyDto()
                 .id(2L)
-                .name("Another name")
-                .build();
+                .name("Another name");
         List<TechnologyDto> dtoList = List.of(dto1, dto2);
 
         List<Technology> actual = underTest.mapListToEntity(dtoList);
@@ -95,14 +91,12 @@ class TechnologyDtoMapperTest {
 
     @Test
     void mapListToDto() {
-        TechnologyDto expected1 = TechnologyDto.builder()
+        TechnologyDto expected1 = new TechnologyDto()
                 .id(12L)
-                .name("Name")
-                .build();
-        TechnologyDto expected2 = TechnologyDto.builder()
+                .name("Name");
+        TechnologyDto expected2 = new TechnologyDto()
                 .id(2L)
-                .name("Another name")
-                .build();
+                .name("Another name");
         List<TechnologyDto> expected = List.of(expected1, expected2);
 
         Technology entity1 = Technology.builder()

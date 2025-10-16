@@ -50,10 +50,9 @@ public class StudentUpdateCommonHandlerTest {
                 .course(2)
                 .groupNumber(22)
                 .technologies(List.of(
-                        TechnologyDto.builder()
+                        new TechnologyDto()
                                 .id(1L)
                                 .name("name")
-                                .build()
                 ))
                 .currentTeam(new StudentUpdateTeamDto().id(student.getCurrentTeam().getId()))
                 .user(new StudentUpdateUserDto().id(1L).fio("newFio"));
