@@ -14,8 +14,10 @@ public class TrackCreationDtoMapper implements DtoMapper<TrackCreationDto, Track
 
     @Override
     public Track mapToEntity(TrackCreationDto dto) {
+        if (dto == null) {
+            return null;
+        }
         return Track.builder()
-                .id(dto.getId())
                 .name(dto.getName())
                 .about(dto.getAbout())
                 .startDate(dto.getStartDate())
@@ -29,13 +31,15 @@ public class TrackCreationDtoMapper implements DtoMapper<TrackCreationDto, Track
 
     @Override
     public TrackCreationDto mapToDto(Track entity) {
+        if (entity == null) {
+            return null;
+        }
         return TrackCreationDto.builder()
-                .id(entity.getId())
                 .name(entity.getName())
                 .about(entity.getAbout())
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
-                .type(entity.getType() != null ? entity.getType().name() : null) // Преобразование Enum в строку
+                .type(entity.getType() != null ? entity.getType().toString() : null) // Преобразование Enum в строку
                 .minConstraint(entity.getMinConstraint())
                 .maxConstraint(entity.getMaxConstraint())
                 .maxSecondCourseConstraint(entity.getMaxSecondCourseConstraint())

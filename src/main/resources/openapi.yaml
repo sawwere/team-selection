@@ -17,7 +17,7 @@ tags:
     description: API для работы со студентами
   - name: Technology
     description: API для взаимодействия с возможными технологиями студентов и проектов
-  - name: TracksController
+  - name: Track
     description: API для работы со треками
   - name: TeamController
     description: API для работы с командами
@@ -388,6 +388,112 @@ paths:
             'application/json':
               schema:
                 type: string
+  /api/v1/tracks:
+    get:
+      tags:
+        - Track
+      summary: 'Получение списка всех треков'
+      operationId: findAllTracks
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrackDto'
+    post:
+      tags:
+        - Track
+      summary: Создание трека
+      operationId: createTrack
+      requestBody:
+        description: Сущность трека
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackCreationDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TrackDto'
+  /api/v1/tracks/{trackId}:
+    get:
+      tags:
+        - Track
+      summary: 'Получение трека по его id'
+      operationId: findTrackById
+      parameters:
+        - name: trackId
+          in: path
+          description: id трека
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/TrackDto'
+    put:
+      tags:
+        - Track
+      summary: Изменить данные трека
+      description: |
+        Используется для модификации данных определенного трека.
+
+        Эта операция может быть выполнена только администратором ресурса.
+      operationId: updateTrack
+      parameters:
+        - name: trackId
+          in: path
+          description: Id трека
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Сущность трека
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackDto'
+    delete:
+      tags:
+        - Track
+      summary: Удалить трек по его id
+      description: |
+        Используется для удаления определенного трека.
+
+        Эта операция может быть выполнена только администратором ресурса.
+      operationId: deleteTrack
+      parameters:
+        - name: trackId
+          in: path
+          description: Id трека
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
 components:
   schemas:
     StudentUpdateDto:

@@ -74,8 +74,8 @@ public class TechnologyControllerTest {
 
     private final List<Technology> technologyList = List.of(
             Technology.builder().id(1L).name("1").build(),
-            Technology.builder().id(1L).name("1").build(),
-            Technology.builder().id(1L).name("1").build()
+            Technology.builder().id(1L).name("2").build(),
+            Technology.builder().id(1L).name("3").build()
     );
 
     private final List<TechnologyDto> technologyDtoList = List.of(

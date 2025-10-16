@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -28,6 +29,7 @@ import ru.sfedu.teamselection.repository.ApplicationRepository;
 import ru.sfedu.teamselection.repository.UserRepository;
 
 @SpringBootTest(classes = TeamSelectionApplication.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Transactional
 @ActiveProfiles("test")
 @TestPropertySource("/application-test.yml")
